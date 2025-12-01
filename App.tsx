@@ -78,15 +78,15 @@ const App: React.FC = () => {
 
       <div className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Mobile / Header Bar */}
-        <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-8 z-10 shadow-sm flex-shrink-0 transition-colors duration-300">
+        <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8 z-10 shadow-sm flex-shrink-0 transition-colors duration-300">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg md:hidden text-slate-600 dark:text-slate-300"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg lg:hidden text-slate-600 dark:text-slate-300"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-xl font-bold text-emaus-900 dark:text-emaus-100 hidden md:block tracking-tight font-serif">
+            <h1 className="text-xl font-bold text-emaus-900 dark:text-emaus-100 hidden lg:block tracking-tight font-serif">
               {currentView === ViewName.DASHBOARD && t('sidebar.dashboard')}
               {currentView === ViewName.SACRAMENTS && t('sidebar.sacraments')}
               {currentView === ViewName.AGENDA && t('sidebar.agenda')}
@@ -95,7 +95,7 @@ const App: React.FC = () => {
             </h1>
           </div>
           
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center gap-3 lg:gap-4">
             {/* Language Selector */}
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
                <Globe className="w-4 h-4 ml-1 text-slate-500" />
@@ -126,13 +126,13 @@ const App: React.FC = () => {
             {/* Logout Button (Visible only in header on larger screens, duplicate of sidebar but useful) */}
             <button 
               onClick={handleLogout}
-              className="hidden md:flex p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+              className="hidden lg:flex p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
               title={t('sidebar.logout')}
             >
               <LogOut className="w-5 h-5" />
             </button>
 
-            <div className="hidden md:flex flex-col items-end">
+            <div className="hidden lg:flex flex-col items-end">
               <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Parroquia Santa María</span>
               <span className="text-xs text-gold-600 dark:text-gold-400 font-medium">Plan Avanzado</span>
             </div>

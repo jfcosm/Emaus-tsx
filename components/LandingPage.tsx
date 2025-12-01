@@ -6,7 +6,7 @@ import {
   FileText, 
   Shield, 
   CheckCircle, 
-  ArrowRight,
+  ArrowRight, 
   ArrowLeft,
   Menu, 
   X,
@@ -194,7 +194,7 @@ const LandingPage: React.FC = () => {
               <span className="text-2xl font-bold tracking-tight font-serif text-emaus-900 dark:text-gold-50">EMAÚS</span>
             </div>
             
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden lg:flex items-center space-x-6">
               <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.features')}</a>
               <a href="#benefits" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.benefits')}</a>
               <a href="#plans" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.plans')}</a>
@@ -242,7 +242,7 @@ const LandingPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="md:hidden">
+            <div className="lg:hidden">
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-600 dark:text-slate-300">
                 {isMenuOpen ? <X /> : <Menu />}
               </button>
@@ -252,7 +252,7 @@ const LandingPage: React.FC = () => {
         
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-6 space-y-4">
+          <div className="lg:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-6 space-y-4">
              <a href="#features" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.features')}</a>
              <a href="#benefits" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.benefits')}</a>
              <a href="#plans" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.plans')}</a>
