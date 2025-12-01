@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Sacraments from './components/Sacraments';
@@ -10,6 +9,7 @@ import { ViewName } from './types';
 import { Menu, Bell, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
 import { useAuth } from './contexts/AuthContext';
+import { useTheme } from './contexts/ThemeContext';
 
 const App: React.FC = () => {
   // Authentication State from Firebase
@@ -18,17 +18,10 @@ const App: React.FC = () => {
   // App State
   const [currentView, setCurrentView] = useState<ViewName>(ViewName.DASHBOARD);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  
+  // Contexts
   const { language, setLanguage, t } = useLanguage();
-
-  // Handle Dark Mode Class on Body/HTML
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
+  const { darkMode, toggleDarkMode } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -119,7 +112,7 @@ const App: React.FC = () => {
 
             {/* Dark Mode Toggle */}
             <button 
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={toggleDarkMode}
               className="p-2 text-slate-500 dark:text-gold-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
             >
                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

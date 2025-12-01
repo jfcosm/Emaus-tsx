@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   BookOpen, 
@@ -22,10 +21,15 @@ import {
   Cloud,
   Printer,
   Heart,
-  Smartphone
+  Smartphone,
+  Globe,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,16 +42,17 @@ const LandingPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Contexts
+  const { t, language, setLanguage } = useLanguage();
+  const { darkMode, toggleDarkMode } = useTheme();
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      // Intenta iniciar sesión con Firebase
-      // Nota: 'username' se trata como email en Firebase
       await signInWithEmailAndPassword(auth, username, password);
-      // El AuthContext detectará el cambio y redirigirá automáticamente en App.tsx
     } catch (err: any) {
       console.error("Login error:", err);
       let msg = 'Error al iniciar sesión.';
@@ -107,7 +112,7 @@ const LandingPage: React.FC = () => {
     ];
 
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans animate-fade-in">
+      <div className="min-h-screen bg-stone-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans animate-fade-in transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 py-12">
           {/* Header simple for sub-page */}
           <div className="flex justify-between items-center mb-16">
@@ -188,28 +193,53 @@ const LandingPage: React.FC = () => {
               <span className="text-2xl font-bold tracking-tight font-serif text-emaus-900 dark:text-gold-50">EMAÚS</span>
             </div>
             
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">Características</a>
-              <a href="#benefits" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">Beneficios</a>
-              <a href="#plans" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">Planes</a>
+            <div className="hidden md:flex items-center space-x-6">
+              <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.features')}</a>
+              <a href="#benefits" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.benefits')}</a>
+              <a href="#plans" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.plans')}</a>
               
-              {/* Demo Button (For Quick Access/Dev) - Now redirects to login modal with placeholder note */}
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+
+              {/* Language Selector */}
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 rounded-lg p-1">
+                 <Globe className="w-4 h-4 ml-1 text-slate-500" />
+                 <select 
+                   value={language} 
+                   onChange={(e) => setLanguage(e.target.value as any)}
+                   className="bg-transparent border-none text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-0 cursor-pointer py-1 pr-8"
+                 >
+                    <option value="es">ES</option>
+                    <option value="en">EN</option>
+                    <option value="it">IT</option>
+                    <option value="fr">FR</option>
+                 </select>
+              </div>
+
+              {/* Dark Mode Toggle */}
+              <button 
+                onClick={toggleDarkMode}
+                className="p-2 text-slate-500 dark:text-gold-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+              >
+                 {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
+              {/* Demo Button */}
               <button 
                 onClick={() => {
                    setUsername('demo@emaus.app');
                    setPassword('demo123');
                    setIsLoginModalOpen(true);
                 }}
-                className="text-gold-600 dark:text-gold-400 font-bold border-2 border-gold-500/50 hover:border-gold-500 rounded-full px-5 py-2 transition-all hover:bg-gold-50 dark:hover:bg-gold-900/10"
+                className="text-gold-600 dark:text-gold-400 font-bold border-2 border-gold-500/50 hover:border-gold-500 rounded-full px-5 py-2 transition-all hover:bg-gold-50 dark:hover:bg-gold-900/10 ml-2"
               >
-                Ver Demo
+                {t('landing.nav.demo')}
               </button>
 
               <button 
                 onClick={() => setIsLoginModalOpen(true)}
                 className="px-6 py-2.5 bg-emaus-700 text-white rounded-full font-medium hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20"
               >
-                Iniciar Sesión
+                {t('landing.nav.login')}
               </button>
             </div>
 
@@ -224,10 +254,29 @@ const LandingPage: React.FC = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-6 space-y-4">
-             <a href="#features" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">Características</a>
-             <a href="#benefits" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">Beneficios</a>
-             <a href="#plans" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">Planes</a>
+             <a href="#features" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.features')}</a>
+             <a href="#benefits" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.benefits')}</a>
+             <a href="#plans" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.plans')}</a>
              
+             {/* Mobile Settings */}
+             <div className="flex items-center gap-4 py-2 border-t border-slate-100 dark:border-slate-800">
+                <button onClick={toggleDarkMode} className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                  {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  <span>{darkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
+                </button>
+             </div>
+             <div className="flex gap-2">
+                {['es', 'en', 'it'].map((lang) => (
+                  <button 
+                    key={lang}
+                    onClick={() => { setLanguage(lang as any); setIsMenuOpen(false); }}
+                    className={`px-3 py-1 rounded border ${language === lang ? 'bg-emaus-100 border-emaus-500 text-emaus-700' : 'border-slate-200 dark:border-slate-700'}`}
+                  >
+                    {lang.toUpperCase()}
+                  </button>
+                ))}
+             </div>
+
              <button 
                 onClick={() => {
                   setIsMenuOpen(false);
@@ -237,7 +286,7 @@ const LandingPage: React.FC = () => {
                 }}
                 className="block w-full text-left font-bold text-gold-600 dark:text-gold-400 py-2 border-t border-slate-100 dark:border-slate-800 mt-2"
              >
-               Ver Demo (Acceso Rápido)
+               {t('landing.nav.demo_quick')}
              </button>
 
              <button 
@@ -247,7 +296,7 @@ const LandingPage: React.FC = () => {
                 }}
                 className="w-full text-left font-bold text-emaus-700 dark:text-emaus-400"
              >
-               Acceso Clientes
+               {t('landing.nav.client_access')}
              </button>
           </div>
         )}
@@ -259,23 +308,23 @@ const LandingPage: React.FC = () => {
           <div className="space-y-8 z-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-100 dark:bg-gold-900/20 text-gold-800 dark:text-gold-300 rounded-full text-sm font-bold uppercase tracking-wide">
               <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
-              Gestión Parroquial 2.0
+              {t('landing.hero.badge')}
             </div>
             <h1 className="text-5xl lg:text-7xl font-bold font-serif leading-tight text-slate-900 dark:text-white">
-              Digitalice la misión de su <span className="text-transparent bg-clip-text bg-gradient-to-r from-emaus-600 to-emaus-400">Parroquia</span>
+              {t('landing.hero.title_start')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emaus-600 to-emaus-400">{t('landing.hero.title_highlight')}</span>
             </h1>
             <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-lg">
-              Emaús ordena el caos administrativo, protege la historia sacramental y libera tiempo para lo verdaderamente importante: la pastoral.
+              {t('landing.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={() => setIsLoginModalOpen(true)}
                 className="px-8 py-4 bg-emaus-700 text-white rounded-xl font-bold text-lg hover:bg-emaus-800 transition-all shadow-xl shadow-emaus-900/20 flex items-center justify-center gap-2"
               >
-                Acceder a la Plataforma <ArrowRight className="w-5 h-5" />
+                {t('landing.hero.cta_access')} <ArrowRight className="w-5 h-5" />
               </button>
               <a href="#plans" className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center">
-                Ver Planes
+                {t('landing.hero.cta_plans')}
               </a>
             </div>
           </div>
@@ -295,12 +344,12 @@ const LandingPage: React.FC = () => {
                          <User className="w-5 h-5" />
                       </div>
                       <div>
-                         <div className="text-xs text-emaus-600 dark:text-emaus-400 font-bold uppercase tracking-wider">Sacramento</div>
-                         <div className="text-lg font-bold text-slate-800 dark:text-white">Ficha de Bautismo</div>
+                         <div className="text-xs text-emaus-600 dark:text-emaus-400 font-bold uppercase tracking-wider">{t('landing.mockup.sacrament')}</div>
+                         <div className="text-lg font-bold text-slate-800 dark:text-white">{t('landing.mockup.baptism_card')}</div>
                       </div>
                    </div>
                    <div className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-2 py-1 rounded">
-                      VERIFICADO
+                      {t('landing.mockup.verified')}
                    </div>
                 </div>
 
@@ -308,7 +357,7 @@ const LandingPage: React.FC = () => {
                 <div className="space-y-4">
                    {/* Name Field */}
                    <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre del Bautizado</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.name_label')}</label>
                       <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-800 dark:text-slate-200 font-medium flex items-center justify-between">
                          Juan Pérez Gómez
                          <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -318,13 +367,13 @@ const LandingPage: React.FC = () => {
                    {/* Date Field */}
                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                         <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Fecha</label>
+                         <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.date_label')}</label>
                          <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-600 dark:text-slate-400 text-sm">
                             15 / 05 / 2024
                          </div>
                       </div>
                       <div>
-                         <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Libro / Pág</label>
+                         <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.book_label')}</label>
                          <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-600 dark:text-slate-400 text-sm">
                             L: 104 / P: 23
                          </div>
@@ -333,7 +382,7 @@ const LandingPage: React.FC = () => {
 
                    {/* Parents Field */}
                    <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Padres</label>
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.parents_label')}</label>
                       <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-600 dark:text-slate-400 text-sm">
                          Pedro Pérez y María Gómez
                       </div>
@@ -342,7 +391,7 @@ const LandingPage: React.FC = () => {
                    {/* Mock Button */}
                    <div className="pt-4">
                       <div className="w-full bg-emaus-700 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md opacity-90">
-                         Generar Certificado Oficial
+                         {t('landing.mockup.generate_btn')}
                       </div>
                    </div>
                 </div>
@@ -357,8 +406,8 @@ const LandingPage: React.FC = () => {
                       <Database className="w-4 h-4" />
                    </div>
                    <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">Base de Datos</p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white">Registro Digitalizado</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">{t('landing.mockup.popup_db')}</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-white">{t('landing.mockup.popup_db_sub')}</p>
                    </div>
                 </div>
 
@@ -368,8 +417,8 @@ const LandingPage: React.FC = () => {
                       <Search className="w-4 h-4" />
                    </div>
                    <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">Búsqueda</p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white">Ficha Encontrada</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">{t('landing.mockup.popup_search')}</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-white">{t('landing.mockup.popup_search_sub')}</p>
                    </div>
                 </div>
 
@@ -379,8 +428,8 @@ const LandingPage: React.FC = () => {
                       <Download className="w-4 h-4" />
                    </div>
                    <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">Documentos</p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white">Certificado Generado</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">{t('landing.mockup.popup_docs')}</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-white">{t('landing.mockup.popup_docs_sub')}</p>
                    </div>
                 </div>
 
@@ -390,8 +439,8 @@ const LandingPage: React.FC = () => {
                       <ThumbsUp className="w-6 h-6" />
                    </div>
                    <div>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">Gestión ágil y paz mental</p>
-                      <p className="text-[10px] text-slate-500 mt-1">Para toda la parroquia</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">{t('landing.mockup.popup_peace')}</p>
+                      <p className="text-[10px] text-slate-500 mt-1">{t('landing.mockup.popup_peace_sub')}</p>
                    </div>
                 </div>
 
@@ -418,8 +467,8 @@ const LandingPage: React.FC = () => {
       <section id="features" className="py-24 bg-white dark:bg-slate-900 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-white mb-4">Todo lo que su secretaría necesita</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg">Emaús reemplaza múltiples herramientas desconectadas por una plataforma unificada diseñada específicamente para la Iglesia.</p>
+            <h2 className="text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.features.title')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">{t('landing.features.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
@@ -428,9 +477,9 @@ const LandingPage: React.FC = () => {
                <div className="w-14 h-14 bg-emaus-100 dark:bg-emaus-900/30 text-emaus-700 dark:text-emaus-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                  <BookOpen className="w-7 h-7" />
                </div>
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Sacramentos Digitales</h3>
+               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.digital_sacraments')}</h3>
                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                 Digitalice Bautizos, Matrimonios y Confirmaciones. Búsquedas instantáneas por nombre o fecha, eliminando horas de revisión manual de libros físicos.
+                 {t('landing.features.digital_sacraments_desc')}
                </p>
             </div>
 
@@ -439,9 +488,9 @@ const LandingPage: React.FC = () => {
                <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                  <FileText className="w-7 h-7" />
                </div>
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Certificados en 1 Clic</h3>
+               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.certs')}</h3>
                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                 Generación automática de certificados oficiales listos para imprimir. Olvídese de redactar documentos en Word cada vez que un feligrés lo solicita.
+                 {t('landing.features.certs_desc')}
                </p>
             </div>
 
@@ -450,9 +499,9 @@ const LandingPage: React.FC = () => {
                <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                  <Calendar className="w-7 h-7" />
                </div>
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Agenda Pastoral</h3>
+               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.agenda')}</h3>
                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                 Coordine misas, confesiones y reuniones parroquiales en un calendario centralizado. Evite topes de horario y mantenga a todo el equipo informado.
+                 {t('landing.features.agenda_desc')}
                </p>
             </div>
           </div>
@@ -465,7 +514,7 @@ const LandingPage: React.FC = () => {
                }}
                className="px-10 py-3 bg-white dark:bg-slate-800 border-2 border-emaus-100 dark:border-slate-700 text-emaus-700 dark:text-slate-200 rounded-full font-bold hover:bg-emaus-50 dark:hover:bg-slate-700 hover:border-emaus-200 transition-all text-lg shadow-sm"
              >
-               Conocer más características
+               {t('landing.features.btn_more')}
              </button>
           </div>
         </div>
@@ -475,16 +524,16 @@ const LandingPage: React.FC = () => {
       <section id="plans" className="py-24 bg-stone-50 dark:bg-slate-950 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-white mb-4">Planes diseñados para cada comunidad</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg">Elija la opción que mejor se adapte al tamaño y necesidades de su parroquia.</p>
+            <h2 className="text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.plans.title')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">{t('landing.plans.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
              {/* Plan Básico */}
              <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all">
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Plan Básico</h3>
-                  <p className="text-slate-500 dark:text-slate-400 mt-2">Para parroquias pequeñas o capillas.</p>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('landing.plans.basic.name')}</h3>
+                  <p className="text-slate-500 dark:text-slate-400 mt-2">{t('landing.plans.basic.desc')}</p>
                 </div>
                 <div className="mb-8">
                   <span className="text-4xl font-bold text-emaus-700 dark:text-emaus-400">$9.000</span>
@@ -511,18 +560,18 @@ const LandingPage: React.FC = () => {
                   onClick={() => setIsLoginModalOpen(true)}
                   className="w-full py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 >
-                  Comenzar
+                  {t('landing.plans.basic.btn')}
                 </button>
              </div>
 
              {/* Plan Avanzado */}
              <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-gold-400 relative hover:shadow-2xl transition-all transform md:-translate-y-4">
                 <div className="absolute top-0 right-0 bg-gold-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wide">
-                  Recomendado
+                  {t('landing.plans.advanced.tag')}
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Plan Avanzado</h3>
-                  <p className="text-slate-500 dark:text-slate-400 mt-2">Gestión integral sin límites.</p>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('landing.plans.advanced.name')}</h3>
+                  <p className="text-slate-500 dark:text-slate-400 mt-2">{t('landing.plans.advanced.desc')}</p>
                 </div>
                 <div className="mb-8">
                   <span className="text-4xl font-bold text-emaus-700 dark:text-emaus-400">$19.000</span>
@@ -549,7 +598,7 @@ const LandingPage: React.FC = () => {
                   onClick={() => setIsLoginModalOpen(true)}
                   className="w-full py-3 bg-gold-500 text-white rounded-xl font-bold hover:bg-gold-600 transition-colors shadow-lg shadow-gold-500/20"
                 >
-                  Obtener Plan Completo
+                  {t('landing.plans.advanced.btn')}
                 </button>
              </div>
           </div>
@@ -562,15 +611,15 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 relative z-10">
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                 <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-6">"Emaús ha transformado nuestra oficina parroquial"</h2>
+                 <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-6">{t('landing.testimonials.quote')}</h2>
                  <p className="text-emaus-200 text-lg mb-8 leading-relaxed">
-                   Antes pasábamos horas buscando partidas de bautismo en libros antiguos. Ahora, con Emaús, entregamos certificados en segundos y tenemos la certeza de que la información está segura.
+                   {t('landing.testimonials.text')}
                  </p>
                  <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gold-500 rounded-full flex items-center justify-center font-bold text-emaus-900 text-xl">P</div>
                     <div>
                        <p className="font-bold text-lg">Padre Ricardo</p>
-                       <p className="text-emaus-300 text-sm">Párroco, Santiago de Chile</p>
+                       <p className="text-emaus-300 text-sm">{t('landing.testimonials.author_role')}, Santiago de Chile</p>
                     </div>
                  </div>
               </div>
@@ -578,18 +627,18 @@ const LandingPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-6">
                  <div className="bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10">
                     <h4 className="text-3xl font-bold text-gold-400 mb-2">85%</h4>
-                    <p className="text-emaus-100">Menos tiempo en trámites administrativos</p>
+                    <p className="text-emaus-100">{t('landing.testimonials.stat_time')}</p>
                  </div>
                  <div className="bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10">
                     <h4 className="text-3xl font-bold text-gold-400 mb-2">100%</h4>
-                    <p className="text-emaus-100">Registros respaldados en la nube</p>
+                    <p className="text-emaus-100">{t('landing.testimonials.stat_backup')}</p>
                  </div>
                  <div className="bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 col-span-2">
                     <div className="flex items-center gap-3 mb-2">
                        <Shield className="w-6 h-6 text-gold-400" />
-                       <h4 className="text-xl font-bold text-white">Privacidad Total</h4>
+                       <h4 className="text-xl font-bold text-white">{t('landing.testimonials.privacy')}</h4>
                     </div>
-                    <p className="text-emaus-100">Acceso restringido por usuario y encriptación de grado bancario para los datos de sus feligreses.</p>
+                    <p className="text-emaus-100">{t('landing.testimonials.privacy_desc')}</p>
                  </div>
               </div>
            </div>
@@ -605,10 +654,10 @@ const LandingPage: React.FC = () => {
             </div>
             <div className="text-center md:text-right">
                <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">
-                 Diseñado para servir a la Iglesia.
+                 {t('landing.footer.designed')}
                </p>
                <p className="text-slate-500 dark:text-slate-400 text-sm">
-                 Emaús es una app desarrollada por <a href="https://www.melodialab.net" target="_blank" rel="noopener noreferrer" className="text-emaus-700 dark:text-gold-500 hover:underline font-medium">MelodIA La♭</a>.
+                 {t('landing.footer.developed')} <a href="https://www.melodialab.net" target="_blank" rel="noopener noreferrer" className="text-emaus-700 dark:text-gold-500 hover:underline font-medium">MelodIA La♭</a>.
                </p>
             </div>
          </div>
@@ -630,8 +679,8 @@ const LandingPage: React.FC = () => {
                     <div className="inline-block p-3 bg-emaus-50 dark:bg-emaus-900/30 rounded-xl mb-4">
                        <Lock className="w-8 h-8 text-emaus-700 dark:text-emaus-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Bienvenido a Emaús</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2">Ingrese sus credenciales para acceder a la plataforma.</p>
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('landing.login.welcome')}</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">{t('landing.login.subtitle')}</p>
                  </div>
 
                  <form onSubmit={handleLoginSubmit} className="space-y-6">
@@ -642,7 +691,7 @@ const LandingPage: React.FC = () => {
                     )}
                     
                     <div>
-                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Usuario (Email)</label>
+                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('landing.login.user')}</label>
                        <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                           <input 
@@ -657,7 +706,7 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     <div>
-                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Contraseña</label>
+                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('landing.login.pass')}</label>
                        <div className="relative">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                           <input 
@@ -676,20 +725,20 @@ const LandingPage: React.FC = () => {
                       disabled={isLoading}
                       className={`w-full py-3 bg-emaus-700 text-white rounded-xl font-bold text-lg hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20 flex items-center justify-center gap-2 group ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                      {isLoading ? 'Verificando...' : 'Ingresar'} 
+                      {isLoading ? t('landing.login.verifying') : t('landing.login.btn')} 
                       {!isLoading && <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                     </button>
                  </form>
 
                  <div className="mt-6 text-center">
                     <p className="text-sm text-slate-400">
-                       ¿Olvidó su contraseña? <a href="#" className="text-emaus-600 hover:underline">Contacte a Soporte</a>
+                       {t('landing.login.forgot')} <a href="#" className="text-emaus-600 hover:underline">{t('landing.login.contact')}</a>
                     </p>
                  </div>
               </div>
               
               <div className="bg-slate-50 dark:bg-slate-950 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                 <p className="text-xs text-slate-400">Acceso seguro encriptado SSL 256-bit</p>
+                 <p className="text-xs text-slate-400">{t('landing.login.secure')}</p>
               </div>
            </div>
         </div>
