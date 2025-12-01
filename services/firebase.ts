@@ -1,4 +1,4 @@
-import * as firebaseApp from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -15,8 +15,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-// Using namespace import to avoid "no exported member" errors in some TS configurations
-const app = firebaseApp.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 // Export Services
 export const auth = getAuth(app);
