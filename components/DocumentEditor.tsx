@@ -315,6 +315,42 @@ const DocumentEditor: React.FC = () => {
        document.execCommand(command, false, value);
     };
 
+    const getInitialContent = () => {
+        if (isBlank) {
+            return `<div class="text-slate-800"><p>Escriba aquí el contenido de su documento...</p></div>`;
+        } else {
+            const dateStr = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            return `
+                <div class="text-center mb-8">
+                    <h1 class="text-2xl font-serif font-bold text-slate-900 mb-2">PARROQUIA SANTA MARÍA</h1>
+                    <p class="text-sm text-slate-500 uppercase tracking-widest">Diócesis de Santiago</p>
+                    <div class="w-16 h-1 bg-slate-900 mx-auto mt-4"></div>
+                </div>
+                
+                <p class="text-right mb-8 font-serif">Santiago, ${dateStr}</p>
+                
+                <h2 class="text-center text-xl font-bold underline mb-8">CERTIFICADO DE BAUTISMO</h2>
+                
+                <p class="mb-4 text-justify leading-relaxed font-serif text-lg">
+                    El infrascrito Cura Párroco certifica que en el Libro de Bautismos N° <strong>104</strong>, página <strong>23</strong>, se encuentra la partida correspondiente a:
+                </p>
+                
+                <p class="text-center text-2xl font-bold my-8 font-serif uppercase bg-slate-50 py-4">
+                    JUAN PÉREZ
+                </p>
+    
+                <p class="mb-4 text-justify leading-relaxed font-serif text-lg">
+                    Nacido el 12 de Enero de 2024, hijo de Pedro Pérez y María Gómez. Fue bautizado el día 15 de Mayo de 2024.
+                </p>
+    
+                <div class="mt-20 pt-8 border-t border-slate-900 w-64 mx-auto text-center">
+                    <p class="font-bold">Pbro. Roberto González</p>
+                    <p class="text-sm">Párroco</p>
+                </div>
+            `;
+        }
+    };
+
     return (
       <div className="h-[calc(100vh-8rem)] flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
         {/* Editor Toolbar */}
@@ -428,42 +464,8 @@ const DocumentEditor: React.FC = () => {
               contentEditable
               suppressContentEditableWarning
               style={{ fontFamily: 'Inter, sans-serif' }}
-          >
-              {isBlank ? (
-                  <div className="text-slate-800">
-                      <p>Escriba aquí el contenido de su documento...</p>
-                  </div>
-              ) : (
-                  <>
-                    <div className="text-center mb-8">
-                        <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">PARROQUIA SANTA MARÍA</h1>
-                        <p className="text-sm text-slate-500 uppercase tracking-widest">Diócesis de Santiago</p>
-                        <div className="w-16 h-1 bg-slate-900 mx-auto mt-4"></div>
-                    </div>
-                    
-                    <p className="text-right mb-8 font-serif">Santiago, {new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                    
-                    <h2 className="text-center text-xl font-bold underline mb-8">CERTIFICADO DE BAUTISMO</h2>
-                    
-                    <p className="mb-4 text-justify leading-relaxed font-serif text-lg">
-                        El infrascrito Cura Párroco certifica que en el Libro de Bautismos N° <strong>104</strong>, página <strong>23</strong>, se encuentra la partida correspondiente a:
-                    </p>
-                    
-                    <p className="text-center text-2xl font-bold my-8 font-serif uppercase bg-slate-50 py-4">
-                        JUAN PÉREZ
-                    </p>
-        
-                    <p className="mb-4 text-justify leading-relaxed font-serif text-lg">
-                        Nacido el 12 de Enero de 2024, hijo de Pedro Pérez y María Gómez. Fue bautizado el día 15 de Mayo de 2024.
-                    </p>
-        
-                    <div className="mt-20 pt-8 border-t border-slate-900 w-64 mx-auto text-center">
-                        <p className="font-bold">Pbro. Roberto González</p>
-                        <p className="text-sm">Párroco</p>
-                    </div>
-                  </>
-              )}
-          </div>
+              dangerouslySetInnerHTML={{ __html: getInitialContent() }}
+          />
         </div>
       </div>
     );
