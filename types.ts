@@ -96,6 +96,7 @@ export interface SavedDocument {
   templateUsed?: string;
   lastModified: string;
   size?: string;
+  content?: string; // HTML Content
 }
 
 export interface PosterElement {
