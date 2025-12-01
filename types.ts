@@ -34,15 +34,42 @@ export interface StatCardProps {
 export interface SacramentRecord {
   id: string;
   type: SacramentType;
-  personName: string;
   date: string;
   celebrant: string;
   book: string;
   page: string;
-  parents?: string;
-  godparents?: string;
-  observations?: string;
   parish?: string;
+  observations?: string;
+
+  // Common Fields (Single Person Sacraments: Baptism, Confirmation, Communion, Death)
+  personName?: string;
+  fatherName?: string;
+  motherName?: string;
+
+  // BAPTISM Specific
+  godparents?: string;
+  birthDate?: string;
+  birthPlace?: string;
+  baptismalTalksDone?: boolean; // Check for talks
+
+  // MARRIAGE Specific
+  groomName?: string;
+  brideName?: string;
+  groomFather?: string;
+  groomMother?: string;
+  brideFather?: string;
+  brideMother?: string;
+  witnesses?: string;
+
+  // CONFIRMATION Specific
+  confirmationSponsor?: string; // Padrino/Madrina
+  baptismParish?: string; // Where they were baptized
+
+  // DEATH Specific
+  age?: number;
+  spouseName?: string;
+  cemetery?: string;
+  causeOfDeath?: string;
 }
 
 export interface CalendarEvent {

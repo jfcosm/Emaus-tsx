@@ -2,7 +2,7 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { translations } from '../services/translations';
 
-type Language = 'es' | 'en' | 'it' | 'fr';
+type Language = 'es' | 'en';
 
 interface LanguageContextType {
   language: Language;
@@ -13,7 +13,17 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('es');
+  const [language, setLanguage] = useState<Language>(() => {
+    // Auto-detect browser language
+    if (typeof navigator !== 'undefined') {
+      const browserLang = navigator.language || (navigator as any).userLanguage;
+      if (browserLang && browserLang.startsWith('en')) {
+        return 'en';
+      }
+    }
+    // Default to Spanish
+    return 'es';
+  });
 
   const t = (path: string): string => {
     const keys = path.split('.');

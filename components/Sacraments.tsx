@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SacramentType, SacramentRecord } from '../types';
-import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database } from 'lucide-react';
+import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database, Heart, Cross, Baby } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getSacraments, updateSacrament, addSacrament, seedDatabase } from '../services/sacramentsService';
 
@@ -14,8 +14,7 @@ const Sacraments: React.FC = () => {
   // Data States
   const [sacraments, setSacraments] = useState<SacramentRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
+  
   // Edit Mode States
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<SacramentRecord | null>(null);
@@ -32,7 +31,6 @@ const Sacraments: React.FC = () => {
       setSacraments(data);
     } catch (err) {
       console.error(err);
-      setError('Error al cargar los datos.');
     } finally {
       setLoading(false);
     }
@@ -52,11 +50,43 @@ const Sacraments: React.FC = () => {
     }
   }, [selectedRecord]);
 
+  // Create New Record Logic
+  const handleCreateNew = () => {
+    const newRecord: SacramentRecord = {
+      id: '', // Will be assigned by Firebase
+      type: activeTab,
+      date: new Date().toISOString().split('T')[0],
+      celebrant: '',
+      book: '',
+      page: '',
+      parish: 'Parroquia Santa María',
+      // Default empty fields
+      personName: '',
+      fatherName: '',
+      motherName: '',
+    };
+    setSelectedRecord(newRecord);
+    setEditForm(newRecord);
+    setIsEditing(true);
+  };
+
   // Filter logic applied to REAL data
   const filteredData = sacraments.filter(
-    (item) => 
-      (activeTab === item.type) && 
-      (item.personName.toLowerCase().includes(searchTerm.toLowerCase()) || item.celebrant.toLowerCase().includes(searchTerm.toLowerCase()))
+    (item) => {
+      const matchType = activeTab === item.type;
+      
+      // Dynamic name check depending on type
+      let nameToSearch = item.personName || '';
+      if (item.type === SacramentType.MATRIMONIO && item.groomName && item.brideName) {
+        nameToSearch = `${item.groomName} ${item.brideName}`;
+      }
+
+      const matchSearch = 
+        nameToSearch.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        item.celebrant.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return matchType && matchSearch;
+    }
   );
 
   const handleCloseDetail = () => {
@@ -64,20 +94,27 @@ const Sacraments: React.FC = () => {
     setIsEditing(false);
   };
 
-  const handleInputChange = (field: keyof SacramentRecord, value: string) => {
+  const handleInputChange = (field: keyof SacramentRecord, value: any) => {
     if (editForm) {
       setEditForm({ ...editForm, [field]: value });
     }
   };
 
   const handleSave = async () => {
-    if (editForm && editForm.id) {
+    if (editForm) {
       try {
-        await updateSacrament(editForm.id, editForm);
-        
-        // Update local state to reflect changes immediately
-        setSacraments(prev => prev.map(item => item.id === editForm.id ? editForm : item));
-        setSelectedRecord(editForm);
+        if (editForm.id) {
+          // Update existing
+          await updateSacrament(editForm.id, editForm);
+          setSacraments(prev => prev.map(item => item.id === editForm.id ? editForm : item));
+        } else {
+          // Create new (exclude id to let Firebase generate it)
+          const { id, ...dataToSave } = editForm;
+          const newId = await addSacrament(dataToSave);
+          const newRecord = { ...editForm, id: newId };
+          setSacraments(prev => [newRecord, ...prev]);
+          setSelectedRecord(newRecord);
+        }
         setIsEditing(false);
       } catch (e) {
         console.error("Error saving:", e);
@@ -87,14 +124,287 @@ const Sacraments: React.FC = () => {
   };
 
   const handleCancelEdit = () => {
-    setEditForm(selectedRecord);
+    if (!selectedRecord?.id) {
+      // If cancelling creation of new record
+      setSelectedRecord(null);
+    } else {
+      setEditForm(selectedRecord);
+    }
     setIsEditing(false);
+  };
+
+  // Helper to get display name based on sacrament type
+  const getDisplayName = (record: SacramentRecord) => {
+    if (record.type === SacramentType.MATRIMONIO) {
+      return `${record.groomName || 'Sin Nombre'} & ${record.brideName || 'Sin Nombre'}`;
+    }
+    return record.personName || 'Sin Nombre';
+  };
+
+  // Helper to render specific fields based on Sacrament Type
+  const renderSpecificFields = () => {
+    if (!editForm) return null;
+
+    switch (editForm.type) {
+      case SacramentType.BAUTIZO:
+        return (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Bautizado</label>
+                {isEditing ? (
+                  <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className="input-field w-full" />
+                ) : <p className="text-lg font-bold">{editForm.personName}</p>}
+              </div>
+              <div>
+                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Charlas Bautismales</label>
+                 {isEditing ? (
+                   <label className="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-slate-50">
+                     <input 
+                       type="checkbox" 
+                       checked={editForm.baptismalTalksDone || false} 
+                       onChange={(e) => handleInputChange('baptismalTalksDone', e.target.checked)} 
+                       className="w-5 h-5 text-emaus-600 rounded focus:ring-emaus-500"
+                     />
+                     <span className="text-sm text-slate-700 font-medium">Realizadas</span>
+                   </label>
+                 ) : (
+                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${editForm.baptismalTalksDone ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                     {editForm.baptismalTalksDone ? 'Realizadas' : 'Pendientes'}
+                   </span>
+                 )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+               <div>
+                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha Nacimiento</label>
+                 {isEditing ? (
+                    <input type="date" value={editForm.birthDate || ''} onChange={(e) => handleInputChange('birthDate', e.target.value)} className="input-field w-full" />
+                 ) : <p>{editForm.birthDate || '-'}</p>}
+               </div>
+               <div>
+                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Lugar Nacimiento</label>
+                 {isEditing ? (
+                    <input type="text" value={editForm.birthPlace || ''} onChange={(e) => handleInputChange('birthPlace', e.target.value)} className="input-field w-full" />
+                 ) : <p>{editForm.birthPlace || '-'}</p>}
+               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.fatherName || ''} onChange={(e) => handleInputChange('fatherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.fatherName || '-'}</p>}
+               </div>
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Madre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.motherName || ''} onChange={(e) => handleInputChange('motherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.motherName || '-'}</p>}
+               </div>
+            </div>
+            <div className="mb-4">
+               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padrinos</label>
+               {isEditing ? (
+                 <textarea value={editForm.godparents || ''} onChange={(e) => handleInputChange('godparents', e.target.value)} className="input-field w-full h-20" />
+               ) : <p>{editForm.godparents || '-'}</p>}
+            </div>
+          </>
+        );
+
+      case SacramentType.MATRIMONIO:
+        return (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+               {/* GROOM */}
+               <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                  <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-3 border-b border-blue-200 pb-2">Datos del Novio</h4>
+                  <div className="space-y-3">
+                     <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Novio</label>
+                       {isEditing ? (
+                         <input type="text" value={editForm.groomName || ''} onChange={(e) => handleInputChange('groomName', e.target.value)} className="input-field w-full" />
+                       ) : <p className="font-bold">{editForm.groomName}</p>}
+                     </div>
+                     <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padre Novio</label>
+                       {isEditing ? (
+                         <input type="text" value={editForm.groomFather || ''} onChange={(e) => handleInputChange('groomFather', e.target.value)} className="input-field w-full" />
+                       ) : <p>{editForm.groomFather}</p>}
+                     </div>
+                     <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Madre Novio</label>
+                       {isEditing ? (
+                         <input type="text" value={editForm.groomMother || ''} onChange={(e) => handleInputChange('groomMother', e.target.value)} className="input-field w-full" />
+                       ) : <p>{editForm.groomMother}</p>}
+                     </div>
+                  </div>
+               </div>
+
+               {/* BRIDE */}
+               <div className="bg-pink-50 dark:bg-pink-900/10 p-4 rounded-lg border border-pink-100 dark:border-pink-900/30">
+                  <h4 className="font-bold text-pink-800 dark:text-pink-300 mb-3 border-b border-pink-200 pb-2">Datos de la Novia</h4>
+                  <div className="space-y-3">
+                     <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Novia</label>
+                       {isEditing ? (
+                         <input type="text" value={editForm.brideName || ''} onChange={(e) => handleInputChange('brideName', e.target.value)} className="input-field w-full" />
+                       ) : <p className="font-bold">{editForm.brideName}</p>}
+                     </div>
+                     <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padre Novia</label>
+                       {isEditing ? (
+                         <input type="text" value={editForm.brideFather || ''} onChange={(e) => handleInputChange('brideFather', e.target.value)} className="input-field w-full" />
+                       ) : <p>{editForm.brideFather}</p>}
+                     </div>
+                     <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Madre Novia</label>
+                       {isEditing ? (
+                         <input type="text" value={editForm.brideMother || ''} onChange={(e) => handleInputChange('brideMother', e.target.value)} className="input-field w-full" />
+                       ) : <p>{editForm.brideMother}</p>}
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div className="mb-4">
+               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Testigos</label>
+               {isEditing ? (
+                 <textarea value={editForm.witnesses || ''} onChange={(e) => handleInputChange('witnesses', e.target.value)} className="input-field w-full h-16" />
+               ) : <p>{editForm.witnesses || '-'}</p>}
+            </div>
+          </>
+        );
+
+      case SacramentType.CONFIRMACION:
+        return (
+          <>
+             <div className="mb-4">
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Confirmado</label>
+                {isEditing ? (
+                  <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className="input-field w-full" />
+                ) : <p className="text-lg font-bold">{editForm.personName}</p>}
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padrino/Madrina</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.confirmationSponsor || ''} onChange={(e) => handleInputChange('confirmationSponsor', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.confirmationSponsor || '-'}</p>}
+               </div>
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Parroquia de Bautismo</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.baptismParish || ''} onChange={(e) => handleInputChange('baptismParish', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.baptismParish || '-'}</p>}
+               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.fatherName || ''} onChange={(e) => handleInputChange('fatherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.fatherName || '-'}</p>}
+               </div>
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Madre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.motherName || ''} onChange={(e) => handleInputChange('motherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.motherName || '-'}</p>}
+               </div>
+            </div>
+          </>
+        );
+
+      case SacramentType.DEFUNCION:
+        return (
+           <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                 <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Difunto</label>
+                    {isEditing ? (
+                      <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className="input-field w-full" />
+                    ) : <p className="text-lg font-bold">{editForm.personName}</p>}
+                 </div>
+                 <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Edad</label>
+                    {isEditing ? (
+                      <input type="number" value={editForm.age || ''} onChange={(e) => handleInputChange('age', parseInt(e.target.value))} className="input-field w-24" />
+                    ) : <p>{editForm.age ? `${editForm.age} años` : '-'}</p>}
+                 </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                 <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cónyuge (si aplica)</label>
+                    {isEditing ? (
+                      <input type="text" value={editForm.spouseName || ''} onChange={(e) => handleInputChange('spouseName', e.target.value)} className="input-field w-full" />
+                    ) : <p>{editForm.spouseName || '-'}</p>}
+                 </div>
+                 <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Causa de Muerte</label>
+                    {isEditing ? (
+                      <input type="text" value={editForm.causeOfDeath || ''} onChange={(e) => handleInputChange('causeOfDeath', e.target.value)} className="input-field w-full" />
+                    ) : <p>{editForm.causeOfDeath || '-'}</p>}
+                 </div>
+              </div>
+              <div className="mb-4">
+                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cementerio</label>
+                 {isEditing ? (
+                   <input type="text" value={editForm.cemetery || ''} onChange={(e) => handleInputChange('cemetery', e.target.value)} className="input-field w-full" />
+                 ) : <p>{editForm.cemetery || '-'}</p>}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.fatherName || ''} onChange={(e) => handleInputChange('fatherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.fatherName || '-'}</p>}
+               </div>
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Madre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.motherName || ''} onChange={(e) => handleInputChange('motherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.motherName || '-'}</p>}
+               </div>
+            </div>
+           </>
+        );
+
+      default:
+        // Default generic view (Primera Comunión, etc)
+        return (
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre</label>
+            {isEditing ? (
+              <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className="input-field w-full" />
+            ) : <p className="text-lg font-bold">{editForm.personName}</p>}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Padre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.fatherName || ''} onChange={(e) => handleInputChange('fatherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.fatherName || '-'}</p>}
+               </div>
+               <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Madre</label>
+                  {isEditing ? (
+                    <input type="text" value={editForm.motherName || ''} onChange={(e) => handleInputChange('motherName', e.target.value)} className="input-field w-full" />
+                  ) : <p>{editForm.motherName || '-'}</p>}
+               </div>
+            </div>
+          </div>
+        );
+    }
   };
 
   // --- DETAIL VIEW COMPONENT ---
   if (selectedRecord && editForm) {
     return (
       <div className="animate-fade-in space-y-6">
+        <style>{`
+          .input-field {
+            @apply w-full border border-slate-300 rounded px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-emaus-500 focus:outline-none shadow-sm dark:bg-slate-800 dark:text-white dark:border-slate-700;
+          }
+        `}</style>
         {/* Detail Header */}
         <div className="flex items-center justify-between">
            <div className="flex items-center gap-4">
@@ -106,9 +416,9 @@ const Sacraments: React.FC = () => {
               </button>
               <div>
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
-                    {isEditing ? t('sacraments.detail.editing') : `${t('sacraments.detail.view_details', {type: selectedRecord.type})}`}
+                    {isEditing ? (selectedRecord.id ? t('sacraments.detail.editing') : 'Creando Registro') : `${t('sacraments.detail.view_details', {type: selectedRecord.type})}`}
                 </h2>
-                <p className="text-slate-500 dark:text-slate-400">{t('sacraments.detail.record_id')}: #{selectedRecord.id}</p>
+                {selectedRecord.id && <p className="text-slate-500 dark:text-slate-400">{t('sacraments.detail.record_id')}: #{selectedRecord.id}</p>}
               </div>
            </div>
            
@@ -143,90 +453,55 @@ const Sacraments: React.FC = () => {
 
         {/* Card Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-           {/* Left Column: Main Info */}
+           {/* Left Column: Specific Info */}
            <div className="lg:col-span-2 space-y-6">
               <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 relative">
                   
+                  {/* Header of the Form: Icon & Type */}
                   <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
                      <div className="w-16 h-16 bg-emaus-50 dark:bg-emaus-900/30 rounded-full flex items-center justify-center text-emaus-700 dark:text-emaus-400">
-                        <User className="w-8 h-8" />
+                        {selectedRecord.type === SacramentType.BAUTIZO && <Baby className="w-8 h-8" />}
+                        {selectedRecord.type === SacramentType.MATRIMONIO && <Heart className="w-8 h-8" />}
+                        {selectedRecord.type === SacramentType.DEFUNCION && <Cross className="w-8 h-8" />}
+                        {(selectedRecord.type === SacramentType.CONFIRMACION || selectedRecord.type === SacramentType.PRIMERA_COMUNION) && <User className="w-8 h-8" />}
                      </div>
                      <div className="flex-1">
                         <span className="text-sm font-bold uppercase text-emaus-700 dark:text-emaus-400 tracking-wide block mb-1">
                             {t(`sacraments.types.${selectedRecord.type}`)}
                         </span>
-                        {isEditing ? (
-                            <input 
-                                type="text"
-                                value={editForm.personName}
-                                onChange={(e) => handleInputChange('personName', e.target.value)}
-                                className="w-full text-2xl font-bold text-slate-900 bg-white border-b-2 border-emaus-200 focus:border-emaus-500 focus:outline-none px-2 py-1 rounded shadow-sm"
-                                placeholder="Nombre completo"
-                            />
-                        ) : (
-                            <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{selectedRecord.personName}</h3>
-                        )}
-                        
-                        <div className="text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-2">
-                           <Calendar className="w-4 h-4" /> 
-                           {isEditing ? (
-                               <input 
-                                   type="date"
-                                   value={editForm.date}
-                                   onChange={(e) => handleInputChange('date', e.target.value)}
-                                   className="text-sm border border-slate-300 rounded px-2 py-1 bg-white text-slate-900 focus:ring-2 focus:ring-emaus-500 focus:outline-none shadow-sm"
-                               />
-                           ) : (
-                               <span>{selectedRecord.date}</span>
-                           )}
+                        <div className="flex items-center gap-4">
+                           <div className="text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                              <Calendar className="w-4 h-4" /> 
+                              {isEditing ? (
+                                  <input 
+                                      type="date"
+                                      value={editForm.date}
+                                      onChange={(e) => handleInputChange('date', e.target.value)}
+                                      className="input-field"
+                                  />
+                              ) : (
+                                  <span className="text-lg font-medium text-slate-800 dark:text-white">{selectedRecord.date}</span>
+                              )}
+                           </div>
                         </div>
                      </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     <div>
-                        <h4 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-                           <Users className="w-4 h-4" /> {t('sacraments.detail.parents')}
-                        </h4>
-                        {isEditing ? (
-                            <textarea 
-                                value={editForm.parents}
-                                onChange={(e) => handleInputChange('parents', e.target.value)}
-                                className="w-full p-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-emaus-500 focus:outline-none min-h-[80px] shadow-sm placeholder:text-slate-400"
-                            />
-                        ) : (
-                            <p className="text-lg text-slate-800 dark:text-slate-200 font-medium bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
-                               {selectedRecord.parents || 'No registrado'}
-                            </p>
-                        )}
-                     </div>
-                     <div>
-                        <h4 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-                           <Users className="w-4 h-4" /> {t('sacraments.detail.godparents')}
-                        </h4>
-                        {isEditing ? (
-                            <textarea 
-                                value={editForm.godparents}
-                                onChange={(e) => handleInputChange('godparents', e.target.value)}
-                                className="w-full p-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-emaus-500 focus:outline-none min-h-[80px] shadow-sm placeholder:text-slate-400"
-                            />
-                        ) : (
-                            <p className="text-lg text-slate-800 dark:text-slate-200 font-medium bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
-                               {selectedRecord.godparents || 'No registrado'}
-                            </p>
-                        )}
-                     </div>
+                  {/* Dynamic Fields Section */}
+                  <div className="bg-slate-50 dark:bg-slate-950/50 p-6 rounded-xl border border-slate-100 dark:border-slate-800 mb-6">
+                     {renderSpecificFields()}
                   </div>
 
+                  {/* Observations */}
                   <div className="mt-8">
                      <h4 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
                         <FileText className="w-4 h-4" /> {t('sacraments.detail.observations')}
                      </h4>
                      {isEditing ? (
                         <textarea 
-                            value={editForm.observations}
+                            value={editForm.observations || ''}
                             onChange={(e) => handleInputChange('observations', e.target.value)}
-                            className="w-full p-4 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-emaus-500 focus:outline-none min-h-[100px] shadow-sm placeholder:text-slate-400"
+                            className="input-field min-h-[100px]"
                         />
                      ) : (
                         <p className="text-slate-700 dark:text-slate-300 leading-relaxed bg-amber-50 dark:bg-amber-900/10 p-4 rounded-lg border border-amber-100 dark:border-amber-900/30 italic">
@@ -252,7 +527,7 @@ const Sacraments: React.FC = () => {
                                 type="text"
                                 value={editForm.book}
                                 onChange={(e) => handleInputChange('book', e.target.value)}
-                                className="w-full font-bold text-slate-800 bg-white border-b border-slate-300 focus:outline-none focus:border-emaus-500 py-1"
+                                className="input-field font-bold py-1"
                             />
                        ) : (
                             <span className="text-xl font-bold text-slate-800 dark:text-white">{selectedRecord.book}</span>
@@ -265,7 +540,7 @@ const Sacraments: React.FC = () => {
                                 type="text"
                                 value={editForm.page}
                                 onChange={(e) => handleInputChange('page', e.target.value)}
-                                className="w-full font-bold text-slate-800 bg-white border-b border-slate-300 focus:outline-none focus:border-emaus-500 py-1"
+                                className="input-field font-bold py-1"
                             />
                        ) : (
                             <span className="text-xl font-bold text-slate-800 dark:text-white">{selectedRecord.page}</span>
@@ -278,7 +553,7 @@ const Sacraments: React.FC = () => {
                                 type="text"
                                 value={editForm.celebrant}
                                 onChange={(e) => handleInputChange('celebrant', e.target.value)}
-                                className="w-full font-bold text-slate-800 bg-white border-b border-slate-300 focus:outline-none focus:border-emaus-500 py-1"
+                                className="input-field font-bold py-1"
                             />
                        ) : (
                             <span className="text-md font-bold text-slate-800 dark:text-white">{selectedRecord.celebrant}</span>
@@ -291,29 +566,13 @@ const Sacraments: React.FC = () => {
                                 type="text"
                                 value={editForm.parish}
                                 onChange={(e) => handleInputChange('parish', e.target.value)}
-                                className="w-full font-bold text-slate-800 bg-white border-b border-slate-300 focus:outline-none focus:border-emaus-500 py-1"
+                                className="input-field font-bold py-1"
                             />
                        ) : (
                             <span className="text-md font-bold text-slate-800 dark:text-white">{selectedRecord.parish || 'Parroquia Santa María'}</span>
                        )}
                     </div>
                  </div>
-              </div>
-
-              <div className="bg-gold-50 dark:bg-gold-900/10 p-6 rounded-2xl border border-gold-100 dark:border-gold-900/30">
-                 <h4 className="text-sm font-bold text-gold-800 dark:text-gold-400 mb-2">Acciones Rápidas</h4>
-                 <ul className="space-y-2">
-                    <li>
-                       <button className="w-full text-left text-sm text-gold-700 dark:text-gold-300 hover:text-gold-900 hover:underline py-1">
-                          Generar Certificado Digital
-                       </button>
-                    </li>
-                    <li>
-                       <button className="w-full text-left text-sm text-gold-700 dark:text-gold-300 hover:text-gold-900 hover:underline py-1">
-                          Ver Historial de Cambios
-                       </button>
-                    </li>
-                 </ul>
               </div>
            </div>
         </div>
@@ -342,7 +601,10 @@ const Sacraments: React.FC = () => {
           <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-sm transition-colors">
             <Download className="w-4 h-4" /> {t('sacraments.export')}
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-emaus-700 text-white rounded-lg hover:bg-emaus-800 font-medium text-sm shadow-sm shadow-emaus-900/20 transition-colors">
+          <button 
+            onClick={handleCreateNew}
+            className="flex items-center gap-2 px-4 py-2 bg-emaus-700 text-white rounded-lg hover:bg-emaus-800 font-medium text-sm shadow-sm shadow-emaus-900/20 transition-colors"
+          >
             <Plus className="w-4 h-4" /> {t('sacraments.new_record')}
           </button>
         </div>
@@ -411,7 +673,9 @@ const Sacraments: React.FC = () => {
                     onClick={() => setSelectedRecord(record)}
                   >
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-emaus-700 dark:group-hover:text-emaus-400 transition-colors">{record.personName}</div>
+                      <div className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-emaus-700 dark:group-hover:text-emaus-400 transition-colors">
+                        {getDisplayName(record)}
+                      </div>
                       <div className="text-xs text-slate-400">ID: #{record.id.slice(0, 8)}...</div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{record.date}</td>

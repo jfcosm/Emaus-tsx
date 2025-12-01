@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -105,8 +106,6 @@ const App: React.FC = () => {
                >
                   <option value="es">ES</option>
                   <option value="en">EN</option>
-                  <option value="it">IT</option>
-                  <option value="fr">FR</option>
                </select>
             </div>
 

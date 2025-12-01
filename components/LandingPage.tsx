@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   BookOpen, 
@@ -210,8 +211,6 @@ const LandingPage: React.FC = () => {
                  >
                     <option value="es">ES</option>
                     <option value="en">EN</option>
-                    <option value="it">IT</option>
-                    <option value="fr">FR</option>
                  </select>
               </div>
 
@@ -266,7 +265,7 @@ const LandingPage: React.FC = () => {
                 </button>
              </div>
              <div className="flex gap-2">
-                {['es', 'en', 'it'].map((lang) => (
+                {['es', 'en'].map((lang) => (
                   <button 
                     key={lang}
                     onClick={() => { setLanguage(lang as any); setIsMenuOpen(false); }}
