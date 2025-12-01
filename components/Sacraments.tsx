@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { SacramentType, SacramentRecord } from '../types';
-import { mockSacraments } from '../services/mockData';
-import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw } from 'lucide-react';
+import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getSacraments, updateSacrament, addSacrament, seedDatabase } from '../services/sacramentsService';
 
 const Sacraments: React.FC = () => {
   const { t } = useLanguage();
@@ -11,9 +11,38 @@ const Sacraments: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecord, setSelectedRecord] = useState<SacramentRecord | null>(null);
   
+  // Data States
+  const [sacraments, setSacraments] = useState<SacramentRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   // Edit Mode States
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<SacramentRecord | null>(null);
+
+  // Load Data from Firebase
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const data = await getSacraments();
+      setSacraments(data);
+    } catch (err) {
+      console.error(err);
+      setError('Error al cargar los datos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSeedData = async () => {
+    setLoading(true);
+    await seedDatabase();
+    await loadData();
+  };
 
   // Initialize edit form when a record is selected
   useEffect(() => {
@@ -23,7 +52,8 @@ const Sacraments: React.FC = () => {
     }
   }, [selectedRecord]);
 
-  const filteredData = mockSacraments.filter(
+  // Filter logic applied to REAL data
+  const filteredData = sacraments.filter(
     (item) => 
       (activeTab === item.type) && 
       (item.personName.toLowerCase().includes(searchTerm.toLowerCase()) || item.celebrant.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -40,11 +70,19 @@ const Sacraments: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
-    if (editForm) {
-      setSelectedRecord(editForm);
-      // In a real app, here you would call an API to save data
-      setIsEditing(false);
+  const handleSave = async () => {
+    if (editForm && editForm.id) {
+      try {
+        await updateSacrament(editForm.id, editForm);
+        
+        // Update local state to reflect changes immediately
+        setSacraments(prev => prev.map(item => item.id === editForm.id ? editForm : item));
+        setSelectedRecord(editForm);
+        setIsEditing(false);
+      } catch (e) {
+        console.error("Error saving:", e);
+        alert("Error al guardar cambios");
+      }
     }
   };
 
@@ -283,7 +321,7 @@ const Sacraments: React.FC = () => {
     );
   }
 
-  // --- LIST VIEW (Original) ---
+  // --- LIST VIEW (Connected to DB) ---
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Actions */}
@@ -293,6 +331,14 @@ const Sacraments: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400">{t('sacraments.subtitle')}</p>
         </div>
         <div className="flex gap-2">
+          {sacraments.length === 0 && !loading && (
+             <button 
+               onClick={handleSeedData}
+               className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-medium text-sm transition-colors border border-slate-200"
+             >
+                <Database className="w-4 h-4" /> Cargar Datos Ejemplo
+             </button>
+          )}
           <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-sm transition-colors">
             <Download className="w-4 h-4" /> {t('sacraments.export')}
           </button>
@@ -351,7 +397,13 @@ const Sacraments: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredData.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                     Cargando registros...
+                  </td>
+                </tr>
+              ) : filteredData.length > 0 ? (
                 filteredData.map((record) => (
                   <tr 
                     key={record.id} 
@@ -360,7 +412,7 @@ const Sacraments: React.FC = () => {
                   >
                     <td className="px-6 py-4">
                       <div className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-emaus-700 dark:group-hover:text-emaus-400 transition-colors">{record.personName}</div>
-                      <div className="text-xs text-slate-400">ID: #{record.id}</div>
+                      <div className="text-xs text-slate-400">ID: #{record.id.slice(0, 8)}...</div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{record.date}</td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{record.celebrant}</td>
