@@ -18,10 +18,14 @@ import {
   LayoutGrid,
   List as ListIcon,
   ChevronRight,
-  FilePlus,
   Clock,
-  MoreHorizontal,
-  ArrowLeft
+  ArrowLeft,
+  Type,
+  Eraser,
+  Undo,
+  Redo,
+  ListOrdered,
+  ChevronDown
 } from 'lucide-react';
 import { SavedDocument } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -305,47 +309,107 @@ const DocumentEditor: React.FC = () => {
   // --- SUB-COMPONENT: EDITOR ---
   const renderEditor = () => {
     const isBlank = selectedTemplateId === 'blank';
+    
+    // Editor Action Helpers
+    const execCmd = (command: string, value: string | undefined = undefined) => {
+       document.execCommand(command, false, value);
+    };
 
     return (
       <div className="h-[calc(100vh-8rem)] flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
         {/* Editor Toolbar */}
-        <div className="border-b border-slate-200 dark:border-slate-800 p-3 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
-          <div className="flex items-center gap-3">
+        <div className="border-b border-slate-200 dark:border-slate-800 p-2 flex flex-wrap items-center justify-between gap-y-2 bg-slate-50 dark:bg-slate-800/50">
+          
+          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
               <button 
                 onClick={() => setView('list')} 
-                className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium flex items-center gap-1 px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors mr-2"
+                title={t('documents.close')}
               >
-                  &larr; {t('documents.close')}
+                  <ArrowLeft className="w-5 h-5" />
               </button>
-              <div className="h-6 w-px bg-slate-300 dark:bg-slate-700"></div>
               
-              {/* Document Title Input */}
-              <div className="flex items-center gap-2">
-                 <FileText className="w-4 h-4 text-emaus-600 dark:text-emaus-400" />
-                 <input 
-                    type="text" 
-                    value={docTitle}
-                    onChange={(e) => setDocTitle(e.target.value)}
-                    className="bg-transparent border-none text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-0 w-64 hover:bg-slate-200 dark:hover:bg-slate-700 rounded px-2 transition-colors"
-                 />
+              {/* History */}
+              <div className="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+                 <button onClick={() => execCmd('undo')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300" title="Deshacer"><Undo className="w-4 h-4" /></button>
+                 <button onClick={() => execCmd('redo')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300" title="Rehacer"><Redo className="w-4 h-4" /></button>
+                 <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                 <button onClick={() => execCmd('removeFormat')} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-slate-600 dark:text-slate-300 hover:text-red-600" title="Limpiar Formato"><Eraser className="w-4 h-4" /></button>
+              </div>
+
+              {/* Typography */}
+              <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+                 {/* Font Family */}
+                 <div className="relative group">
+                    <select 
+                      onChange={(e) => execCmd('fontName', e.target.value)}
+                      className="w-28 text-xs bg-transparent border-none focus:ring-0 text-slate-700 dark:text-slate-300 font-medium py-1 px-2 cursor-pointer appearance-none"
+                    >
+                       <option value="Inter">Inter</option>
+                       <option value="Cinzel">Cinzel</option>
+                       <option value="Georgia">Georgia</option>
+                       <option value="Courier New">Courier</option>
+                       <option value="Arial">Arial</option>
+                    </select>
+                    <ChevronDown className="w-3 h-3 absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                 </div>
+                 <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                 {/* Font Size (1-7) */}
+                 <div className="relative">
+                    <select 
+                      onChange={(e) => execCmd('fontSize', e.target.value)}
+                      className="w-12 text-xs bg-transparent border-none focus:ring-0 text-slate-700 dark:text-slate-300 font-medium py-1 px-1 cursor-pointer appearance-none text-center"
+                      defaultValue="3"
+                    >
+                       <option value="1">10</option>
+                       <option value="2">13</option>
+                       <option value="3">16</option>
+                       <option value="4">18</option>
+                       <option value="5">24</option>
+                       <option value="6">32</option>
+                       <option value="7">48</option>
+                    </select>
+                    <ChevronDown className="w-3 h-3 absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                 </div>
+              </div>
+  
+              {/* Formatting Tools */}
+              <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+                  <button onClick={() => execCmd('bold')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300 font-bold" title="Negrita"><Bold className="w-4 h-4" /></button>
+                  <button onClick={() => execCmd('italic')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300 italic" title="Cursiva"><Italic className="w-4 h-4" /></button>
+                  <button onClick={() => execCmd('underline')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300 underline" title="Subrayado"><Underline className="w-4 h-4" /></button>
+              </div>
+
+               {/* Align & Lists */}
+              <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+                  <button onClick={() => execCmd('justifyLeft')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300" title="Izquierda"><AlignLeft className="w-4 h-4" /></button>
+                  <button onClick={() => execCmd('justifyCenter')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300" title="Centro"><AlignCenter className="w-4 h-4" /></button>
+                  <button onClick={() => execCmd('justifyRight')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300" title="Derecha"><AlignRight className="w-4 h-4" /></button>
+                  <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                  <button onClick={() => execCmd('insertUnorderedList')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300" title="Viñetas"><ListIcon className="w-4 h-4" /></button>
+                  <button onClick={() => execCmd('insertOrderedList')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300" title="Lista Numérica"><ListOrdered className="w-4 h-4" /></button>
+              </div>
+
+               {/* Media */}
+              <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+                  <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><ImageIcon className="w-4 h-4" /></button>
               </div>
           </div>
   
-          {/* Formatting Tools */}
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><Bold className="w-4 h-4" /></button>
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><Italic className="w-4 h-4" /></button>
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><Underline className="w-4 h-4" /></button>
-              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><AlignLeft className="w-4 h-4" /></button>
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><AlignCenter className="w-4 h-4" /></button>
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><AlignRight className="w-4 h-4" /></button>
-              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300"><ImageIcon className="w-4 h-4" /></button>
-          </div>
-  
-          <div className="flex items-center gap-2">
-              <button className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+              {/* Document Title Input */}
+              <input 
+                  type="text" 
+                  value={docTitle}
+                  onChange={(e) => setDocTitle(e.target.value)}
+                  className="bg-transparent border-b border-transparent hover:border-slate-300 focus:border-emaus-500 text-sm font-bold text-slate-800 dark:text-white focus:outline-none w-32 md:w-48 text-right md:text-left transition-colors"
+               />
+              <button 
+                onClick={() => window.print()} 
+                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
+                title={t('documents.print')}
+              >
                   <Printer className="w-4 h-4" />
               </button>
               <button 
@@ -358,11 +422,12 @@ const DocumentEditor: React.FC = () => {
         </div>
   
         {/* Editor Canvas */}
-        <div className="flex-1 bg-slate-100 dark:bg-slate-950/50 overflow-y-auto p-8 flex justify-center">
+        <div className="flex-1 bg-slate-100 dark:bg-slate-950/50 overflow-y-auto p-4 md:p-8 flex justify-center">
           <div 
               className="bg-white w-[210mm] min-h-[297mm] shadow-lg p-[25mm] focus:outline-none text-slate-900"
               contentEditable
               suppressContentEditableWarning
+              style={{ fontFamily: 'Inter, sans-serif' }}
           >
               {isBlank ? (
                   <div className="text-slate-800">
