@@ -74,6 +74,17 @@ const DocumentEditor: React.FC = () => {
     setLoading(false);
   };
 
+  // --- CONTENT SYNCHRONIZATION EFFECT (FIX FOR SAVING BUG) ---
+  useEffect(() => {
+    // This ensures that when we switch to editor view or switch documents,
+    // the content is loaded into the editable DIV.
+    // We do NOT use dangerouslySetInnerHTML in the render to avoid React 
+    // wiping out user changes on re-renders (like title updates).
+    if (view === 'editor' && editorContentRef.current && activeDocument) {
+       editorContentRef.current.innerHTML = activeDocument.content || '';
+    }
+  }, [view, activeDocument?.id]);
+
   // --- FILE SYSTEM LOGIC ---
 
   // Filter documents based on current folder
@@ -631,8 +642,8 @@ const DocumentEditor: React.FC = () => {
               contentEditable
               suppressContentEditableWarning
               style={{ fontFamily: 'Inter, sans-serif' }}
-              // DangerouslySetInnerHTML is only for initial load to prevent React Reconciliation bugs with contentEditable
-              dangerouslySetInnerHTML={{ __html: activeDocument?.content || '' }}
+              // DangerouslySetInnerHTML REMOVED to prevent React overwrite bugs.
+              // Content is handled by the useEffect above.
           />
         </div>
       </div>
