@@ -416,7 +416,10 @@ const Sacraments: React.FC = () => {
               </button>
               <div>
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
-                    {isEditing ? (selectedRecord.id ? t('sacraments.detail.editing') : 'Creando Registro') : `${t('sacraments.detail.view_details', {type: selectedRecord.type})}`}
+                    {isEditing 
+                      ? (selectedRecord.id ? t('sacraments.detail.editing') : t('sacraments.new_record')) 
+                      : `${t('sacraments.detail.record_card')} ${t(`sacraments.types.${selectedRecord.type}`)}`
+                    }
                 </h2>
                 {selectedRecord.id && <p className="text-slate-500 dark:text-slate-400">{t('sacraments.detail.record_id')}: #{selectedRecord.id}</p>}
               </div>

@@ -50,6 +50,7 @@ export const translations = {
         no_records: 'No se encontraron registros.'
       },
       detail: {
+        record_card: 'Ficha de',
         editing: 'Editando Registro',
         record_id: 'Registro ID',
         edit: 'Editar Datos',
@@ -242,6 +243,7 @@ export const translations = {
         no_records: 'No records found.'
       },
       detail: {
+        record_card: 'Record of',
         editing: 'Editing Record',
         record_id: 'Record ID',
         edit: 'Edit Data',
