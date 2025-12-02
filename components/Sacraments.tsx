@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { SacramentType, SacramentRecord } from '../types';
-import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database, Heart, Cross, Baby } from 'lucide-react';
+import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database, Heart, Cross, Baby, ArrowLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getSacraments, updateSacrament, addSacrament, seedDatabase } from '../services/sacramentsService';
 
 const Sacraments: React.FC = () => {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<SacramentType>(SacramentType.BAUTIZO);
+  // State changed: activeTab can be null (Dashboard view)
+  const [activeTab, setActiveTab] = useState<SacramentType | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecord, setSelectedRecord] = useState<SacramentRecord | null>(null);
   
@@ -52,6 +52,8 @@ const Sacraments: React.FC = () => {
 
   // Create New Record Logic
   const handleCreateNew = () => {
+    if (!activeTab) return; // Should not happen
+    
     const newRecord: SacramentRecord = {
       id: '', // Will be assigned by Firebase
       type: activeTab,
@@ -73,6 +75,7 @@ const Sacraments: React.FC = () => {
   // Filter logic applied to REAL data
   const filteredData = sacraments.filter(
     (item) => {
+      // Filter by Active Tab (Sacrament Type)
       const matchType = activeTab === item.type;
       
       // Dynamic name check depending on type
@@ -139,6 +142,24 @@ const Sacraments: React.FC = () => {
       return `${record.groomName || 'Sin Nombre'} & ${record.brideName || 'Sin Nombre'}`;
     }
     return record.personName || 'Sin Nombre';
+  };
+
+  // --- HELPER FOR SACRAMENT CARDS ---
+  const getSacramentConfig = (type: SacramentType) => {
+    switch(type) {
+      case SacramentType.BAUTIZO:
+        return { icon: Baby, color: 'text-cyan-600', bg: 'bg-cyan-50', border: 'border-cyan-100', hover: 'hover:border-cyan-300' };
+      case SacramentType.PRIMERA_COMUNION:
+        return { icon: Users, color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-100', hover: 'hover:border-yellow-300' };
+      case SacramentType.CONFIRMACION:
+        return { icon: User, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', hover: 'hover:border-orange-300' };
+      case SacramentType.MATRIMONIO:
+        return { icon: Heart, color: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-100', hover: 'hover:border-pink-300' };
+      case SacramentType.DEFUNCION:
+        return { icon: Cross, color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-200', hover: 'hover:border-slate-400' };
+      default:
+        return { icon: BookOpen, color: 'text-emaus-600', bg: 'bg-emaus-50', border: 'border-emaus-100', hover: 'hover:border-emaus-300' };
+    }
   };
 
   // Helper to render specific fields based on Sacrament Type
@@ -396,7 +417,56 @@ const Sacraments: React.FC = () => {
     }
   };
 
-  // --- DETAIL VIEW COMPONENT ---
+  // 1. DASHBOARD VIEW (Cards)
+  if (!activeTab) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{t('sacraments.title')}</h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-2xl">{t('sacraments.subtitle')}</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Object.values(SacramentType).map((type) => {
+            const config = getSacramentConfig(type);
+            const Icon = config.icon;
+            
+            return (
+              <button
+                key={type}
+                onClick={() => setActiveTab(type)}
+                className={`
+                  relative overflow-hidden bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm 
+                  border-2 ${config.border} ${config.hover}
+                  text-left transition-all duration-200 group hover:shadow-lg hover:-translate-y-1
+                `}
+              >
+                <div className={`
+                  w-16 h-16 rounded-2xl flex items-center justify-center mb-6 
+                  ${config.bg} ${config.color} 
+                  transition-transform group-hover:scale-110
+                `}>
+                  <Icon className="w-8 h-8" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2 group-hover:text-emaus-700 dark:group-hover:text-emaus-400">
+                  {t(`sacraments.types.${type}`)}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Gestionar registros <ChevronRight className="w-4 h-4" />
+                </p>
+                
+                {/* Decorative background element */}
+                <div className={`absolute -right-4 -bottom-4 w-32 h-32 rounded-full opacity-5 ${config.bg}`}></div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // 2. DETAIL VIEW COMPONENT
   if (selectedRecord && editForm) {
     return (
       <div className="animate-fade-in space-y-6">
@@ -583,14 +653,25 @@ const Sacraments: React.FC = () => {
     );
   }
 
-  // --- LIST VIEW (Connected to DB) ---
+  // 3. LIST VIEW (Specific Type)
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('sacraments.title')}</h2>
-          <p className="text-slate-500 dark:text-slate-400">{t('sacraments.subtitle')}</p>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setActiveTab(null)}
+            className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500 dark:text-slate-400"
+            title="Volver al menú"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
+              Libro de {t(`sacraments.types.${activeTab}`)}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Registros oficiales de la parroquia</p>
+          </div>
         </div>
         <div className="flex gap-2">
           {sacraments.length === 0 && !loading && (
@@ -611,24 +692,6 @@ const Sacraments: React.FC = () => {
             <Plus className="w-4 h-4" /> {t('sacraments.new_record')}
           </button>
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
-        {Object.values(SacramentType).map((type) => (
-          <button
-            key={type}
-            onClick={() => setActiveTab(type)}
-            className={`
-              px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
-              ${activeTab === type 
-                ? 'bg-emaus-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md' 
-                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'}
-            `}
-          >
-            {t(`sacraments.types.${type}`)}
-          </button>
-        ))}
       </div>
 
       {/* Search & Filter */}
