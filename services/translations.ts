@@ -82,7 +82,10 @@ export const translations = {
         save: 'Guardar Evento',
         types: {
           Misa: 'Misa',
-          Sacramento: 'Sacramento',
+          Bautizo: 'Bautizo',
+          Matrimonio: 'Matrimonio',
+          Confirmación: 'Confirmación',
+          'Primera Comunión': '1° Comunión',
           Reunión: 'Reunión',
           Otro: 'Otro'
         }
@@ -339,7 +342,10 @@ export const translations = {
         save: 'Save Event',
         types: {
           Misa: 'Mass',
-          Sacramento: 'Sacrament',
+          Bautizo: 'Baptism',
+          Matrimonio: 'Marriage',
+          Confirmación: 'Confirmation',
+          'Primera Comunión': 'First Communion',
           Reunión: 'Meeting',
           Otro: 'Other'
         }

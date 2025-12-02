@@ -103,9 +103,11 @@ export const mockSacraments: SacramentRecord[] = [
 
 export const mockEvents: CalendarEvent[] = [
   { id: '1', title: 'Misa Dominical', date: '2024-06-16', time: '12:00', type: 'Misa', location: 'Templo Mayor' },
-  { id: '2', title: 'Bautizos Grupales', date: '2024-06-16', time: '16:00', type: 'Sacramento', location: 'Capilla' },
+  { id: '2', title: 'Bautizos Grupales', date: '2024-06-16', time: '16:00', type: 'Bautizo', location: 'Capilla' },
   { id: '3', title: 'Reunión Consejo', date: '2024-06-18', time: '19:30', type: 'Reunión', location: 'Salón Parroquial' },
   { id: '4', title: 'Ensayo Coro', date: '2024-06-20', time: '18:00', type: 'Otro', location: 'Templo Menor' },
+  { id: '5', title: 'Matrimonio: Rojas-Silva', date: '2024-06-22', time: '17:00', type: 'Matrimonio', location: 'Templo Mayor' },
+  { id: '6', title: 'Confirmaciones Colegio', date: '2024-06-23', time: '11:00', type: 'Confirmación', location: 'Templo Mayor' },
 ];
 
 export const documentTemplates: DocumentTemplate[] = [

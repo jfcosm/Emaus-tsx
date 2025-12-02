@@ -48,7 +48,34 @@ const Agenda: React.FC = () => {
     ? events 
     : events.filter(e => e.type === filterType);
 
-  const eventTypes = ['Misa', 'Sacramento', 'Reunión', 'Otro'];
+  // New specific types
+  const eventTypes = ['Misa', 'Bautizo', 'Matrimonio', 'Confirmación', 'Primera Comunión', 'Reunión', 'Otro'];
+
+  // Helper for Badge Colors
+  const getTypeColorClass = (type: string) => {
+    switch(type) {
+      case 'Misa': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
+      case 'Bautizo': return 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300';
+      case 'Matrimonio': return 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300';
+      case 'Confirmación': return 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300';
+      case 'Primera Comunión': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
+      case 'Reunión': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300';
+      default: return 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
+    }
+  };
+
+  // Helper for Dot Colors
+  const getTypeDotColor = (type: string) => {
+    switch(type) {
+      case 'Misa': return 'bg-purple-500';
+      case 'Bautizo': return 'bg-cyan-500';
+      case 'Matrimonio': return 'bg-pink-500';
+      case 'Confirmación': return 'bg-orange-500';
+      case 'Primera Comunión': return 'bg-yellow-500';
+      case 'Reunión': return 'bg-emerald-500';
+      default: return 'bg-slate-400';
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in relative">
@@ -124,18 +151,16 @@ const Agenda: React.FC = () => {
                   <span className={`text-sm font-medium ${i === 15 ? 'text-gold-700 dark:text-gold-400' : 'text-slate-700 dark:text-slate-300'}`}>{i + 1}</span>
                   {hasEvent && (
                     <div className="mt-1 flex gap-1 flex-wrap justify-center">
-                       {dayEvents.slice(0, 3).map((e, idx) => (
-                         <div key={idx} className={`w-1.5 h-1.5 rounded-full 
-                            ${e.type === 'Misa' ? 'bg-purple-500' : 
-                              e.type === 'Sacramento' ? 'bg-blue-500' : 
-                              e.type === 'Reunión' ? 'bg-emerald-500' : 'bg-slate-400'
-                            }
-                         `}></div>
+                       {dayEvents.slice(0, 4).map((e, idx) => (
+                         <div key={idx} className={`w-1.5 h-1.5 rounded-full ${getTypeDotColor(e.type)}`}></div>
                        ))}
                     </div>
                   )}
-                  {i === 15 && filterType === 'all' && (
-                     <div className="mt-1 text-xs bg-gold-100 dark:bg-gold-900/30 text-gold-800 dark:text-gold-300 p-1 rounded truncate hidden md:block">Misa 10:00</div>
+                  {/* Show one concise label if filter is specific */}
+                  {hasEvent && filterType !== 'all' && (
+                     <div className="mt-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1 rounded truncate hidden md:block">
+                        {dayEvents[0].time}
+                     </div>
                   )}
                 </div>
               );
@@ -154,11 +179,7 @@ const Agenda: React.FC = () => {
               filteredEvents.map((event) => (
                 <div key={event.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-emaus-200 dark:hover:border-emaus-800 transition-colors">
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase
-                      ${event.type === 'Misa' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 
-                        event.type === 'Sacramento' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 
-                        event.type === 'Reunión' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}
-                    `}>
+                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${getTypeColorClass(event.type)}`}>
                       {t(`agenda.modal.types.${event.type}`)}
                     </span>
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap ml-2">{event.date}</span>
@@ -190,7 +211,7 @@ const Agenda: React.FC = () => {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.event_title')}</label>
+                <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.event_title')}</label>
                 <input
                   type="text"
                   name="title"
@@ -204,7 +225,7 @@ const Agenda: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.date')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.date')}</label>
                   <input
                     type="date"
                     name="date"
@@ -215,7 +236,7 @@ const Agenda: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.time')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.time')}</label>
                   <input
                     type="time"
                     name="time"
@@ -229,21 +250,20 @@ const Agenda: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.type')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.type')}</label>
                   <select
                     name="type"
                     value={newEvent.type}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white text-slate-900"
                   >
-                    <option value="Misa">{t('agenda.modal.types.Misa')}</option>
-                    <option value="Sacramento">{t('agenda.modal.types.Sacramento')}</option>
-                    <option value="Reunión">{t('agenda.modal.types.Reunión')}</option>
-                    <option value="Otro">{t('agenda.modal.types.Otro')}</option>
+                    {eventTypes.map(type => (
+                       <option key={type} value={type}>{t(`agenda.modal.types.${type}`)}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.location')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.location')}</label>
                   <input
                     type="text"
                     name="location"

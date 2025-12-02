@@ -78,7 +78,7 @@ export interface CalendarEvent {
   title: string;
   date: string;
   time: string;
-  type: 'Misa' | 'Sacramento' | 'Reunión' | 'Otro';
+  type: 'Misa' | 'Bautizo' | 'Matrimonio' | 'Confirmación' | 'Primera Comunión' | 'Reunión' | 'Otro';
   location: string;
 }
 
