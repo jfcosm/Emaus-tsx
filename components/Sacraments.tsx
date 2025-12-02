@@ -47,7 +47,11 @@ const Sacraments: React.FC = () => {
   useEffect(() => {
     if (selectedRecord) {
       setEditForm(selectedRecord);
-      setIsEditing(false);
+      // FIX: Only switch to read-mode if it is an existing record. 
+      // New records (empty ID) should remain in edit mode as set by handleCreateNew.
+      if (selectedRecord.id) {
+        setIsEditing(false);
+      }
     }
   }, [selectedRecord]);
 
