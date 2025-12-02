@@ -2,13 +2,16 @@
 import React, { useState } from 'react';
 import { mockEvents } from '../services/mockData';
 import { CalendarEvent } from '../types';
-import { Calendar as CalendarIcon, Clock, MapPin, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, ChevronLeft, ChevronRight, Plus, X, Filter } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Agenda: React.FC = () => {
   const { t } = useLanguage();
   // Local state to manage events (initialized with mock data)
   const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
+  
+  // Filter State
+  const [filterType, setFilterType] = useState<string>('all');
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,16 +43,55 @@ const Agenda: React.FC = () => {
     setNewEvent(initialFormState);
   };
 
+  // Filter Logic
+  const filteredEvents = filterType === 'all' 
+    ? events 
+    : events.filter(e => e.type === filterType);
+
+  const eventTypes = ['Misa', 'Sacramento', 'Reunión', 'Otro'];
+
   return (
     <div className="space-y-6 animate-fade-in relative">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('agenda.title')}</h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('agenda.title')}</h2>
+           <p className="text-slate-500 dark:text-slate-400 text-sm">Gestione las actividades y celebraciones litúrgicas.</p>
+        </div>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-emaus-700 text-white rounded-lg hover:bg-emaus-800 shadow-sm transition-colors"
         >
           <Plus className="w-4 h-4" /> {t('agenda.new_event')}
         </button>
+      </div>
+
+      {/* FILTERS */}
+      <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar border-b border-slate-200 dark:border-slate-800">
+        <button
+            onClick={() => setFilterType('all')}
+            className={`
+              px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2
+              ${filterType === 'all' 
+                ? 'bg-slate-800 dark:bg-white text-white dark:text-slate-900 shadow-md' 
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'}
+            `}
+          >
+            <Filter className="w-3 h-3" /> Todos
+        </button>
+        {eventTypes.map((type) => (
+          <button
+            key={type}
+            onClick={() => setFilterType(type)}
+            className={`
+              px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
+              ${filterType === type 
+                ? 'bg-emaus-600 text-white shadow-md' 
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'}
+            `}
+          >
+            {t(`agenda.modal.types.${type}`)}
+          </button>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -73,18 +115,26 @@ const Agenda: React.FC = () => {
             {Array.from({ length: 35 }).map((_, i) => {
                // Logic to simulate event dots on calendar days
                const dayNumber = i + 1;
-               // Mock check if day has event (just for visual representation in this grid)
-               const hasEvent = events.some(e => parseInt(e.date.split('-')[2]) === dayNumber);
+               // Check if day has event based on FILTERED events
+               const dayEvents = filteredEvents.filter(e => parseInt(e.date.split('-')[2]) === dayNumber);
+               const hasEvent = dayEvents.length > 0;
                
                return (
                 <div key={i} className={`bg-white dark:bg-slate-900 h-24 p-2 relative hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${i === 15 ? 'bg-gold-50 dark:bg-gold-900/10' : ''}`}>
                   <span className={`text-sm font-medium ${i === 15 ? 'text-gold-700 dark:text-gold-400' : 'text-slate-700 dark:text-slate-300'}`}>{i + 1}</span>
                   {hasEvent && (
-                    <div className="mt-1">
-                       <div className="w-1.5 h-1.5 bg-emaus-500 rounded-full mx-auto"></div>
+                    <div className="mt-1 flex gap-1 flex-wrap justify-center">
+                       {dayEvents.slice(0, 3).map((e, idx) => (
+                         <div key={idx} className={`w-1.5 h-1.5 rounded-full 
+                            ${e.type === 'Misa' ? 'bg-purple-500' : 
+                              e.type === 'Sacramento' ? 'bg-blue-500' : 
+                              e.type === 'Reunión' ? 'bg-emerald-500' : 'bg-slate-400'
+                            }
+                         `}></div>
+                       ))}
                     </div>
                   )}
-                  {i === 15 && (
+                  {i === 15 && filterType === 'all' && (
                      <div className="mt-1 text-xs bg-gold-100 dark:bg-gold-900/30 text-gold-800 dark:text-gold-300 p-1 rounded truncate hidden md:block">Misa 10:00</div>
                   )}
                 </div>
@@ -100,8 +150,8 @@ const Agenda: React.FC = () => {
           </h3>
           
           <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-            {events.length > 0 ? (
-              events.map((event) => (
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((event) => (
                 <div key={event.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-emaus-200 dark:hover:border-emaus-800 transition-colors">
                   <div className="flex justify-between items-start mb-2">
                     <span className={`px-2 py-1 rounded text-xs font-bold uppercase
@@ -130,17 +180,17 @@ const Agenda: React.FC = () => {
       {/* CREATE EVENT MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-lg font-bold text-slate-800">{t('agenda.modal.title')}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in border border-slate-200 dark:border-slate-800">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950/50">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white">{t('agenda.modal.title')}</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('agenda.modal.event_title')}</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.event_title')}</label>
                 <input
                   type="text"
                   name="title"
@@ -154,7 +204,7 @@ const Agenda: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('agenda.modal.date')}</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.date')}</label>
                   <input
                     type="date"
                     name="date"
@@ -165,7 +215,7 @@ const Agenda: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('agenda.modal.time')}</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.time')}</label>
                   <input
                     type="time"
                     name="time"
@@ -179,7 +229,7 @@ const Agenda: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('agenda.modal.type')}</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.type')}</label>
                   <select
                     name="type"
                     value={newEvent.type}
@@ -193,7 +243,7 @@ const Agenda: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('agenda.modal.location')}</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('agenda.modal.location')}</label>
                   <input
                     type="text"
                     name="location"
@@ -210,7 +260,7 @@ const Agenda: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors"
                 >
                   {t('agenda.modal.cancel')}
                 </button>
