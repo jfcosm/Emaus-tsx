@@ -121,7 +121,8 @@ export const translations = {
         title: 'Directorio de Parroquias',
         subtitle: 'Conecta con otras parroquias de la red Emaús.',
         search: 'Buscar parroquia o ciudad...',
-        start_conversation: 'Conversar'
+        start_conversation: 'Conversar',
+        unavailable_basic: 'No disponible (Plan Básico)'
       }
     },
     landing: {
@@ -157,8 +158,8 @@ export const translations = {
         popup_search_sub: 'Ficha Encontrada',
         popup_docs: 'Documentos',
         popup_docs_sub: 'Certificado Generado',
-        popup_peace: 'Gestión ágil y paz mental',
-        popup_peace_sub: 'Para toda la parroquia'
+        popup_chat: 'Hna. María',
+        popup_chat_sub: 'Partida enviada ✅'
       },
       features: {
         title: 'Todo lo que su secretaría necesita',
@@ -169,7 +170,25 @@ export const translations = {
         certs_desc: 'Generación automática de certificados oficiales listos para imprimir.',
         agenda: 'Agenda Pastoral',
         agenda_desc: 'Coordine misas, confesiones y reuniones parroquiales en un calendario centralizado.',
+        network: 'Red Interparroquial',
+        network_desc: 'Conecte directamente con otras secretarías. Solicite traslados y resuelva dudas por chat seguro.',
         btn_more: 'Conocer más características'
+      },
+      community: {
+        title: 'Nunca más trabaje en solitario',
+        subtitle: 'Únase al directorio nacional de parroquias y agilice la burocracia eclesial con Emaús.',
+        card_community: {
+          title: 'Comunidad Emaús',
+          desc: 'Cientos de secretarías conectadas'
+        },
+        card_chat: {
+          title: 'Comunicación Instantánea',
+          desc: 'Chat exclusivo entre parroquias'
+        },
+        card_docs: {
+          title: 'Documentación Ágil',
+          desc: 'Comparta archivos eclesiales al instante'
+        }
       },
       plans: {
         title: 'Planes diseñados para cada comunidad',
@@ -184,7 +203,13 @@ export const translations = {
           tag: 'Recomendado',
           name: 'Plan Avanzado',
           desc: 'Gestión integral sin límites.',
-          items: ['Todo lo del Plan Básico', 'Editor de Documentos (WYSIWYG)', 'Generador de Afiches', 'Reportes y Estadísticas', 'Soporte Prioritario'],
+          items: {
+            basic_features: 'Todo lo del Plan Básico',
+            word_editor: 'Editor de Documentos tipo Word',
+            chat: 'Chat y Directorio Interparroquial',
+            reports: 'Reportes y Estadísticas',
+            support: 'Soporte Prioritario'
+          },
           btn: 'Obtener Plan Completo'
         }
       },
@@ -192,10 +217,28 @@ export const translations = {
         quote: '"Emaús ha transformado nuestra oficina parroquial"',
         text: 'Antes pasábamos horas buscando partidas de bautismo en libros antiguos. Ahora, con Emaús, entregamos certificados en segundos.',
         author_role: 'Párroco',
-        stat_time: 'Menos tiempo en trámites',
-        stat_backup: 'Registros respaldados en la nube',
-        privacy: 'Privacidad Total',
-        privacy_desc: 'Acceso restringido por usuario y encriptación de grado bancario.'
+        carousel: {
+          t1: {
+            quote: "Es increíble lo fácil que es contactar con otras parroquias para pedir traslados.",
+            author: "Hna. Lucía",
+            role: "Secretaria, Valparaíso"
+          },
+          t2: {
+            quote: "El orden que nos ha dado en la agenda de matrimonios es impagable. Se acabaron los topes.",
+            author: "P. Andrés",
+            role: "Párroco, Santiago"
+          },
+          t3: {
+            quote: "Puedo revisar los datos de un bautizo desde mi celular antes de la misa. Muy práctico.",
+            author: "Diác. Carlos",
+            role: "Diácono, Concepción"
+          },
+          t4: {
+            quote: "El soporte es excelente, siempre me ayudan cuando tengo dudas con algún certificado.",
+            author: "Sra. Carmen",
+            role: "Administradora, La Serena"
+          }
+        }
       },
       footer: {
         designed: 'Diseñado para servir a la Iglesia.',
@@ -335,7 +378,8 @@ export const translations = {
         title: 'Parish Directory',
         subtitle: 'Connect with other parishes in the Emaús network.',
         search: 'Search parish or city...',
-        start_conversation: 'Chat'
+        start_conversation: 'Chat',
+        unavailable_basic: 'Unavailable (Basic Plan)'
       }
     },
     landing: {
@@ -371,8 +415,8 @@ export const translations = {
         popup_search_sub: 'Record Found',
         popup_docs: 'Documents',
         popup_docs_sub: 'Certificate Generated',
-        popup_peace: 'Agile management & peace of mind',
-        popup_peace_sub: 'For the whole parish'
+        popup_chat: 'Sr. Mary',
+        popup_chat_sub: 'Record sent ✅'
       },
       features: {
         title: 'Everything your office needs',
@@ -383,7 +427,25 @@ export const translations = {
         certs_desc: 'Automatic generation of official certificates ready to print.',
         agenda: 'Pastoral Calendar',
         agenda_desc: 'Coordinate masses, confessions, and parish meetings in a centralized calendar.',
+        network: 'Inter-parish Network',
+        network_desc: 'Connect directly with other secretariats. Request transfers and resolve doubts via secure chat.',
         btn_more: 'Learn more features'
+      },
+      community: {
+        title: 'Never work alone again',
+        subtitle: 'Join the national parish directory and streamline ecclesiastical bureaucracy with Emaús.',
+        card_community: {
+          title: 'Emaús Community',
+          desc: 'Hundreds of connected secretariats'
+        },
+        card_chat: {
+          title: 'Instant Communication',
+          desc: 'Exclusive chat between parishes'
+        },
+        card_docs: {
+          title: 'Agile Documentation',
+          desc: 'Share church files instantly'
+        }
       },
       plans: {
         title: 'Plans designed for every community',
@@ -398,7 +460,13 @@ export const translations = {
           tag: 'Recommended',
           name: 'Advanced Plan',
           desc: 'Unlimited comprehensive management.',
-          items: ['Everything in Basic', 'Document Editor (WYSIWYG)', 'Poster Generator', 'Reports & Analytics', 'Priority Support'],
+          items: {
+            basic_features: 'Everything in Basic',
+            word_editor: 'Word-like Document Editor',
+            chat: 'Inter-parish Chat & Directory',
+            reports: 'Reports & Analytics',
+            support: 'Priority Support'
+          },
           btn: 'Get Full Plan'
         }
       },
@@ -406,10 +474,28 @@ export const translations = {
         quote: '"Emaús has transformed our parish office"',
         text: 'We used to spend hours searching for baptism records in old books. Now, with Emaús, we issue certificates in seconds.',
         author_role: 'Parish Priest',
-        stat_time: 'Less time on paperwork',
-        stat_backup: 'Records backed up in cloud',
-        privacy: 'Total Privacy',
-        privacy_desc: 'Restricted access per user and bank-grade encryption.'
+        carousel: {
+          t1: {
+            quote: "It's amazing how easy it is to contact other parishes to request transfers.",
+            author: "Sr. Lucia",
+            role: "Secretary, Valparaíso"
+          },
+          t2: {
+            quote: "The order it has given us in the marriage agenda is priceless. No more double bookings.",
+            author: "Fr. Andres",
+            role: "Parish Priest, Santiago"
+          },
+          t3: {
+            quote: "I can check baptism data from my phone before mass. Very practical.",
+            author: "Dcn. Carlos",
+            role: "Deacon, Concepción"
+          },
+          t4: {
+            quote: "Support is excellent, they always help me when I have doubts with any certificate.",
+            author: "Mrs. Carmen",
+            role: "Administrator, La Serena"
+          }
+        }
       },
       footer: {
         designed: 'Designed to serve the Church.',

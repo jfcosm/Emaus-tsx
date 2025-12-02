@@ -25,7 +25,10 @@ import {
   Smartphone,
   Globe,
   Sun,
-  Moon
+  Moon,
+  MessageCircle,
+  Users,
+  FileCheck
 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
@@ -86,6 +89,11 @@ const LandingPage: React.FC = () => {
         desc: "Gestión de intenciones de misa, reservas de salones, reuniones de catequesis y visitas a enfermos. Evite topes de horario."
       },
       {
+        icon: MessageCircle,
+        title: "Red Interparroquial",
+        desc: "Conecte directamente con otras secretarías para solicitar traslados y resolver dudas mediante un chat seguro y exclusivo."
+      },
+      {
         icon: Shield,
         title: "Seguridad y Privacidad",
         desc: "Datos encriptados y respaldos automáticos diarios. Acceso diferenciado para párroco, secretaria y consejos pastorales."
@@ -104,11 +112,6 @@ const LandingPage: React.FC = () => {
         icon: Smartphone,
         title: "Diseño Móvil",
         desc: "Interfaz optimizada para teléfonos, permitiendo al sacerdote consultar datos urgentes mientras está en terreno."
-      },
-      {
-        icon: Heart,
-        title: "Enfoque Pastoral",
-        desc: "Herramienta creada pensando en personas no tecnológicas. Interfaz limpia, letras grandes y procesos simplificados al máximo."
       }
     ];
 
@@ -182,7 +185,19 @@ const LandingPage: React.FC = () => {
   // --- MAIN LANDING PAGE VIEW ---
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
-      
+      <style>{`
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-scroll {
+          animation: scroll 40s linear infinite;
+        }
+        .animate-scroll:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
       {/* --- NAVBAR --- */}
       <nav className="fixed w-full z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -194,6 +209,7 @@ const LandingPage: React.FC = () => {
               <span className="text-2xl font-bold tracking-tight font-serif text-emaus-900 dark:text-gold-50">EMAÚS</span>
             </div>
             
+            {/* Desktop Nav */}
             <div className="hidden lg:flex items-center space-x-6">
               <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.features')}</a>
               <a href="#benefits" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.benefits')}</a>
@@ -242,6 +258,7 @@ const LandingPage: React.FC = () => {
               </button>
             </div>
 
+            {/* Mobile Menu Button */}
             <div className="lg:hidden">
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-600 dark:text-slate-300">
                 {isMenuOpen ? <X /> : <Menu />}
@@ -432,14 +449,14 @@ const LandingPage: React.FC = () => {
                    </div>
                 </div>
 
-                {/* Popup 4: Paz Mental */}
+                {/* Popup 4: Chat (NEW) */}
                 <div className="absolute -bottom-64 -left-48 lg:-left-64 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-4 animate-[fade-in-up_0.5s_ease-out_forwards] opacity-0 w-64 md:w-72" style={{ animationDelay: '5.0s' }}>
-                   <div className="bg-gold-100 dark:bg-gold-900/30 p-3 rounded-full text-gold-600 dark:text-gold-400 shrink-0">
-                      <ThumbsUp className="w-6 h-6" />
+                   <div className="bg-emaus-100 dark:bg-emaus-900/30 p-3 rounded-full text-emaus-600 dark:text-emaus-400 shrink-0">
+                      <MessageCircle className="w-6 h-6" />
                    </div>
                    <div>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">{t('landing.mockup.popup_peace')}</p>
-                      <p className="text-[10px] text-slate-500 mt-1">{t('landing.mockup.popup_peace_sub')}</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">{t('landing.mockup.popup_chat')}</p>
+                      <p className="text-xs text-slate-500 mt-1">{t('landing.mockup.popup_chat_sub')}</p>
                    </div>
                 </div>
 
@@ -470,14 +487,14 @@ const LandingPage: React.FC = () => {
             <p className="text-slate-500 dark:text-slate-400 text-lg">{t('landing.features.subtitle')}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Feature 1 */}
             <div className="group p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 hover:bg-gold-50 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800">
                <div className="w-14 h-14 bg-emaus-100 dark:bg-emaus-900/30 text-emaus-700 dark:text-emaus-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                  <BookOpen className="w-7 h-7" />
                </div>
                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.digital_sacraments')}</h3>
-               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
                  {t('landing.features.digital_sacraments_desc')}
                </p>
             </div>
@@ -488,7 +505,7 @@ const LandingPage: React.FC = () => {
                  <FileText className="w-7 h-7" />
                </div>
                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.certs')}</h3>
-               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
                  {t('landing.features.certs_desc')}
                </p>
             </div>
@@ -499,8 +516,19 @@ const LandingPage: React.FC = () => {
                  <Calendar className="w-7 h-7" />
                </div>
                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.agenda')}</h3>
-               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
                  {t('landing.features.agenda_desc')}
+               </p>
+            </div>
+
+            {/* Feature 4 (Network) */}
+            <div className="group p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 hover:bg-teal-50 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800">
+               <div className="w-14 h-14 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                 <MessageCircle className="w-7 h-7" />
+               </div>
+               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.network')}</h3>
+               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                 {t('landing.features.network_desc')}
                </p>
             </div>
           </div>
@@ -549,10 +577,10 @@ const LandingPage: React.FC = () => {
                     <Check className="w-5 h-5 text-gold-500" /> Certificados Automáticos
                   </li>
                   <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
-                    <X className="w-5 h-5" /> Editor de Documentos (Word)
+                    <X className="w-5 h-5" /> Editor Tipo Word
                   </li>
                   <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
-                    <X className="w-5 h-5" /> Reportes Avanzados
+                    <X className="w-5 h-5" /> Chat Interparroquial
                   </li>
                 </ul>
                 <button 
@@ -578,19 +606,19 @@ const LandingPage: React.FC = () => {
                 </div>
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> <strong>Todo lo del Plan Básico</strong>
+                    <Check className="w-5 h-5 text-emaus-600" /> <strong>{t('landing.plans.advanced.items.basic_features')}</strong>
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> Editor de Documentos (WYSIWYG)
+                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.word_editor')}
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> Generador de Afiches
+                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.chat')}
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> Reportes y Estadísticas
+                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.reports')}
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> Soporte Prioritario
+                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.support')}
                   </li>
                 </ul>
                 <button 
@@ -604,41 +632,80 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* --- BENEFITS / SOCIAL PROOF --- */}
+      {/* --- COMMUNITY SECTION (NEW) --- */}
+      <section className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.community.title')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-lg mb-12 max-w-2xl mx-auto">{t('landing.community.subtitle')}</p>
+            
+            <div className="relative">
+               {/* Decorative connecting lines (abstract) */}
+               <div className="absolute top-1/2 left-0 w-full h-px bg-slate-200 dark:bg-slate-800 -z-10 hidden md:block"></div>
+               
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:border-gold-200 transition-colors group">
+                     <div className="w-12 h-12 bg-emaus-100 dark:bg-emaus-900/30 text-emaus-600 dark:text-emaus-400 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <Users className="w-6 h-6" />
+                     </div>
+                     <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{t('landing.community.card_community.title')}</h3>
+                     <p className="text-sm text-slate-500 dark:text-slate-400">{t('landing.community.card_community.desc')}</p>
+                  </div>
+                  
+                  <div className="bg-gold-500 text-white p-6 rounded-2xl shadow-lg transform md:-translate-y-4">
+                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <MessageCircle className="w-6 h-6" />
+                     </div>
+                     <h3 className="font-bold text-lg mb-1">{t('landing.community.card_chat.title')}</h3>
+                     <p className="text-sm text-white/80">{t('landing.community.card_chat.desc')}</p>
+                  </div>
+                  
+                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:border-gold-200 transition-colors group">
+                     <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <FileCheck className="w-6 h-6" />
+                     </div>
+                     <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{t('landing.community.card_docs.title')}</h3>
+                     <p className="text-sm text-slate-500 dark:text-slate-400">{t('landing.community.card_docs.desc')}</p>
+                  </div>
+               </div>
+            </div>
+        </div>
+      </section>
+
+      {/* --- BENEFITS / SOCIAL PROOF (CAROUSEL) --- */}
       <section id="benefits" className="py-24 bg-emaus-900 relative overflow-hidden text-white scroll-mt-24">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="max-w-7xl mx-auto px-4 relative z-10">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div>
-                 <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-6">{t('landing.testimonials.quote')}</h2>
-                 <p className="text-emaus-200 text-lg mb-8 leading-relaxed">
-                   {t('landing.testimonials.text')}
-                 </p>
-                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gold-500 rounded-full flex items-center justify-center font-bold text-emaus-900 text-xl">P</div>
-                    <div>
-                       <p className="font-bold text-lg">Padre Ricardo</p>
-                       <p className="text-emaus-300 text-sm">{t('landing.testimonials.author_role')}, Santiago de Chile</p>
-                    </div>
-                 </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-6">
-                 <div className="bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10">
-                    <h4 className="text-3xl font-bold text-gold-400 mb-2">85%</h4>
-                    <p className="text-emaus-100">{t('landing.testimonials.stat_time')}</p>
-                 </div>
-                 <div className="bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10">
-                    <h4 className="text-3xl font-bold text-gold-400 mb-2">100%</h4>
-                    <p className="text-emaus-100">{t('landing.testimonials.stat_backup')}</p>
-                 </div>
-                 <div className="bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 col-span-2">
-                    <div className="flex items-center gap-3 mb-2">
-                       <Shield className="w-6 h-6 text-gold-400" />
-                       <h4 className="text-xl font-bold text-white">{t('landing.testimonials.privacy')}</h4>
-                    </div>
-                    <p className="text-emaus-100">{t('landing.testimonials.privacy_desc')}</p>
-                 </div>
+           <div className="text-center mb-12">
+              <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-4">{t('landing.testimonials.quote')}</h2>
+              <p className="text-emaus-200 text-lg max-w-2xl mx-auto">
+                {t('landing.testimonials.text')}
+              </p>
+           </div>
+
+           {/* Infinite Carousel */}
+           <div className="relative w-full overflow-hidden mask-linear-gradient">
+              <div className="flex gap-6 animate-scroll w-max hover:[animation-play-state:paused]">
+                 {/* Duplicate items for infinite effect */}
+                 {[1, 2].map((iter) => (
+                    <React.Fragment key={iter}>
+                       {['t1', 't2', 't3', 't4'].map((key) => (
+                          <div key={`${iter}-${key}`} className="w-80 md:w-96 bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 shrink-0">
+                             <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center font-bold text-emaus-900 text-sm">
+                                   {t(`landing.testimonials.carousel.${key}.author`).charAt(0)}
+                                </div>
+                                <div>
+                                   <p className="font-bold text-sm">{t(`landing.testimonials.carousel.${key}.author`)}</p>
+                                   <p className="text-emaus-300 text-xs">{t(`landing.testimonials.carousel.${key}.role`)}</p>
+                                </div>
+                             </div>
+                             <p className="text-emaus-100 text-sm italic leading-relaxed">
+                               "{t(`landing.testimonials.carousel.${key}.quote`)}"
+                             </p>
+                          </div>
+                       ))}
+                    </React.Fragment>
+                 ))}
               </div>
            </div>
         </div>

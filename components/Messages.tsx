@@ -22,7 +22,8 @@ import {
   User,
   X,
   MapPin,
-  CheckCircle
+  CheckCircle,
+  Lock
 } from 'lucide-react';
 
 const Messages: React.FC = () => {
@@ -170,7 +171,7 @@ const Messages: React.FC = () => {
         </div>
 
         {/* Threads List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto flex flex-col">
            {threads.length === 0 ? (
              <div className="p-8 text-center text-slate-400 text-sm">
                 {t('messages.empty_state')}
@@ -182,7 +183,7 @@ const Messages: React.FC = () => {
                <div 
                  key={thread.id}
                  onClick={() => setActiveThreadId(thread.id)}
-                 className={`p-4 flex gap-3 cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800/50
+                 className={`p-4 flex gap-3 cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800/50 shrink-0
                     ${activeThreadId === thread.id 
                       ? 'bg-white dark:bg-slate-800 border-l-4 border-l-emaus-600' 
                       : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-l-4 border-l-transparent'}
@@ -339,7 +340,9 @@ const Messages: React.FC = () => {
                        <p>No se encontraron parroquias.</p>
                     </div>
                  ) : (
-                    filteredDirectory.map((parish) => (
+                    filteredDirectory.map((parish) => {
+                       const isBasic = parish.planType === 'basic';
+                       return (
                        <div key={parish.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                           <div className="flex items-center gap-4">
                              <div className="w-12 h-12 bg-gradient-to-br from-emaus-500 to-emaus-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -363,13 +366,26 @@ const Messages: React.FC = () => {
                           </div>
                           
                           <button 
-                             onClick={() => handleStartChatFromDirectory(parish.email)}
-                             className="px-4 py-2 bg-white dark:bg-slate-900 text-emaus-700 dark:text-emaus-400 border border-slate-200 dark:border-slate-700 rounded-lg font-bold text-sm hover:bg-emaus-50 dark:hover:bg-emaus-900/20 group-hover:border-emaus-200 transition-all shadow-sm"
+                             disabled={isBasic}
+                             onClick={() => !isBasic && handleStartChatFromDirectory(parish.email)}
+                             className={`px-4 py-2 border rounded-lg font-bold text-sm transition-all shadow-sm flex items-center gap-2
+                                ${isBasic 
+                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 cursor-not-allowed' 
+                                    : 'bg-white dark:bg-slate-900 text-emaus-700 dark:text-emaus-400 border-slate-200 dark:border-slate-700 hover:bg-emaus-50 dark:hover:bg-emaus-900/20 group-hover:border-emaus-200'
+                                }
+                             `}
                           >
-                             {t('messages.directory.start_conversation')}
+                             {isBasic ? (
+                                 <>
+                                    <Lock className="w-3 h-3" />
+                                    {t('messages.directory.unavailable_basic')}
+                                 </>
+                             ) : (
+                                 t('messages.directory.start_conversation')
+                             )}
                           </button>
                        </div>
-                    ))
+                    );})
                  )}
               </div>
            </div>
