@@ -86,7 +86,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isMessages = item.name === ViewName.MESSAGES;
-            const isDimmed = isMessages && isBasicPlan;
+            const isDocuments = item.name === ViewName.DOCUMENTS;
+            const isLocked = isBasicPlan && (isMessages || isDocuments);
 
             return (
               <button
@@ -100,14 +101,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
                   ${currentView === item.name 
                     ? 'bg-emaus-700 dark:bg-slate-800 text-white shadow-lg shadow-black/10 border border-emaus-600 dark:border-slate-700' 
                     : 'text-emaus-100 dark:text-slate-400 hover:bg-emaus-800 dark:hover:bg-slate-900 hover:text-white'}
-                  ${isDimmed ? 'opacity-70 grayscale-[0.5]' : ''}
+                  ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}
                 `}
               >
                 <item.icon className={`w-5 h-5 ${currentView === item.name ? 'text-gold-400' : 'text-emaus-300 dark:text-slate-500'}`} />
                 <div className="text-left flex-1">
                   <span className="block font-medium">{getTranslatedName(item.name)}</span>
                 </div>
-                {isMessages && isBasicPlan && <Lock className="w-3 h-3 text-gold-500" />}
+                {isLocked && <Lock className="w-3 h-3 text-gold-500" />}
               </button>
             );
           })}

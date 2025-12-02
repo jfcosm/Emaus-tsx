@@ -29,10 +29,15 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-  FolderPlus
+  FolderPlus,
+  Lock,
+  CheckCircle,
+  ArrowRight as ArrowRightIcon
 } from 'lucide-react';
 import { SavedDocument } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 import { getDocuments, createDocument, updateDocument, deleteFolderAndContents } from '../services/documentsService';
 
 type EditorView = 'list' | 'templates' | 'editor';
@@ -40,6 +45,8 @@ type DisplayMode = 'list' | 'grid';
 
 const DocumentEditor: React.FC = () => {
   const { t } = useLanguage();
+  const { settings } = useSettings();
+  const { logout } = useAuth();
   
   // Data State
   const [documents, setDocuments] = useState<SavedDocument[]>([]);
@@ -64,8 +71,10 @@ const DocumentEditor: React.FC = () => {
 
   // --- INITIAL LOAD ---
   useEffect(() => {
-    loadDocuments();
-  }, []);
+    if (settings.planType !== 'basic') {
+      loadDocuments();
+    }
+  }, [settings.planType]);
 
   const loadDocuments = async () => {
     setLoading(true);
@@ -84,6 +93,61 @@ const DocumentEditor: React.FC = () => {
        editorContentRef.current.innerHTML = activeDocument.content || '';
     }
   }, [view, activeDocument?.id]);
+
+  // --- UPSELL LOCK FOR BASIC PLANS ---
+  if (settings.planType === 'basic') {
+    return (
+      <div className="h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-fade-in">
+        {/* Blurred Content Background (Simulating the App) */}
+        <div className="absolute inset-0 filter blur-md opacity-30 pointer-events-none flex flex-col p-6">
+            <div className="flex justify-between mb-6">
+               <div className="h-8 w-48 bg-slate-300 dark:bg-slate-700 rounded"></div>
+               <div className="h-8 w-24 bg-slate-300 dark:bg-slate-700 rounded"></div>
+            </div>
+            <div className="grid grid-cols-4 gap-6">
+               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                  <div key={i} className="h-32 bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+               ))}
+            </div>
+        </div>
+
+        {/* Upsell Card */}
+        <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 max-w-md w-full p-8 rounded-3xl shadow-2xl border border-gold-200 dark:border-gold-800 text-center relative overflow-hidden transform hover:scale-105 transition-transform duration-500">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gold-300 to-gold-500"></div>
+                
+                <div className="w-20 h-20 bg-gold-50 dark:bg-gold-900/20 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-gold-50/50 dark:ring-gold-900/10">
+                    <Lock className="w-10 h-10 text-gold-600 dark:text-gold-400" />
+                </div>
+                
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('documents.upsell.title')}</h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed text-sm">{t('documents.upsell.desc')}</p>
+                
+                <ul className="text-left space-y-4 mb-8 max-w-xs mx-auto bg-slate-50 dark:bg-slate-950/50 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                        <div className="bg-emaus-100 dark:bg-emaus-900/30 p-1 rounded-full"><CheckCircle className="w-4 h-4 text-emaus-600 dark:text-emaus-400" /></div>
+                        {t('documents.upsell.benefit1')}
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                        <div className="bg-emaus-100 dark:bg-emaus-900/30 p-1 rounded-full"><CheckCircle className="w-4 h-4 text-emaus-600 dark:text-emaus-400" /></div>
+                        {t('documents.upsell.benefit2')}
+                    </li>
+                </ul>
+
+                <button 
+                    onClick={async () => {
+                        await logout();
+                        window.location.href = window.location.origin + '/#plans';
+                    }} 
+                    className="w-full py-3.5 bg-emaus-700 text-white rounded-xl font-bold hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20 flex items-center justify-center gap-2 group"
+                >
+                    {t('documents.upsell.cta')} <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+            </div>
+        </div>
+      </div>
+    );
+  }
 
   // --- FILE SYSTEM LOGIC ---
 

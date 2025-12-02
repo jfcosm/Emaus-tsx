@@ -108,7 +108,7 @@ const Messages: React.FC = () => {
                 <button 
                     onClick={async () => {
                         await logout();
-                        window.location.hash = 'plans';
+                        window.location.href = window.location.origin + '/#plans';
                     }} 
                     className="w-full py-3.5 bg-emaus-700 text-white rounded-xl font-bold hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20 flex items-center justify-center gap-2 group"
                 >

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
   Calendar, 
@@ -49,6 +49,19 @@ const LandingPage: React.FC = () => {
   // Contexts
   const { t, language, setLanguage } = useLanguage();
   const { darkMode, toggleDarkMode } = useTheme();
+
+  // Check URL hash on mount to scroll to section if redirected
+  useEffect(() => {
+    if (window.location.hash) {
+      const id = window.location.hash.substring(1);
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500);
+    }
+  }, []);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

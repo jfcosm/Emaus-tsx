@@ -135,7 +135,14 @@ export const translations = {
       save: 'Guardar',
       close: 'Cerrar',
       untitled: 'Documento sin título',
-      print: 'Imprimir'
+      print: 'Imprimir',
+      upsell: {
+        title: 'Funcionalidad Premium',
+        desc: 'El editor de documentos tipo Word está reservado para planes avanzados.',
+        benefit1: 'Editor completo sin Office',
+        benefit2: 'Plantillas eclesiales oficiales',
+        cta: 'Conocer Planes'
+      }
     },
     messages: {
       title: 'Mensajes',
@@ -431,7 +438,14 @@ export const translations = {
       save: 'Save',
       close: 'Close',
       untitled: 'Untitled Document',
-      print: 'Print'
+      print: 'Print',
+      upsell: {
+        title: 'Premium Feature',
+        desc: 'The Word-like document editor is reserved for advanced plans.',
+        benefit1: 'Full editor without Office',
+        benefit2: 'Official church templates',
+        cta: 'View Plans'
+      }
     },
     messages: {
       title: 'Messages',
