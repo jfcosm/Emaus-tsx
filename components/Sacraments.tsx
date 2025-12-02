@@ -70,7 +70,7 @@ const Sacraments: React.FC = () => {
     };
     setSelectedRecord(newRecord);
     setEditForm(newRecord);
-    setIsEditing(true);
+    setIsEditing(true); // Open directly in edit mode
   };
 
   // Filter logic applied to REAL data
@@ -167,6 +167,28 @@ const Sacraments: React.FC = () => {
   const renderSpecificFields = () => {
     if (!editForm) return null;
 
+    // Common Catechesis Checkbox (Available for all except Defunción)
+    const CatechesisCheckbox = () => (
+      <div>
+         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Catequesis</label>
+         {isEditing ? (
+           <label className="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-slate-50">
+             <input 
+               type="checkbox" 
+               checked={editForm.catechesisDone || false} 
+               onChange={(e) => handleInputChange('catechesisDone', e.target.checked)} 
+               className="w-5 h-5 text-emaus-600 rounded focus:ring-emaus-500"
+             />
+             <span className="text-sm text-slate-700 font-medium">Realizada</span>
+           </label>
+         ) : (
+           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${editForm.catechesisDone ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+             {editForm.catechesisDone ? 'Realizada' : 'Pendiente'}
+           </span>
+         )}
+      </div>
+    );
+
     switch (editForm.type) {
       case SacramentType.BAUTIZO:
         return (
@@ -178,24 +200,7 @@ const Sacraments: React.FC = () => {
                   <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className="input-field w-full" />
                 ) : <p className="text-lg font-bold">{editForm.personName}</p>}
               </div>
-              <div>
-                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Charlas Bautismales</label>
-                 {isEditing ? (
-                   <label className="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-slate-50">
-                     <input 
-                       type="checkbox" 
-                       checked={editForm.baptismalTalksDone || false} 
-                       onChange={(e) => handleInputChange('baptismalTalksDone', e.target.checked)} 
-                       className="w-5 h-5 text-emaus-600 rounded focus:ring-emaus-500"
-                     />
-                     <span className="text-sm text-slate-700 font-medium">Realizadas</span>
-                   </label>
-                 ) : (
-                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${editForm.baptismalTalksDone ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                     {editForm.baptismalTalksDone ? 'Realizadas' : 'Pendientes'}
-                   </span>
-                 )}
-              </div>
+              <CatechesisCheckbox />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                <div>
@@ -237,6 +242,7 @@ const Sacraments: React.FC = () => {
       case SacramentType.MATRIMONIO:
         return (
           <>
+            <div className="flex justify-end mb-4"><CatechesisCheckbox /></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                {/* GROOM */}
                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30">
@@ -300,6 +306,7 @@ const Sacraments: React.FC = () => {
       case SacramentType.CONFIRMACION:
         return (
           <>
+             <div className="flex justify-end mb-4"><CatechesisCheckbox /></div>
              <div className="mb-4">
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Confirmado</label>
                 {isEditing ? (
@@ -395,6 +402,7 @@ const Sacraments: React.FC = () => {
         // Default generic view (Primera Comunión, etc)
         return (
           <div className="mb-4">
+            <div className="flex justify-end mb-2"><CatechesisCheckbox /></div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre</label>
             {isEditing ? (
               <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className="input-field w-full" />

@@ -52,7 +52,7 @@ export interface SacramentRecord {
   godparents?: string;
   birthDate?: string;
   birthPlace?: string;
-  baptismalTalksDone?: boolean; // Check for talks
+  catechesisDone?: boolean; // Check for catechesis (replaces baptismalTalksDone)
 
   // MARRIAGE Specific
   groomName?: string;

@@ -33,7 +33,7 @@ export const mockSacraments: SacramentRecord[] = [
     godparents: 'Carlos Ruiz y Ana Torres',
     observations: 'Bautismo realizado en ceremonia privada.',
     parish: 'Parroquia Santa María',
-    baptismalTalksDone: true
+    catechesisDone: true
   },
   { 
     id: '2', 
@@ -51,7 +51,8 @@ export const mockSacraments: SacramentRecord[] = [
     page: '112',
     witnesses: 'Roberto Díaz y Carla Méndez',
     observations: 'Matrimonio con misa.',
-    parish: 'Parroquia Santa María'
+    parish: 'Parroquia Santa María',
+    catechesisDone: true
   },
   { 
     id: '3', 
@@ -66,7 +67,8 @@ export const mockSacraments: SacramentRecord[] = [
     confirmationSponsor: 'Esteban Quito',
     baptismParish: 'Parroquia San José',
     observations: 'Grupo de confirmación 2024.',
-    parish: 'Catedral Metropolitana'
+    parish: 'Catedral Metropolitana',
+    catechesisDone: true
   },
   { 
     id: '4', 
@@ -97,7 +99,7 @@ export const mockSacraments: SacramentRecord[] = [
     godparents: 'Luis Silva y Carmen Ores',
     observations: '',
     parish: 'Parroquia Santa María',
-    baptismalTalksDone: false
+    catechesisDone: false
   },
 ];
 
