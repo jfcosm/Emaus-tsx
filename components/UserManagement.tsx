@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ParishDirectoryEntry } from '../types';
@@ -153,7 +152,9 @@ const UserManagement: React.FC = () => {
                   <tr key={user.email} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-bold text-slate-800 dark:text-white">{user.email}</div>
-                      <div className="text-xs text-slate-400 font-mono">{user.uid || 'No UID'}</div>
+                      <div className={`text-xs font-mono mt-1 ${user.uid ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-400'}`}>
+                         {user.uid ? 'UID Linked' : 'No UID (Log in user to fix)'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{user.parishName}</td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{user.city}</td>

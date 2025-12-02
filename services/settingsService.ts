@@ -1,6 +1,5 @@
-
 import { db, auth } from './firebase';
-import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 import { ParishSettings, ParishDirectoryEntry } from '../types';
 import { mockDirectory } from './mockData';
 
@@ -26,12 +25,14 @@ export const getSettings = async (): Promise<ParishSettings> => {
     const user = auth.currentUser;
     if (!user) return DEFAULT_SETTINGS;
 
+    let settingsToReturn = { ...DEFAULT_SETTINGS };
+
     // 1. Try to get user specific settings
     const docRef = doc(db, COLLECTION_NAME, user.uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      return docSnap.data() as ParishSettings;
+      settingsToReturn = docSnap.data() as ParishSettings;
     } else {
       // FALLBACK for legacy Admin: Try 'general' doc if specific doc doesn't exist
       // This is a one-time check to migrate or support the original admin setup
@@ -39,11 +40,56 @@ export const getSettings = async (): Promise<ParishSettings> => {
          const legacyRef = doc(db, COLLECTION_NAME, 'general');
          const legacySnap = await getDoc(legacyRef);
          if (legacySnap.exists()) {
-             return legacySnap.data() as ParishSettings;
+             settingsToReturn = legacySnap.data() as ParishSettings;
          }
       }
-      return DEFAULT_SETTINGS;
     }
+
+    // --- SELF-HEALING & SYNC LOGIC ---
+    // This ensures consistency between Admin (Directory) and User (Private Settings)
+    if (user.email) {
+        try {
+            const dirRef = doc(db, DIRECTORY_COLLECTION, user.email);
+            const dirSnap = await getDoc(dirRef);
+
+            if (dirSnap.exists()) {
+                const dirData = dirSnap.data() as ParishDirectoryEntry;
+                
+                // A. HEAL UID: If directory lacks UID, inject it now so Admin can manage this user
+                if (!dirData.uid) {
+                    await updateDoc(dirRef, { uid: user.uid });
+                    console.log("Self-healing: Injected missing UID into directory");
+                }
+
+                // B. SYNC PLAN: Directory is the authority. If Admin changed plan, update private settings.
+                // We trust the directory plan over the private plan.
+                if (dirData.planType && dirData.planType !== settingsToReturn.planType) {
+                    console.log(`Syncing plan from Directory (${dirData.planType}) to Settings`);
+                    settingsToReturn.planType = dirData.planType;
+                    
+                    // Persist the correction to private settings
+                    await setDoc(docRef, { planType: dirData.planType }, { merge: true });
+                }
+            } else {
+                // If user has no directory entry (legacy), create one now
+                const newEntry: ParishDirectoryEntry = {
+                    id: user.email,
+                    uid: user.uid,
+                    email: user.email,
+                    parishName: settingsToReturn.parishName,
+                    city: settingsToReturn.city,
+                    diocese: settingsToReturn.diocese,
+                    planType: (settingsToReturn.planType as 'basic' | 'advanced') || 'advanced'
+                };
+                await setDoc(dirRef, newEntry);
+            }
+        } catch (syncErr) {
+            console.warn("Error during settings sync:", syncErr);
+        }
+    }
+
+    return settingsToReturn;
+
   } catch (error) {
     console.error("Error getting settings:", error);
     return DEFAULT_SETTINGS;
