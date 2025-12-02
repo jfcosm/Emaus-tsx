@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { ChatThread, ChatMessage, ParishDirectoryEntry } from '../types';
 import { 
   subscribeToChats, 
@@ -22,12 +24,14 @@ import {
   X,
   MapPin,
   CheckCircle,
-  Lock
+  Lock,
+  ArrowRight
 } from 'lucide-react';
 
 const Messages: React.FC = () => {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
+  const { settings } = useSettings();
   
   // State
   const [threads, setThreads] = useState<ChatThread[]>([]);
@@ -43,9 +47,82 @@ const Messages: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // --- UPSELL LOCK FOR BASIC PLANS ---
+  if (settings.planType === 'basic') {
+    return (
+      <div className="h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-fade-in">
+        {/* Blurred Content Background (Simulating the App) */}
+        <div className="absolute inset-0 filter blur-md opacity-30 pointer-events-none flex">
+            {/* Fake Sidebar */}
+            <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hidden md:block">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-800 h-16 flex items-center justify-between">
+                    <div className="h-6 w-24 bg-slate-300 dark:bg-slate-700 rounded"></div>
+                    <div className="h-8 w-8 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+                </div>
+                <div className="p-4 space-y-4">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="flex gap-3">
+                            <div className="w-12 h-12 bg-slate-300 dark:bg-slate-700 rounded-full shrink-0"></div>
+                            <div className="flex-1 space-y-2">
+                                <div className="h-4 w-3/4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+                                <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {/* Fake Chat Window */}
+            <div className="flex-1 bg-white dark:bg-slate-900 flex flex-col">
+                <div className="h-16 border-b border-slate-200 dark:border-slate-800"></div>
+                <div className="flex-1 p-6 space-y-6">
+                    <div className="flex justify-start"><div className="h-12 w-64 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div></div>
+                    <div className="flex justify-end"><div className="h-16 w-56 bg-slate-200 dark:bg-slate-700 rounded-2xl"></div></div>
+                    <div className="flex justify-start"><div className="h-10 w-48 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div></div>
+                </div>
+            </div>
+        </div>
+
+        {/* Upsell Card */}
+        <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 max-w-md w-full p-8 rounded-3xl shadow-2xl border border-gold-200 dark:border-gold-800 text-center relative overflow-hidden transform hover:scale-105 transition-transform duration-500">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gold-300 to-gold-500"></div>
+                
+                <div className="w-20 h-20 bg-gold-50 dark:bg-gold-900/20 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-gold-50/50 dark:ring-gold-900/10">
+                    <Lock className="w-10 h-10 text-gold-600 dark:text-gold-400" />
+                </div>
+                
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('messages.upsell.title')}</h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed text-sm">{t('messages.upsell.desc')}</p>
+                
+                <ul className="text-left space-y-4 mb-8 max-w-xs mx-auto bg-slate-50 dark:bg-slate-950/50 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                        <div className="bg-emaus-100 dark:bg-emaus-900/30 p-1 rounded-full"><CheckCircle className="w-4 h-4 text-emaus-600 dark:text-emaus-400" /></div>
+                        {t('messages.upsell.benefit1')}
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                        <div className="bg-emaus-100 dark:bg-emaus-900/30 p-1 rounded-full"><CheckCircle className="w-4 h-4 text-emaus-600 dark:text-emaus-400" /></div>
+                        {t('messages.upsell.benefit2')}
+                    </li>
+                </ul>
+
+                <button 
+                    onClick={async () => {
+                        await logout();
+                        window.location.hash = 'plans';
+                    }} 
+                    className="w-full py-3.5 bg-emaus-700 text-white rounded-xl font-bold hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20 flex items-center justify-center gap-2 group"
+                >
+                    {t('messages.upsell.cta')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+            </div>
+        </div>
+      </div>
+    );
+  }
+
   // Initial Data Load (Threads)
   useEffect(() => {
-    if (!currentUser?.email) return;
+    if (!currentUser?.email || settings.planType === 'basic') return;
 
     // Initialize support chat just so user has someone to talk to
     initSupportChat(currentUser.email);
@@ -55,7 +132,7 @@ const Messages: React.FC = () => {
     });
 
     return () => unsubscribe();
-  }, [currentUser]);
+  }, [currentUser, settings.planType]);
 
   // Load Directory when modal opens
   useEffect(() => {

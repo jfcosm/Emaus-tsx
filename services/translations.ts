@@ -155,6 +155,13 @@ export const translations = {
         search: 'Buscar parroquia o ciudad...',
         start_conversation: 'Conversar',
         unavailable_basic: 'No disponible (Plan Básico)'
+      },
+      upsell: {
+        title: 'Funcionalidad Premium',
+        desc: 'La mensajería interparroquial está reservada exclusivamente para planes avanzados.',
+        benefit1: 'Chat directo con otras parroquias',
+        benefit2: 'Directorio nacional de contactos',
+        cta: 'Conocer Planes'
       }
     },
     landing: {
@@ -444,6 +451,13 @@ export const translations = {
         search: 'Search parish or city...',
         start_conversation: 'Chat',
         unavailable_basic: 'Unavailable (Basic Plan)'
+      },
+      upsell: {
+        title: 'Premium Feature',
+        desc: 'Inter-parish messaging is reserved exclusively for advanced plans.',
+        benefit1: 'Direct chat with other parishes',
+        benefit2: 'National contact directory',
+        cta: 'View Plans'
       }
     },
     landing: {
