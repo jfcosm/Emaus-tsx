@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -147,7 +146,7 @@ const Messages: React.FC = () => {
       {/* LEFT SIDEBAR: THREADS */}
       <div className={`${activeThreadId ? 'hidden md:flex' : 'flex'} w-full md:w-80 flex-col border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50`}>
         {/* Header */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
            <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-slate-800 dark:text-white">{t('messages.title')}</h2>
               <button 
@@ -170,8 +169,8 @@ const Messages: React.FC = () => {
            </div>
         </div>
 
-        {/* Threads List */}
-        <div className="flex-1 overflow-y-auto flex flex-col">
+        {/* Threads List - FIX: Added flex-col and w-full explicitly */}
+        <div className="flex-1 overflow-y-auto flex flex-col w-full">
            {threads.length === 0 ? (
              <div className="p-8 text-center text-slate-400 text-sm">
                 {t('messages.empty_state')}
@@ -183,23 +182,23 @@ const Messages: React.FC = () => {
                <div 
                  key={thread.id}
                  onClick={() => setActiveThreadId(thread.id)}
-                 className={`p-4 flex gap-3 cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800/50 shrink-0
+                 className={`p-4 flex gap-3 cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800/50 w-full shrink-0
                     ${activeThreadId === thread.id 
                       ? 'bg-white dark:bg-slate-800 border-l-4 border-l-emaus-600' 
                       : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-l-4 border-l-transparent'}
                  `}
                >
-                  <div className="relative">
+                  <div className="relative shrink-0">
                      <div className="w-12 h-12 bg-gradient-to-br from-emaus-400 to-emaus-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                         {getContactName(thread).charAt(0).toUpperCase()}
                      </div>
                      {/* Online Indicator (Fake) */}
                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-50 dark:border-slate-900 rounded-full"></div>
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
                      <div className="flex justify-between items-baseline mb-1">
-                        <h3 className="font-bold text-slate-800 dark:text-slate-200 truncate">{getContactName(thread)}</h3>
-                        <span className="text-xs text-slate-400">{formatTime(thread.lastMessageTime)}</span>
+                        <h3 className="font-bold text-slate-800 dark:text-slate-200 truncate pr-2">{getContactName(thread)}</h3>
+                        <span className="text-xs text-slate-400 shrink-0">{formatTime(thread.lastMessageTime)}</span>
                      </div>
                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                        {thread.lastMessage}

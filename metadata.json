@@ -1,5 +1,6 @@
 {
   "name": "Emaús - Gestión Parroquial",
   "description": "Plataforma integral de gestión administrativa para parroquias. Digitalización de sacramentos, agenda y documentos.",
+  "version": "1.0.1",
   "requestFramePermissions": []
 }

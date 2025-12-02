@@ -1,10 +1,8 @@
-
 import { db } from './firebase';
 import { 
   collection, 
   query, 
   where, 
-  orderBy, 
   addDoc, 
   updateDoc, 
   serverTimestamp, 
@@ -12,7 +10,8 @@ import {
   onSnapshot, 
   getDocs,
   setDoc,
-  Timestamp
+  Timestamp,
+  orderBy
 } from 'firebase/firestore';
 import { ChatThread, ChatMessage } from '../types';
 
@@ -20,10 +19,11 @@ const CHATS_COLLECTION = 'chats';
 
 // Escuchar cambios en la lista de chats de un usuario
 export const subscribeToChats = (userEmail: string, callback: (chats: ChatThread[]) => void) => {
+  // NOTA: Se eliminó orderBy('lastMessageTime', 'desc') para evitar el error de "Missing Index"
+  // en Firestore. Se ordenará en el cliente.
   const q = query(
     collection(db, CHATS_COLLECTION),
-    where('participants', 'array-contains', userEmail),
-    orderBy('lastMessageTime', 'desc')
+    where('participants', 'array-contains', userEmail)
   );
 
   return onSnapshot(q, (snapshot) => {
@@ -31,6 +31,14 @@ export const subscribeToChats = (userEmail: string, callback: (chats: ChatThread
       id: doc.id,
       ...doc.data()
     } as ChatThread));
+    
+    // Ordenar localmente por fecha (más reciente primero)
+    chats.sort((a, b) => {
+       const timeA = a.lastMessageTime?.toMillis ? a.lastMessageTime.toMillis() : (a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0);
+       const timeB = b.lastMessageTime?.toMillis ? b.lastMessageTime.toMillis() : (b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0);
+       return timeB - timeA;
+    });
+
     callback(chats);
   });
 };
