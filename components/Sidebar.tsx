@@ -9,10 +9,13 @@ import {
   Settings, 
   LogOut,
   Cross,
-  MessageCircle
+  MessageCircle,
+  Lock,
+  Users
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   currentView: ViewName;
@@ -33,6 +36,7 @@ const navItems: NavItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, setIsOpen }) => {
   const { t } = useLanguage();
   const { settings } = useSettings();
+  const { currentUser } = useAuth();
 
   const getTranslatedName = (name: ViewName): string => {
      switch(name) {
@@ -42,9 +46,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
        case ViewName.DOCUMENTS: return t('sidebar.documents');
        case ViewName.MESSAGES: return t('sidebar.messages');
        case ViewName.SETTINGS: return t('sidebar.settings');
+       case ViewName.USERS: return t('sidebar.users');
        default: return name;
      }
   };
+
+  const isBasicPlan = settings.planType === 'basic';
+  const isAdmin = currentUser?.email === 'admin@emaus.app';
 
   return (
     <>
@@ -76,26 +84,54 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
 
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => {
-                onChangeView(item.name);
-                setIsOpen(false);
-              }}
-              className={`
-                w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                ${currentView === item.name 
-                  ? 'bg-emaus-700 dark:bg-slate-800 text-white shadow-lg shadow-black/10 border border-emaus-600 dark:border-slate-700' 
-                  : 'text-emaus-100 dark:text-slate-400 hover:bg-emaus-800 dark:hover:bg-slate-900 hover:text-white'}
-              `}
-            >
-              <item.icon className={`w-5 h-5 ${currentView === item.name ? 'text-gold-400' : 'text-emaus-300 dark:text-slate-500'}`} />
-              <div className="text-left">
-                <span className="block font-medium">{getTranslatedName(item.name)}</span>
-              </div>
-            </button>
-          ))}
+          {navItems.map((item) => {
+            const isMessages = item.name === ViewName.MESSAGES;
+            const isDimmed = isMessages && isBasicPlan;
+
+            return (
+              <button
+                key={item.name}
+                onClick={() => {
+                  onChangeView(item.name);
+                  setIsOpen(false);
+                }}
+                className={`
+                  w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative group
+                  ${currentView === item.name 
+                    ? 'bg-emaus-700 dark:bg-slate-800 text-white shadow-lg shadow-black/10 border border-emaus-600 dark:border-slate-700' 
+                    : 'text-emaus-100 dark:text-slate-400 hover:bg-emaus-800 dark:hover:bg-slate-900 hover:text-white'}
+                  ${isDimmed ? 'opacity-70 grayscale-[0.5]' : ''}
+                `}
+              >
+                <item.icon className={`w-5 h-5 ${currentView === item.name ? 'text-gold-400' : 'text-emaus-300 dark:text-slate-500'}`} />
+                <div className="text-left flex-1">
+                  <span className="block font-medium">{getTranslatedName(item.name)}</span>
+                </div>
+                {isMessages && isBasicPlan && <Lock className="w-3 h-3 text-gold-500" />}
+              </button>
+            );
+          })}
+
+          {/* Admin Only Item */}
+          {isAdmin && (
+             <div className="pt-4 mt-4 border-t border-emaus-800 dark:border-slate-800">
+                <button
+                  onClick={() => {
+                    onChangeView(ViewName.USERS);
+                    setIsOpen(false);
+                  }}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                    ${currentView === ViewName.USERS 
+                      ? 'bg-slate-800 text-white shadow-lg border border-slate-700' 
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
+                  `}
+                >
+                  <Users className="w-5 h-5" />
+                  <span className="block font-medium">{t('sidebar.users')}</span>
+                </button>
+             </div>
+          )}
         </nav>
 
         {/* User Profile / Logout */}

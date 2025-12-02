@@ -8,9 +8,38 @@ export const translations = {
       documents: 'Documentos',
       messages: 'Mensajes',
       settings: 'Configuración',
+      users: 'Usuarios',
       logout: 'Cerrar Sesión',
       role: 'Secretaria',
       parish: 'Gestión Parroquial'
+    },
+    users: {
+      title: 'Gestión de Usuarios',
+      subtitle: 'Administración de cuentas y planes de suscripción',
+      create_user: 'Crear Usuario',
+      search_placeholder: 'Buscar por email, parroquia o ciudad...',
+      table: {
+        email: 'Usuario / Email',
+        parish: 'Parroquia',
+        city: 'Ciudad',
+        plan: 'Plan',
+        actions: 'Acciones'
+      },
+      actions: {
+        edit_plan: 'Editar Plan',
+        reset_pass: 'Resetear Contraseña',
+        delete: 'Eliminar'
+      },
+      modal: {
+        create_title: 'Nuevo Usuario',
+        edit_plan_title: 'Editar Plan',
+        email: 'Correo Electrónico',
+        password: 'Contraseña',
+        plan: 'Plan Asignado',
+        cancel: 'Cancelar',
+        create: 'Crear Usuario',
+        save: 'Guardar Cambios'
+      }
     },
     dashboard: {
       stats: {
@@ -268,9 +297,38 @@ export const translations = {
       documents: 'Documents',
       messages: 'Messages',
       settings: 'Settings',
+      users: 'Users',
       logout: 'Log Out',
       role: 'Secretary',
       parish: 'Parish Management'
+    },
+    users: {
+      title: 'User Management',
+      subtitle: 'Manage accounts and subscription plans',
+      create_user: 'Create User',
+      search_placeholder: 'Search by email, parish or city...',
+      table: {
+        email: 'User / Email',
+        parish: 'Parish',
+        city: 'City',
+        plan: 'Plan',
+        actions: 'Actions'
+      },
+      actions: {
+        edit_plan: 'Edit Plan',
+        reset_pass: 'Reset Password',
+        delete: 'Delete'
+      },
+      modal: {
+        create_title: 'New User',
+        edit_plan_title: 'Edit Plan',
+        email: 'Email Address',
+        password: 'Password',
+        plan: 'Assigned Plan',
+        cancel: 'Cancel',
+        create: 'Create User',
+        save: 'Save Changes'
+      }
     },
     dashboard: {
       stats: {

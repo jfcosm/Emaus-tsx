@@ -1,3 +1,4 @@
+
 import { LucideIcon } from 'lucide-react';
 
 export enum ViewName {
@@ -6,7 +7,8 @@ export enum ViewName {
   AGENDA = 'Agenda',
   DOCUMENTS = 'Documentos',
   MESSAGES = 'Mensajes',
-  SETTINGS = 'Configuración'
+  SETTINGS = 'Configuración',
+  USERS = 'Usuarios'
 }
 
 export enum SacramentType {
@@ -143,7 +145,8 @@ export interface ParishSettings {
 }
 
 export interface ParishDirectoryEntry {
-  id: string; // usually email or auth uid
+  id: string; // usually email (doc ID)
+  uid?: string; // Auth User ID (crucial for admin updates)
   parishName: string;
   city: string;
   diocese: string;

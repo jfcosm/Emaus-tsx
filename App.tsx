@@ -8,6 +8,7 @@ import DocumentEditor from './components/DocumentEditor';
 import Messages from './components/Messages';
 import LandingPage from './components/LandingPage';
 import Settings from './components/Settings';
+import UserManagement from './components/UserManagement';
 import { ViewName } from './types';
 import { Menu, Bell, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
@@ -51,6 +52,8 @@ const App: React.FC = () => {
         return <Messages />;
       case ViewName.SETTINGS:
         return <Settings />;
+      case ViewName.USERS:
+        return <UserManagement />;
       default:
         return <Dashboard />;
     }
@@ -88,6 +91,7 @@ const App: React.FC = () => {
               {currentView === ViewName.DOCUMENTS && t('sidebar.documents')}
               {currentView === ViewName.MESSAGES && t('sidebar.messages')}
               {currentView === ViewName.SETTINGS && t('sidebar.settings')}
+              {currentView === ViewName.USERS && t('sidebar.users')}
             </h1>
           </div>
           
@@ -130,7 +134,9 @@ const App: React.FC = () => {
 
             <div className="hidden lg:flex flex-col items-end">
               <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{settings.parishName || 'Parroquia Santa María'}</span>
-              <span className="text-xs text-gold-600 dark:text-gold-400 font-medium">Plan Avanzado</span>
+              <span className="text-xs text-gold-600 dark:text-gold-400 font-medium">
+                 {settings.planType === 'basic' ? 'Plan Básico' : 'Plan Avanzado'}
+              </span>
             </div>
           </div>
         </header>
