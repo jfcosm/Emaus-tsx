@@ -6,6 +6,7 @@ export const translations = {
       agenda: 'Agenda',
       sacraments: 'Sacramentos',
       documents: 'Documentos',
+      messages: 'Mensajes',
       settings: 'Configuración',
       logout: 'Cerrar Sesión',
       role: 'Secretaria',
@@ -101,7 +102,21 @@ export const translations = {
       cancel_back: 'Cancelar y volver',
       save: 'Guardar',
       close: 'Cerrar',
-      untitled: 'Documento sin título'
+      untitled: 'Documento sin título',
+      print: 'Imprimir'
+    },
+    messages: {
+      title: 'Mensajes',
+      subtitle: 'Comunidad Parroquial',
+      search_placeholder: 'Buscar chat...',
+      type_message: 'Escribe un mensaje...',
+      no_chat_selected: 'Selecciona un chat para comenzar',
+      start_chat: 'Iniciar nuevo chat',
+      empty_state: 'No tienes mensajes aún.',
+      new_chat_modal: 'Nuevo Chat',
+      email_placeholder: 'Correo de la parroquia',
+      create_chat: 'Crear Chat',
+      support: 'Soporte Emaús'
     },
     landing: {
       nav: {
@@ -199,6 +214,7 @@ export const translations = {
       agenda: 'Calendar',
       sacraments: 'Sacraments',
       documents: 'Documents',
+      messages: 'Messages',
       settings: 'Settings',
       logout: 'Log Out',
       role: 'Secretary',
@@ -294,7 +310,21 @@ export const translations = {
       cancel_back: 'Cancel and return',
       save: 'Save',
       close: 'Close',
-      untitled: 'Untitled Document'
+      untitled: 'Untitled Document',
+      print: 'Print'
+    },
+    messages: {
+      title: 'Messages',
+      subtitle: 'Parish Community',
+      search_placeholder: 'Search chat...',
+      type_message: 'Type a message...',
+      no_chat_selected: 'Select a chat to start',
+      start_chat: 'Start new chat',
+      empty_state: 'No messages yet.',
+      new_chat_modal: 'New Chat',
+      email_placeholder: 'Parish email',
+      create_chat: 'Create Chat',
+      support: 'Emaús Support'
     },
     landing: {
       nav: {

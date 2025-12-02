@@ -1,0 +1,310 @@
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { ChatThread, ChatMessage } from '../types';
+import { 
+  subscribeToChats, 
+  subscribeToMessages, 
+  sendMessage, 
+  createOrGetChat,
+  initSupportChat 
+} from '../services/chatService';
+import { 
+  Search, 
+  Send, 
+  Plus, 
+  MoreVertical, 
+  Paperclip, 
+  Smile, 
+  CheckCheck, 
+  User,
+  X
+} from 'lucide-react';
+
+const Messages: React.FC = () => {
+  const { t } = useLanguage();
+  const { currentUser } = useAuth();
+  
+  // State
+  const [threads, setThreads] = useState<ChatThread[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [newChatEmail, setNewChatEmail] = useState('');
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initial Data Load (Threads)
+  useEffect(() => {
+    if (!currentUser?.email) return;
+
+    // Initialize support chat just so user has someone to talk to
+    initSupportChat(currentUser.email);
+
+    const unsubscribe = subscribeToChats(currentUser.email, (updatedThreads) => {
+      setThreads(updatedThreads);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Load Messages when Active Thread Changes
+  useEffect(() => {
+    if (!activeThreadId) return;
+
+    const unsubscribe = subscribeToMessages(activeThreadId, (updatedMessages) => {
+      setMessages(updatedMessages);
+      scrollToBottom();
+    });
+
+    return () => unsubscribe();
+  }, [activeThreadId]);
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeThreadId || !currentUser?.email || !newMessage.trim()) return;
+
+    try {
+      await sendMessage(activeThreadId, currentUser.email, newMessage);
+      setNewMessage('');
+    } catch (error) {
+      console.error("Failed to send", error);
+    }
+  };
+
+  const handleCreateChat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser?.email || !newChatEmail.trim()) return;
+
+    try {
+      const chatId = await createOrGetChat(currentUser.email, newChatEmail);
+      setActiveThreadId(chatId);
+      setShowNewChatModal(false);
+      setNewChatEmail('');
+    } catch (error) {
+      alert("Error al crear chat. Verifica el correo.");
+    }
+  };
+
+  // Helper to get contact name from thread
+  const getContactName = (thread: ChatThread) => {
+    // In a real app, we would map email to User Profile
+    const otherEmail = thread.participants.find(p => p !== currentUser?.email);
+    if (otherEmail === 'soporte@emaus.app') return t('messages.support');
+    return otherEmail?.split('@')[0] || 'Usuario';
+  };
+
+  // Helper to format time
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return '';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const activeThread = threads.find(t => t.id === activeThreadId);
+
+  return (
+    <div className="h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden flex animate-fade-in">
+      
+      {/* LEFT SIDEBAR: THREADS */}
+      <div className={`${activeThreadId ? 'hidden md:flex' : 'flex'} w-full md:w-80 flex-col border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50`}>
+        {/* Header */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800">
+           <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white">{t('messages.title')}</h2>
+              <button 
+                onClick={() => setShowNewChatModal(true)}
+                className="p-2 bg-emaus-700 text-white rounded-full hover:bg-emaus-800 transition-colors shadow-sm"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+           </div>
+           {/* Search */}
+           <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder={t('messages.search_placeholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emaus-500 dark:text-white"
+              />
+           </div>
+        </div>
+
+        {/* Threads List */}
+        <div className="flex-1 overflow-y-auto">
+           {threads.length === 0 ? (
+             <div className="p-8 text-center text-slate-400 text-sm">
+                {t('messages.empty_state')}
+             </div>
+           ) : (
+             threads
+              .filter(t => getContactName(t).toLowerCase().includes(searchTerm.toLowerCase()))
+              .map(thread => (
+               <div 
+                 key={thread.id}
+                 onClick={() => setActiveThreadId(thread.id)}
+                 className={`p-4 flex gap-3 cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800/50
+                    ${activeThreadId === thread.id 
+                      ? 'bg-white dark:bg-slate-800 border-l-4 border-l-emaus-600' 
+                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-l-4 border-l-transparent'}
+                 `}
+               >
+                  <div className="relative">
+                     <div className="w-12 h-12 bg-gradient-to-br from-emaus-400 to-emaus-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {getContactName(thread).charAt(0).toUpperCase()}
+                     </div>
+                     {/* Online Indicator (Fake) */}
+                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-50 dark:border-slate-900 rounded-full"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                     <div className="flex justify-between items-baseline mb-1">
+                        <h3 className="font-bold text-slate-800 dark:text-slate-200 truncate">{getContactName(thread)}</h3>
+                        <span className="text-xs text-slate-400">{formatTime(thread.lastMessageTime)}</span>
+                     </div>
+                     <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                       {thread.lastMessage}
+                     </p>
+                  </div>
+               </div>
+             ))
+           )}
+        </div>
+      </div>
+
+      {/* RIGHT AREA: CHAT WINDOW */}
+      <div className={`${!activeThreadId ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-[url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png')] bg-repeat`}>
+         {activeThreadId ? (
+           <>
+              {/* Chat Header */}
+              <div className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 flex-shrink-0 z-10 shadow-sm">
+                 <div className="flex items-center gap-3">
+                    <button onClick={() => setActiveThreadId(null)} className="md:hidden text-slate-500 mr-2">
+                       <X className="w-6 h-6" />
+                    </button>
+                    <div className="w-10 h-10 bg-gradient-to-br from-emaus-400 to-emaus-600 rounded-full flex items-center justify-center text-white font-bold">
+                       {activeThread ? getContactName(activeThread).charAt(0).toUpperCase() : '?'}
+                    </div>
+                    <div>
+                       <h3 className="font-bold text-slate-800 dark:text-white">{activeThread && getContactName(activeThread)}</h3>
+                       <p className="text-xs text-green-600 dark:text-green-400 font-medium">En línea</p>
+                    </div>
+                 </div>
+                 <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <MoreVertical className="w-5 h-5" />
+                 </button>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-stone-100/50 dark:bg-slate-950/50">
+                 {messages.map((msg, idx) => {
+                   const isMe = msg.senderId === currentUser?.email;
+                   return (
+                     <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                        <div 
+                          className={`
+                            max-w-[75%] px-4 py-3 rounded-2xl shadow-sm text-sm relative
+                            ${isMe 
+                              ? 'bg-emaus-600 text-white rounded-br-none' 
+                              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none'}
+                          `}
+                        >
+                           <p className="leading-relaxed">{msg.text}</p>
+                           <div className={`text-[10px] mt-1 flex items-center justify-end gap-1 ${isMe ? 'text-emaus-200' : 'text-slate-400'}`}>
+                              {formatTime(msg.timestamp)}
+                              {isMe && <CheckCheck className="w-3 h-3" />}
+                           </div>
+                        </div>
+                     </div>
+                   );
+                 })}
+                 <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input Area */}
+              <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+                 <form onSubmit={handleSendMessage} className="flex items-end gap-2">
+                    <button type="button" className="p-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                       <Paperclip className="w-5 h-5" />
+                    </button>
+                    <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center px-4 py-2 border border-transparent focus-within:border-emaus-300 dark:focus-within:border-emaus-700 transition-colors">
+                       <input 
+                         type="text"
+                         value={newMessage}
+                         onChange={(e) => setNewMessage(e.target.value)}
+                         placeholder={t('messages.type_message')}
+                         className="flex-1 bg-transparent border-none focus:ring-0 text-slate-800 dark:text-white placeholder-slate-400"
+                       />
+                       <button type="button" className="ml-2 text-slate-400 hover:text-slate-600">
+                          <Smile className="w-5 h-5" />
+                       </button>
+                    </div>
+                    <button 
+                      type="submit"
+                      disabled={!newMessage.trim()}
+                      className="p-3 bg-emaus-600 text-white rounded-full hover:bg-emaus-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all hover:scale-105"
+                    >
+                       <Send className="w-5 h-5" />
+                    </button>
+                 </form>
+              </div>
+           </>
+         ) : (
+           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8">
+              <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                 <User className="w-12 h-12 text-slate-300 dark:text-slate-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-2">{t('messages.no_chat_selected')}</h3>
+              <p className="max-w-xs text-center">{t('messages.subtitle')}</p>
+              <button 
+                 onClick={() => setShowNewChatModal(true)}
+                 className="mt-6 px-6 py-2 bg-emaus-700 text-white rounded-full font-bold hover:bg-emaus-800 transition-colors"
+              >
+                 {t('messages.start_chat')}
+              </button>
+           </div>
+         )}
+      </div>
+
+      {/* NEW CHAT MODAL */}
+      {showNewChatModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                 <h3 className="font-bold text-lg text-slate-800 dark:text-white">{t('messages.new_chat_modal')}</h3>
+                 <button onClick={() => setShowNewChatModal(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+              </div>
+              <form onSubmit={handleCreateChat} className="p-6 space-y-4">
+                 <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Correo Electrónico</label>
+                    <input 
+                      type="email" 
+                      required
+                      placeholder={t('messages.email_placeholder')}
+                      value={newChatEmail}
+                      onChange={(e) => setNewChatEmail(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    />
+                 </div>
+                 <button type="submit" className="w-full py-2 bg-emaus-700 text-white rounded-lg font-bold hover:bg-emaus-800">
+                    {t('messages.create_chat')}
+                 </button>
+              </form>
+           </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Messages;

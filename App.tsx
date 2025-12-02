@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import Sacraments from './components/Sacraments';
 import Agenda from './components/Agenda';
 import DocumentEditor from './components/DocumentEditor';
+import Messages from './components/Messages';
 import LandingPage from './components/LandingPage';
 import Settings from './components/Settings';
 import { ViewName } from './types';
@@ -46,6 +47,8 @@ const App: React.FC = () => {
         return <Agenda />;
       case ViewName.DOCUMENTS:
         return <DocumentEditor />;
+      case ViewName.MESSAGES:
+        return <Messages />;
       case ViewName.SETTINGS:
         return <Settings />;
       default:
@@ -83,6 +86,7 @@ const App: React.FC = () => {
               {currentView === ViewName.SACRAMENTS && t('sidebar.sacraments')}
               {currentView === ViewName.AGENDA && t('sidebar.agenda')}
               {currentView === ViewName.DOCUMENTS && t('sidebar.documents')}
+              {currentView === ViewName.MESSAGES && t('sidebar.messages')}
               {currentView === ViewName.SETTINGS && t('sidebar.settings')}
             </h1>
           </div>

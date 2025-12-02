@@ -6,6 +6,7 @@ export enum ViewName {
   SACRAMENTS = 'Sacramentos',
   AGENDA = 'Agenda',
   DOCUMENTS = 'Documentos',
+  MESSAGES = 'Mensajes',
   SETTINGS = 'Configuración'
 }
 
@@ -139,4 +140,25 @@ export interface ParishSettings {
   priestName: string; // Default celebrant
   secretaryName: string; // App operator
   city: string;
+}
+
+// --- CHAT INTERFACES ---
+
+export interface ChatMessage {
+  id: string;
+  senderId: string; // User Email or ID
+  text: string;
+  timestamp: any; // Firestore Timestamp
+  read: boolean;
+}
+
+export interface ChatThread {
+  id: string;
+  participants: string[]; // Array of emails
+  lastMessage: string;
+  lastMessageTime: any;
+  unreadCount: number;
+  // Metadata for UI (Simulated for this demo since we don't have a user db)
+  contactName?: string;
+  contactAvatar?: string;
 }

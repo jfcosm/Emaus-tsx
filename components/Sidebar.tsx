@@ -8,7 +8,8 @@ import {
   FileText, 
   Settings, 
   LogOut,
-  Cross
+  Cross,
+  MessageCircle
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -25,6 +26,7 @@ const navItems: NavItem[] = [
   { name: ViewName.AGENDA, icon: CalendarDays, description: 'Calendario y eventos' },
   { name: ViewName.SACRAMENTS, icon: BookOpen, description: 'Libros y registros' },
   { name: ViewName.DOCUMENTS, icon: FileText, description: 'Editor y certificados' },
+  { name: ViewName.MESSAGES, icon: MessageCircle, description: 'Comunidad' },
   { name: ViewName.SETTINGS, icon: Settings, description: 'Configuración general' },
 ];
 
@@ -38,6 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
        case ViewName.AGENDA: return t('sidebar.agenda');
        case ViewName.SACRAMENTS: return t('sidebar.sacraments');
        case ViewName.DOCUMENTS: return t('sidebar.documents');
+       case ViewName.MESSAGES: return t('sidebar.messages');
        case ViewName.SETTINGS: return t('sidebar.settings');
        default: return name;
      }
