@@ -12,6 +12,7 @@ import { Menu, Bell, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
 import { useAuth } from './contexts/AuthContext';
 import { useTheme } from './contexts/ThemeContext';
+import { useSettings } from './contexts/SettingsContext';
 
 const App: React.FC = () => {
   // Authentication State from Firebase
@@ -24,6 +25,7 @@ const App: React.FC = () => {
   // Contexts
   const { language, setLanguage, t } = useLanguage();
   const { darkMode, toggleDarkMode } = useTheme();
+  const { settings } = useSettings();
 
   const handleLogout = async () => {
     try {
@@ -123,7 +125,7 @@ const App: React.FC = () => {
             </button>
 
             <div className="hidden lg:flex flex-col items-end">
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Parroquia Santa María</span>
+              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{settings.parishName || 'Parroquia Santa María'}</span>
               <span className="text-xs text-gold-600 dark:text-gold-400 font-medium">Plan Avanzado</span>
             </div>
           </div>

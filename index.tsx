@@ -1,9 +1,11 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -16,7 +18,9 @@ root.render(
     <AuthProvider>
       <ThemeProvider>
         <LanguageProvider>
-          <App />
+          <SettingsProvider>
+            <App />
+          </SettingsProvider>
         </LanguageProvider>
       </ThemeProvider>
     </AuthProvider>

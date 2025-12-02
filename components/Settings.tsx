@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle } from 'lucide-react';
 import { ParishSettings } from '../types';
 import { getSettings, saveSettings } from '../services/settingsService';
@@ -9,6 +10,7 @@ import { getSettings, saveSettings } from '../services/settingsService';
 const Settings: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
+  const { refreshSettings } = useSettings();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,6 +49,7 @@ const Settings: React.FC = () => {
     setSuccessMsg('');
     try {
       await saveSettings(formData);
+      await refreshSettings(); // Update global context immediately
       setSuccessMsg('Configuración guardada exitosamente.');
       // Auto hide success message
       setTimeout(() => setSuccessMsg(''), 3000);

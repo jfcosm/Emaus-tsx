@@ -194,6 +194,16 @@ const DocumentEditor: React.FC = () => {
       setView('editor');
   };
 
+  const handleCloseEditor = () => {
+    // Explicitly clean up content to prevent ghosting
+    if (editorContentRef.current) {
+      editorContentRef.current.innerHTML = '';
+    }
+    setActiveDocument(null);
+    setDocTitle('');
+    setView('list');
+  };
+
   const handleSaveDocument = async () => {
       if (!editorContentRef.current || !activeDocument) return;
       
@@ -258,7 +268,7 @@ const DocumentEditor: React.FC = () => {
 
   // --- SUB-COMPONENT: FILE LIST (Mac Finder Style) ---
   const renderFileList = () => (
-    <div className="space-y-4 h-full flex flex-col relative">
+    <div key="list-view" className="space-y-4 h-full flex flex-col relative animate-fade-in">
       {/* Header / Toolbar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -476,7 +486,7 @@ const DocumentEditor: React.FC = () => {
 
   // --- SUB-COMPONENT: TEMPLATE SELECTOR ---
   const renderTemplateSelector = () => (
-    <div className="space-y-6">
+    <div key="templates-view" className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
            <button 
@@ -536,13 +546,13 @@ const DocumentEditor: React.FC = () => {
     };
 
     return (
-      <div className="h-[calc(100vh-8rem)] flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div key="editor-view" className="h-[calc(100vh-8rem)] flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in">
         {/* Editor Toolbar */}
         <div className="border-b border-slate-200 dark:border-slate-800 p-2 flex flex-wrap items-center justify-between gap-y-2 bg-slate-50 dark:bg-slate-800/50">
           
           <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
               <button 
-                onClick={() => setView('list')} 
+                onClick={handleCloseEditor} 
                 className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors mr-2"
                 title={t('documents.close')}
               >

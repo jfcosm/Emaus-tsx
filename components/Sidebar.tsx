@@ -11,6 +11,7 @@ import {
   Cross
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface SidebarProps {
   currentView: ViewName;
@@ -29,6 +30,7 @@ const navItems: NavItem[] = [
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, setIsOpen }) => {
   const { t } = useLanguage();
+  const { settings } = useSettings();
 
   const getTranslatedName = (name: ViewName): string => {
      switch(name) {
@@ -102,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
               className="w-10 h-10 rounded-full border-2 border-gold-500" 
             />
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-white">María González</p>
+              <p className="text-sm font-medium text-white truncate max-w-[140px]">{settings.secretaryName || 'Secretaria'}</p>
               <p className="text-xs text-emaus-300 dark:text-slate-400">{t('sidebar.role')}</p>
             </div>
             <LogOut className="w-5 h-5 text-emaus-400 hover:text-red-400" />
