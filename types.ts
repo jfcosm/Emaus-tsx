@@ -129,3 +129,14 @@ export interface SavedPoster {
   thumbnail: string;
   lastModified: string;
 }
+
+export interface ParishSettings {
+  parishName: string;
+  parishAddress: string;
+  parishPhone: string;
+  parishEmail: string;
+  diocese: string; // Added: Important for documents
+  priestName: string; // Default celebrant
+  secretaryName: string; // App operator
+  city: string;
+}

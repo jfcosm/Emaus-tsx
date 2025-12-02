@@ -6,6 +6,7 @@ import Sacraments from './components/Sacraments';
 import Agenda from './components/Agenda';
 import DocumentEditor from './components/DocumentEditor';
 import LandingPage from './components/LandingPage';
+import Settings from './components/Settings';
 import { ViewName } from './types';
 import { Menu, Bell, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
@@ -44,18 +45,7 @@ const App: React.FC = () => {
       case ViewName.DOCUMENTS:
         return <DocumentEditor />;
       case ViewName.SETTINGS:
-        return (
-          <div className="flex flex-col items-center justify-center h-[60vh] text-center p-6 animate-fade-in">
-            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-full mb-4">
-              <span className="text-4xl">⚙️</span>
-            </div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('sidebar.settings')}</h2>
-            <p className="text-slate-500 dark:text-slate-400">Gestione los usuarios, roles y datos de la parroquia.</p>
-            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
-               <p>Usuario actual: {currentUser?.email}</p>
-            </div>
-          </div>
-        );
+        return <Settings />;
       default:
         return <Dashboard />;
     }
