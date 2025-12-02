@@ -3,9 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle } from 'lucide-react';
+import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Database } from 'lucide-react';
 import { ParishSettings } from '../types';
-import { getSettings, saveSettings } from '../services/settingsService';
+import { getSettings, saveSettings, initializeParishDb } from '../services/settingsService';
+
+// Import Firebase Compat to create a secondary app instance
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 const Settings: React.FC = () => {
   const { t } = useLanguage();
@@ -16,6 +20,14 @@ const Settings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   
+  // Admin State
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPass, setNewUserPass] = useState('');
+  const [newUserPlan, setNewUserPlan] = useState<'basic' | 'advanced'>('basic');
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [adminMsg, setAdminMsg] = useState('');
+  
   const [formData, setFormData] = useState<ParishSettings>({
     parishName: '',
     parishAddress: '',
@@ -24,12 +36,16 @@ const Settings: React.FC = () => {
     diocese: '',
     priestName: '',
     secretaryName: '',
-    city: ''
+    city: '',
+    planType: 'advanced' // Default for current view
   });
 
   useEffect(() => {
     loadSettings();
-  }, []);
+    if (currentUser?.email === 'admin@emaus.app') {
+      setIsAdmin(true);
+    }
+  }, [currentUser]);
 
   const loadSettings = async () => {
     setLoading(true);
@@ -38,7 +54,7 @@ const Settings: React.FC = () => {
     setLoading(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -51,13 +67,63 @@ const Settings: React.FC = () => {
       await saveSettings(formData);
       await refreshSettings(); // Update global context immediately
       setSuccessMsg('Configuración guardada exitosamente.');
-      // Auto hide success message
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
       alert("Error al guardar la configuración");
     } finally {
       setSaving(false);
     }
+  };
+
+  // --- SUPER ADMIN: CREATE USER LOGIC ---
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatingUser(true);
+    setAdminMsg('');
+
+    try {
+      // 1. Create a secondary Firebase App instance
+      // This allows us to create a user WITHOUT logging out the current admin
+      const secondaryApp = firebase.initializeApp(firebase.app().options, "Secondary");
+      
+      // 2. Create the user on the secondary app
+      const userCred = await secondaryApp.auth().createUserWithEmailAndPassword(newUserEmail, newUserPass);
+      
+      // 3. Initialize DB entry for this user (Public Directory)
+      // We use the MAIN app's database connection (imported services) because the admin has permissions
+      if (userCred.user) {
+         await initializeParishDb(userCred.user.uid, newUserEmail, newUserPlan);
+      }
+
+      // 4. Logout and delete secondary app to clean up
+      await secondaryApp.auth().signOut();
+      await secondaryApp.delete();
+
+      setAdminMsg(`Usuario creado: ${newUserEmail} (${newUserPlan})`);
+      setNewUserEmail('');
+      setNewUserPass('');
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      setAdminMsg(`Error: ${error.message}`);
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
+  // --- REPAIR DB LOGIC (Self-Fix) ---
+  const handleRepairDb = async () => {
+     setSaving(true);
+     try {
+         // Force save current settings ensuring planType is advanced (if admin) or existing
+         const fixedSettings = { ...formData, planType: formData.planType || 'advanced' };
+         await saveSettings(fixedSettings);
+         await refreshSettings();
+         alert("Base de datos reparada y sincronizada.");
+     } catch (e) {
+         alert("Error al reparar.");
+     } finally {
+         setSaving(false);
+     }
   };
 
   if (loading) {
@@ -81,7 +147,7 @@ const Settings: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: User Info (Read Only) */}
+        {/* Left Column: User Info & Admin Tools */}
         <div className="space-y-6">
              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Cuenta Actual</h3>
@@ -94,10 +160,85 @@ const Settings: React.FC = () => {
                         <p className="font-bold text-slate-800 dark:text-white truncate max-w-[200px]">{currentUser?.email}</p>
                     </div>
                 </div>
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs leading-relaxed">
-                   Este es el usuario administrador de la cuenta. Los cambios que realice aquí afectarán a los documentos y registros generados.
+                
+                {/* Plan Badge */}
+                <div className="mb-4">
+                   <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${formData.planType === 'basic' ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-gold-100 text-gold-700 border-gold-200'}`}>
+                      {formData.planType === 'basic' ? 'Plan Básico' : 'Plan Avanzado'}
+                   </span>
+                </div>
+
+                {/* DB Tools */}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button 
+                       type="button"
+                       onClick={handleRepairDb}
+                       className="w-full py-2 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
+                    >
+                       <Database className="w-3 h-3" /> Inicializar / Reparar Cuenta
+                    </button>
                 </div>
              </div>
+
+             {/* SUPER ADMIN PANEL */}
+             {isAdmin && (
+                 <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 relative overflow-hidden">
+                     <div className="absolute top-0 right-0 p-2 opacity-10">
+                        <Shield className="w-24 h-24 text-white" />
+                     </div>
+                     <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-gold-400" /> Super Admin
+                     </h3>
+                     
+                     <form onSubmit={handleCreateUser} className="space-y-4 relative z-10">
+                        <div>
+                           <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Nuevo Usuario (Email)</label>
+                           <input 
+                             type="email" 
+                             required
+                             value={newUserEmail}
+                             onChange={(e) => setNewUserEmail(e.target.value)}
+                             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-gold-500 focus:outline-none"
+                           />
+                        </div>
+                        <div>
+                           <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Contraseña</label>
+                           <input 
+                             type="text" 
+                             required
+                             value={newUserPass}
+                             onChange={(e) => setNewUserPass(e.target.value)}
+                             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-gold-500 focus:outline-none"
+                           />
+                        </div>
+                        <div>
+                           <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Plan</label>
+                           <select 
+                             value={newUserPlan}
+                             onChange={(e) => setNewUserPlan(e.target.value as any)}
+                             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-gold-500 focus:outline-none"
+                           >
+                              <option value="basic">Plan Básico</option>
+                              <option value="advanced">Plan Avanzado</option>
+                           </select>
+                        </div>
+                        
+                        <button 
+                           type="submit"
+                           disabled={creatingUser}
+                           className="w-full py-2 bg-gold-500 text-emaus-900 rounded-lg font-bold text-sm hover:bg-gold-400 transition-colors flex items-center justify-center gap-2"
+                        >
+                           {creatingUser ? 'Creando...' : <><UserPlus className="w-4 h-4" /> Crear Usuario</>}
+                        </button>
+                        
+                        {adminMsg && (
+                           <div className={`text-xs p-2 rounded ${adminMsg.includes('Error') ? 'bg-red-900/50 text-red-200' : 'bg-green-900/50 text-green-200'}`}>
+                              {adminMsg}
+                           </div>
+                        )}
+                     </form>
+                 </div>
+             )}
         </div>
 
         {/* Right Column: Settings Form */}

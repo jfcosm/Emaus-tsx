@@ -1,4 +1,3 @@
-
 import { LucideIcon } from 'lucide-react';
 
 export enum ViewName {
@@ -140,6 +139,7 @@ export interface ParishSettings {
   priestName: string; // Default celebrant
   secretaryName: string; // App operator
   city: string;
+  planType?: 'basic' | 'advanced';
 }
 
 export interface ParishDirectoryEntry {
@@ -165,7 +165,7 @@ export interface ChatThread {
   id: string;
   participants: string[]; // Array of emails
   lastMessage: string;
-  lastMessageTime: any;
+  lastMessageTime: any; // Firestore Timestamp
   unreadCount: number;
   // Metadata for UI (Simulated for this demo since we don't have a user db)
   contactName?: string;
