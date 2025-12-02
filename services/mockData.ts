@@ -1,5 +1,5 @@
 
-import { SacramentType, SacramentRecord, CalendarEvent, DocumentTemplate, SavedDocument, PosterTemplate, SavedPoster } from '../types';
+import { SacramentType, SacramentRecord, CalendarEvent, DocumentTemplate, SavedDocument, PosterTemplate, SavedPoster, ParishDirectoryEntry } from '../types';
 
 export const dashboardStats = [
   { name: 'Total Bautizos', value: 124, trend: '+12%', color: 'bg-blue-500' },
@@ -216,4 +216,12 @@ export const mockSavedPosters: SavedPoster[] = [
     thumbnail: 'https://picsum.photos/300/400?random=14',
     lastModified: 'Hace 1 semana'
   }
+];
+
+export const mockDirectory: ParishDirectoryEntry[] = [
+  { id: 'soporte', parishName: 'Soporte Emaús', city: 'Central', diocese: 'Nacional', email: 'soporte@emaus.app', planType: 'advanced' },
+  { id: 'p1', parishName: 'Parroquia San Miguel', city: 'San Miguel', diocese: 'Arquidiócesis de Santiago', email: 'sanmiguel@ejemplo.com', planType: 'advanced' },
+  { id: 'p2', parishName: 'Catedral de Valparaíso', city: 'Valparaíso', diocese: 'Diócesis de Valparaíso', email: 'catedral.valpo@ejemplo.com', planType: 'advanced' },
+  { id: 'p3', parishName: 'Capilla San Alberto', city: 'Maipú', diocese: 'Arquidiócesis de Santiago', email: 'capilla.alberto@ejemplo.com', planType: 'basic' },
+  { id: 'p4', parishName: 'Santuario de la Merced', city: 'Curicó', diocese: 'Diócesis de Talca', email: 'merced.curico@ejemplo.com', planType: 'advanced' },
 ];

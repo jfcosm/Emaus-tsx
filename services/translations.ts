@@ -116,7 +116,13 @@ export const translations = {
       new_chat_modal: 'Nuevo Chat',
       email_placeholder: 'Correo de la parroquia',
       create_chat: 'Crear Chat',
-      support: 'Soporte Emaús'
+      support: 'Soporte Emaús',
+      directory: {
+        title: 'Directorio de Parroquias',
+        subtitle: 'Conecta con otras parroquias de la red Emaús.',
+        search: 'Buscar parroquia o ciudad...',
+        start_conversation: 'Conversar'
+      }
     },
     landing: {
       nav: {
@@ -324,7 +330,13 @@ export const translations = {
       new_chat_modal: 'New Chat',
       email_placeholder: 'Parish email',
       create_chat: 'Create Chat',
-      support: 'Emaús Support'
+      support: 'Emaús Support',
+      directory: {
+        title: 'Parish Directory',
+        subtitle: 'Connect with other parishes in the Emaús network.',
+        search: 'Search parish or city...',
+        start_conversation: 'Chat'
+      }
     },
     landing: {
       nav: {

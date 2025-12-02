@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ChatThread, ChatMessage } from '../types';
+import { ChatThread, ChatMessage, ParishDirectoryEntry } from '../types';
 import { 
   subscribeToChats, 
   subscribeToMessages, 
@@ -10,6 +10,7 @@ import {
   createOrGetChat,
   initSupportChat 
 } from '../services/chatService';
+import { getParishDirectory } from '../services/settingsService';
 import { 
   Search, 
   Send, 
@@ -19,7 +20,9 @@ import {
   Smile, 
   CheckCheck, 
   User,
-  X
+  X,
+  MapPin,
+  CheckCircle
 } from 'lucide-react';
 
 const Messages: React.FC = () => {
@@ -32,8 +35,11 @@ const Messages: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Directory & New Chat State
   const [showNewChatModal, setShowNewChatModal] = useState(false);
-  const [newChatEmail, setNewChatEmail] = useState('');
+  const [directory, setDirectory] = useState<ParishDirectoryEntry[]>([]);
+  const [directorySearch, setDirectorySearch] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +56,19 @@ const Messages: React.FC = () => {
 
     return () => unsubscribe();
   }, [currentUser]);
+
+  // Load Directory when modal opens
+  useEffect(() => {
+    if (showNewChatModal) {
+      const loadDir = async () => {
+         const data = await getParishDirectory();
+         // Filter out myself
+         const filtered = data.filter(p => p.email !== currentUser?.email);
+         setDirectory(filtered);
+      };
+      loadDir();
+    }
+  }, [showNewChatModal, currentUser?.email]);
 
   // Load Messages when Active Thread Changes
   useEffect(() => {
@@ -81,17 +100,14 @@ const Messages: React.FC = () => {
     }
   };
 
-  const handleCreateChat = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUser?.email || !newChatEmail.trim()) return;
-
+  const handleStartChatFromDirectory = async (email: string) => {
+    if (!currentUser?.email) return;
     try {
-      const chatId = await createOrGetChat(currentUser.email, newChatEmail);
+      const chatId = await createOrGetChat(currentUser.email, email);
       setActiveThreadId(chatId);
       setShowNewChatModal(false);
-      setNewChatEmail('');
     } catch (error) {
-      alert("Error al crear chat. Verifica el correo.");
+      alert("Error al iniciar chat.");
     }
   };
 
@@ -100,6 +116,12 @@ const Messages: React.FC = () => {
     // In a real app, we would map email to User Profile
     const otherEmail = thread.participants.find(p => p !== currentUser?.email);
     if (otherEmail === 'soporte@emaus.app') return t('messages.support');
+    
+    // Try to find name in directory if available locally, else fallback
+    // Note: Ideally we would sync contact profiles in the thread metadata
+    const dirMatch = directory.find(d => d.email === otherEmail);
+    if (dirMatch) return dirMatch.parishName;
+
     return otherEmail?.split('@')[0] || 'Usuario';
   };
 
@@ -111,6 +133,12 @@ const Messages: React.FC = () => {
   };
 
   const activeThread = threads.find(t => t.id === activeThreadId);
+
+  // Filter Directory
+  const filteredDirectory = directory.filter(p => 
+     p.parishName.toLowerCase().includes(directorySearch.toLowerCase()) || 
+     p.city.toLowerCase().includes(directorySearch.toLowerCase())
+  );
 
   return (
     <div className="h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden flex animate-fade-in">
@@ -276,30 +304,74 @@ const Messages: React.FC = () => {
          )}
       </div>
 
-      {/* NEW CHAT MODAL */}
+      {/* NEW CHAT MODAL (DIRECTORY) */}
       {showNewChatModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                 <h3 className="font-bold text-lg text-slate-800 dark:text-white">{t('messages.new_chat_modal')}</h3>
-                 <button onClick={() => setShowNewChatModal(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
-              </div>
-              <form onSubmit={handleCreateChat} className="p-6 space-y-4">
+           <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-fade-in flex flex-col h-[600px]">
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Correo Electrónico</label>
+                    <h3 className="font-bold text-xl text-slate-800 dark:text-white">{t('messages.directory.title')}</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">{t('messages.directory.subtitle')}</p>
+                 </div>
+                 <button onClick={() => setShowNewChatModal(false)} className="text-slate-400 hover:text-slate-600 bg-slate-100 dark:bg-slate-800 p-2 rounded-full"><X className="w-5 h-5" /></button>
+              </div>
+
+              {/* Search */}
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/30 shrink-0">
+                 <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input 
-                      type="email" 
-                      required
-                      placeholder={t('messages.email_placeholder')}
-                      value={newChatEmail}
-                      onChange={(e) => setNewChatEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      type="text"
+                      placeholder={t('messages.directory.search')}
+                      value={directorySearch}
+                      onChange={(e) => setDirectorySearch(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emaus-500 dark:text-white shadow-sm"
+                      autoFocus
                     />
                  </div>
-                 <button type="submit" className="w-full py-2 bg-emaus-700 text-white rounded-lg font-bold hover:bg-emaus-800">
-                    {t('messages.create_chat')}
-                 </button>
-              </form>
+              </div>
+
+              {/* Directory List */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                 {filteredDirectory.length === 0 ? (
+                    <div className="text-center py-12 text-slate-400">
+                       <p>No se encontraron parroquias.</p>
+                    </div>
+                 ) : (
+                    filteredDirectory.map((parish) => (
+                       <div key={parish.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                          <div className="flex items-center gap-4">
+                             <div className="w-12 h-12 bg-gradient-to-br from-emaus-500 to-emaus-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {parish.parishName.charAt(0)}
+                             </div>
+                             <div>
+                                <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                   {parish.parishName}
+                                   {parish.planType === 'advanced' && (
+                                      <span className="bg-gold-100 dark:bg-gold-900/30 text-gold-700 dark:text-gold-400 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1 border border-gold-200 dark:border-gold-800">
+                                         <CheckCircle className="w-3 h-3" /> Plan Avanzado
+                                      </span>
+                                   )}
+                                </h4>
+                                <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {parish.city}</span>
+                                   <span>•</span>
+                                   <span>{parish.diocese}</span>
+                                </div>
+                             </div>
+                          </div>
+                          
+                          <button 
+                             onClick={() => handleStartChatFromDirectory(parish.email)}
+                             className="px-4 py-2 bg-white dark:bg-slate-900 text-emaus-700 dark:text-emaus-400 border border-slate-200 dark:border-slate-700 rounded-lg font-bold text-sm hover:bg-emaus-50 dark:hover:bg-emaus-900/20 group-hover:border-emaus-200 transition-all shadow-sm"
+                          >
+                             {t('messages.directory.start_conversation')}
+                          </button>
+                       </div>
+                    ))
+                 )}
+              </div>
            </div>
         </div>
       )}

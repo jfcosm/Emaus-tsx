@@ -142,6 +142,15 @@ export interface ParishSettings {
   city: string;
 }
 
+export interface ParishDirectoryEntry {
+  id: string; // usually email or auth uid
+  parishName: string;
+  city: string;
+  diocese: string;
+  email: string;
+  planType: 'basic' | 'advanced';
+}
+
 // --- CHAT INTERFACES ---
 
 export interface ChatMessage {
