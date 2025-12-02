@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { SacramentType, SacramentRecord } from '../types';
 import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database, Heart, Cross, Baby, ArrowLeft, ChevronRight } from 'lucide-react';
@@ -148,17 +149,17 @@ const Sacraments: React.FC = () => {
   const getSacramentConfig = (type: SacramentType) => {
     switch(type) {
       case SacramentType.BAUTIZO:
-        return { icon: Baby, color: 'text-cyan-600', bg: 'bg-cyan-50', border: 'border-cyan-100', hover: 'hover:border-cyan-300' };
+        return { icon: Baby, color: 'text-cyan-600', bg: 'bg-cyan-50', border: 'border-cyan-100', hover: 'hover:border-cyan-300', lightColor: 'text-cyan-500' };
       case SacramentType.PRIMERA_COMUNION:
-        return { icon: Users, color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-100', hover: 'hover:border-yellow-300' };
+        return { icon: Users, color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-100', hover: 'hover:border-yellow-300', lightColor: 'text-yellow-500' };
       case SacramentType.CONFIRMACION:
-        return { icon: User, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', hover: 'hover:border-orange-300' };
+        return { icon: User, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', hover: 'hover:border-orange-300', lightColor: 'text-orange-500' };
       case SacramentType.MATRIMONIO:
-        return { icon: Heart, color: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-100', hover: 'hover:border-pink-300' };
+        return { icon: Heart, color: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-100', hover: 'hover:border-pink-300', lightColor: 'text-pink-500' };
       case SacramentType.DEFUNCION:
-        return { icon: Cross, color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-200', hover: 'hover:border-slate-400' };
+        return { icon: Cross, color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-200', hover: 'hover:border-slate-400', lightColor: 'text-slate-500' };
       default:
-        return { icon: BookOpen, color: 'text-emaus-600', bg: 'bg-emaus-50', border: 'border-emaus-100', hover: 'hover:border-emaus-300' };
+        return { icon: BookOpen, color: 'text-emaus-600', bg: 'bg-emaus-50', border: 'border-emaus-100', hover: 'hover:border-emaus-300', lightColor: 'text-emaus-500' };
     }
   };
 
@@ -654,6 +655,9 @@ const Sacraments: React.FC = () => {
   }
 
   // 3. LIST VIEW (Specific Type)
+  const config = getSacramentConfig(activeTab);
+  const Icon = config.icon;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Actions */}
@@ -673,25 +677,32 @@ const Sacraments: React.FC = () => {
             <p className="text-slate-500 dark:text-slate-400 text-sm">Registros oficiales de la parroquia</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          {sacraments.length === 0 && !loading && (
-             <button 
-               onClick={handleSeedData}
-               className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-medium text-sm transition-colors border border-slate-200"
-             >
-                <Database className="w-4 h-4" /> Cargar Datos Ejemplo
-             </button>
-          )}
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-sm transition-colors">
-            <Download className="w-4 h-4" /> {t('sacraments.export')}
-          </button>
-          <button 
-            onClick={handleCreateNew}
-            className="flex items-center gap-2 px-4 py-2 bg-emaus-700 text-white rounded-lg hover:bg-emaus-800 font-medium text-sm shadow-sm shadow-emaus-900/20 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> {t('sacraments.new_record')}
-          </button>
+      </div>
+
+      {/* HERO ACTION CARD */}
+      <div 
+        onClick={handleCreateNew}
+        className={`mt-4 mb-8 p-6 rounded-2xl border ${config.border} ${config.bg} flex items-center justify-between relative overflow-hidden group cursor-pointer transition-all hover:shadow-md`}
+      >
+        <div className="relative z-10 flex items-center gap-6">
+            <div className={`w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm ${config.color}`}>
+                <Icon className="w-8 h-8" />
+            </div>
+            <div>
+                <h3 className={`text-xl font-bold text-slate-800 dark:text-slate-800`}>
+                    Registrar nuevo {t(`sacraments.types.${activeTab}`)}
+                </h3>
+                <p className="text-slate-600 dark:text-slate-600">
+                    Haga clic aquí para agregar una nueva partida al libro oficial.
+                </p>
+            </div>
         </div>
+        <div className="relative z-10 bg-white/50 p-2 rounded-full">
+            <Plus className={`w-6 h-6 ${config.color}`} />
+        </div>
+        
+        {/* Background decoration */}
+        <div className={`absolute -right-10 -top-10 w-40 h-40 bg-white/40 rounded-full blur-2xl`}></div>
       </div>
 
       {/* Search & Filter */}
