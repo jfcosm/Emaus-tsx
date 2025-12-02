@@ -211,7 +211,15 @@ const Messages: React.FC = () => {
       </div>
 
       {/* RIGHT AREA: CHAT WINDOW */}
-      <div className={`${!activeThreadId ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-[url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png')] bg-repeat`}>
+      <div 
+        className={`${!activeThreadId ? 'hidden md:flex' : 'flex'} flex-1 flex-col`}
+        style={{
+          // Minimalist Ecclesial Cross Pattern (SVG Data URI)
+          // 7% Opacity Burgundy Crosses on transparent background
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239f1843' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+          backgroundRepeat: 'repeat'
+        }}
+      >
          {activeThreadId ? (
            <>
               {/* Chat Header */}
@@ -234,7 +242,7 @@ const Messages: React.FC = () => {
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-stone-100/50 dark:bg-slate-950/50">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-stone-50/80 dark:bg-slate-950/80 backdrop-blur-sm">
                  {messages.map((msg, idx) => {
                    const isMe = msg.senderId === currentUser?.email;
                    return (
@@ -243,7 +251,7 @@ const Messages: React.FC = () => {
                           className={`
                             max-w-[75%] px-4 py-3 rounded-2xl shadow-sm text-sm relative
                             ${isMe 
-                              ? 'bg-emaus-600 text-white rounded-br-none' 
+                              ? 'bg-emaus-700 text-white rounded-br-none' 
                               : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none'}
                           `}
                         >
@@ -280,7 +288,7 @@ const Messages: React.FC = () => {
                     <button 
                       type="submit"
                       disabled={!newMessage.trim()}
-                      className="p-3 bg-emaus-600 text-white rounded-full hover:bg-emaus-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all hover:scale-105"
+                      className="p-3 bg-emaus-700 text-white rounded-full hover:bg-emaus-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all hover:scale-105"
                     >
                        <Send className="w-5 h-5" />
                     </button>
@@ -288,7 +296,7 @@ const Messages: React.FC = () => {
               </div>
            </>
          ) : (
-           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8">
+           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 backdrop-blur-sm bg-stone-50/80 dark:bg-slate-950/80">
               <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
                  <User className="w-12 h-12 text-slate-300 dark:text-slate-600" />
               </div>
