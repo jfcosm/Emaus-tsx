@@ -139,7 +139,8 @@ export interface ParishSettings {
   parishEmail: string;
   diocese: string; // Added: Important for documents
   priestName: string; // Default celebrant
-  secretaryName: string; // App operator
+  secretaryName: string; // App operator name
+  userRole?: string; // New: User Role (Secretary, Deacon, Priest, etc.)
   city: string;
   planType?: 'basic' | 'advanced';
 }

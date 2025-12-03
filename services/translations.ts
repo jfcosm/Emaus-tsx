@@ -216,8 +216,8 @@ export const translations = {
         certs_desc: 'Generación automática de certificados oficiales listos para imprimir.',
         agenda: 'Agenda Pastoral',
         agenda_desc: 'Coordine misas, confesiones y reuniones parroquiales en un calendario centralizado.',
-        network: 'Red Interparroquial',
-        network_desc: 'Conecte directamente con otras secretarías. Solicite traslados y resuelva dudas por chat seguro.',
+        network: 'Chat Interparroquial',
+        network_desc: 'Conecte directamente con otras secretarías para solicitar traslados y resolver dudas mediante un chat seguro.',
         btn_more: 'Conocer más características'
       },
       community: {
@@ -252,7 +252,7 @@ export const translations = {
           items: {
             basic_features: 'Todo lo del Plan Básico',
             word_editor: 'Editor de Documentos tipo Word',
-            chat: 'Chat y Directorio Interparroquial',
+            chat: 'Mensajería Instantánea',
             reports: 'Reportes y Estadísticas',
             support: 'Soporte Prioritario'
           },

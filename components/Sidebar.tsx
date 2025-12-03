@@ -144,8 +144,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
               className="w-10 h-10 rounded-full border-2 border-gold-500" 
             />
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-white truncate max-w-[140px]">{settings.secretaryName || 'Secretaria'}</p>
-              <p className="text-xs text-emaus-300 dark:text-slate-400">{t('sidebar.role')}</p>
+              <p className="text-sm font-medium text-white truncate max-w-[140px]">{settings.secretaryName || 'Usuario'}</p>
+              <p className="text-xs text-emaus-300 dark:text-slate-400">{settings.userRole || t('sidebar.role')}</p>
             </div>
             <LogOut className="w-5 h-5 text-emaus-400 hover:text-red-400" />
           </button>

@@ -1,3 +1,4 @@
+
 import { db, auth } from './firebase';
 import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 import { ParishSettings, ParishDirectoryEntry } from '../types';
@@ -16,6 +17,7 @@ const DEFAULT_SETTINGS: ParishSettings = {
   diocese: '',
   priestName: '',
   secretaryName: '',
+  userRole: 'Secretaria', // Default role
   city: '',
   planType: 'advanced' // Default fallback, though should be set on creation
 };

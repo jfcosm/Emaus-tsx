@@ -36,6 +36,7 @@ const Settings: React.FC = () => {
     diocese: '',
     priestName: '',
     secretaryName: '',
+    userRole: '',
     city: '',
     planType: 'advanced' // Default for current view
   });
@@ -166,17 +167,6 @@ const Settings: React.FC = () => {
                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${formData.planType === 'basic' ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-gold-100 text-gold-700 border-gold-200'}`}>
                       {formData.planType === 'basic' ? 'Plan Básico' : 'Plan Avanzado'}
                    </span>
-                </div>
-
-                {/* DB Tools */}
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                    <button 
-                       type="button"
-                       onClick={handleRepairDb}
-                       className="w-full py-2 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
-                    >
-                       <Database className="w-3 h-3" /> Inicializar / Reparar Cuenta
-                    </button>
                 </div>
              </div>
 
@@ -346,17 +336,30 @@ const Settings: React.FC = () => {
                           <p className="text-xs text-slate-400 mt-1">Este nombre aparecerá automáticamente al crear nuevos registros de sacramentos.</p>
                       </div>
 
-                      <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre de la Secretaria (Operador)</label>
-                          <input 
-                            type="text"
-                            name="secretaryName"
-                            value={formData.secretaryName}
-                            onChange={handleInputChange}
-                            placeholder="Ej: María González"
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white dark:border-slate-700"
-                          />
-                          <p className="text-xs text-slate-400 mt-1">Nombre utilizado para firmas de documentos internos o pies de página.</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre del Usuario (Operador)</label>
+                              <input 
+                                type="text"
+                                name="secretaryName"
+                                value={formData.secretaryName}
+                                onChange={handleInputChange}
+                                placeholder="Ej: María González"
+                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white dark:border-slate-700"
+                              />
+                              <p className="text-xs text-slate-400 mt-1">Nombre utilizado para firmas o pies de página.</p>
+                          </div>
+                          <div>
+                              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cargo / Rol en la Parroquia</label>
+                              <input 
+                                type="text"
+                                name="userRole"
+                                value={formData.userRole}
+                                onChange={handleInputChange}
+                                placeholder="Ej: Secretaria, Diácono, Párroco..."
+                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white dark:border-slate-700"
+                              />
+                          </div>
                       </div>
                   </div>
               </div>
