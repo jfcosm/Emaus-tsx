@@ -1,5 +1,4 @@
-
-import { SacramentType, SacramentRecord, CalendarEvent, DocumentTemplate, SavedDocument, PosterTemplate, SavedPoster, ParishDirectoryEntry } from '../types';
+import { SacramentType, SacramentRecord, CalendarEvent, DocumentTemplate, SavedDocument, PosterTemplate, SavedPoster, ParishDirectoryEntry, FinanceTransaction } from '../types';
 
 export const dashboardStats = [
   { name: 'Total Bautizos', value: 124, trend: '+12%', color: 'bg-blue-500' },
@@ -228,4 +227,12 @@ export const mockDirectory: ParishDirectoryEntry[] = [
   { id: 'p2', parishName: 'Catedral de Valparaíso', city: 'Valparaíso', diocese: 'Diócesis de Valparaíso', email: 'catedral.valpo@ejemplo.com', planType: 'advanced' },
   { id: 'p3', parishName: 'Capilla San Alberto', city: 'Maipú', diocese: 'Arquidiócesis de Santiago', email: 'capilla.alberto@ejemplo.com', planType: 'basic' },
   { id: 'p4', parishName: 'Santuario de la Merced', city: 'Curicó', diocese: 'Diócesis de Talca', email: 'merced.curico@ejemplo.com', planType: 'advanced' },
+];
+
+export const mockTransactions: FinanceTransaction[] = [
+  { id: '1', date: '2024-06-01', type: 'income', category: 'Estipendios', amount: 50000, description: 'Bautizo Familia González', paymentMethod: 'Efectivo' },
+  { id: '2', date: '2024-06-02', type: 'income', category: 'Colecta', amount: 125000, description: 'Misa Dominical', paymentMethod: 'Efectivo' },
+  { id: '3', date: '2024-06-05', type: 'expense', category: 'Servicios Básicos', amount: 85000, description: 'Cuenta de Luz', paymentMethod: 'Transferencia' },
+  { id: '4', date: '2024-06-10', type: 'expense', category: 'Insumos', amount: 30000, description: 'Velas y Flores', paymentMethod: 'Efectivo' },
+  { id: '5', date: '2024-06-12', type: 'income', category: 'Donaciones', amount: 200000, description: 'Aporte anónimo reparación techo', paymentMethod: 'Transferencia' },
 ];

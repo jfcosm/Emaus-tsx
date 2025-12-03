@@ -1,4 +1,3 @@
-
 export const translations = {
   es: {
     sidebar: {
@@ -7,6 +6,7 @@ export const translations = {
       sacraments: 'Sacramentos',
       documents: 'Documentos',
       messages: 'Mensajes',
+      finances: 'Finanzas',
       settings: 'Configuración',
       users: 'Usuarios',
       logout: 'Cerrar Sesión',
@@ -171,6 +171,52 @@ export const translations = {
         cta: 'Conocer Planes'
       }
     },
+    finances: {
+      title: 'Finanzas Parroquiales',
+      subtitle: 'Control de ingresos, egresos y balance mensual.',
+      income: 'Ingresos',
+      expense: 'Egresos',
+      balance: 'Balance',
+      new_transaction: 'Nueva Transacción',
+      no_transactions: 'No hay transacciones registradas.',
+      search: 'Buscar movimiento...',
+      upsell: {
+        title: 'Funcionalidad Premium',
+        desc: 'El módulo de Contabilidad y Finanzas está reservado para planes avanzados.',
+        benefit1: 'Control de caja e ingresos',
+        benefit2: 'Reportes financieros automáticos',
+        cta: 'Conocer Planes'
+      },
+      table: {
+        date: 'Fecha',
+        type: 'Tipo',
+        category: 'Categoría',
+        description: 'Descripción',
+        amount: 'Monto',
+        actions: 'Acciones'
+      },
+      modal: {
+        title: 'Registrar Movimiento',
+        type: 'Tipo de Movimiento',
+        amount: 'Monto',
+        date: 'Fecha',
+        category: 'Categoría',
+        desc: 'Descripción',
+        method: 'Método de Pago',
+        cancel: 'Cancelar',
+        save: 'Guardar'
+      },
+      categories: {
+        stipends: 'Estipendios',
+        collection: 'Colecta',
+        donations: 'Donaciones',
+        services: 'Servicios Básicos',
+        maintenance: 'Mantenimiento',
+        supplies: 'Insumos',
+        personnel: 'Personal',
+        other: 'Otro'
+      }
+    },
     landing: {
       nav: {
         features: 'Características',
@@ -310,6 +356,7 @@ export const translations = {
       sacraments: 'Sacraments',
       documents: 'Documents',
       messages: 'Messages',
+      finances: 'Finances',
       settings: 'Settings',
       users: 'Users',
       logout: 'Log Out',
@@ -472,6 +519,52 @@ export const translations = {
         benefit1: 'Direct chat with other parishes',
         benefit2: 'National contact directory',
         cta: 'View Plans'
+      }
+    },
+    finances: {
+      title: 'Parish Finances',
+      subtitle: 'Income, expense, and balance control.',
+      income: 'Income',
+      expense: 'Expenses',
+      balance: 'Balance',
+      new_transaction: 'New Transaction',
+      no_transactions: 'No transactions found.',
+      search: 'Search movement...',
+      upsell: {
+        title: 'Premium Feature',
+        desc: 'Accounting module is reserved for advanced plans.',
+        benefit1: 'Cash flow control',
+        benefit2: 'Automatic financial reports',
+        cta: 'View Plans'
+      },
+      table: {
+        date: 'Date',
+        type: 'Type',
+        category: 'Category',
+        description: 'Description',
+        amount: 'Amount',
+        actions: 'Actions'
+      },
+      modal: {
+        title: 'Register Transaction',
+        type: 'Transaction Type',
+        amount: 'Amount',
+        date: 'Date',
+        category: 'Category',
+        desc: 'Description',
+        method: 'Payment Method',
+        cancel: 'Cancel',
+        save: 'Save'
+      },
+      categories: {
+        stipends: 'Stipends',
+        collection: 'Collection',
+        donations: 'Donations',
+        services: 'Utilities',
+        maintenance: 'Maintenance',
+        supplies: 'Supplies',
+        personnel: 'Personnel',
+        other: 'Other'
       }
     },
     landing: {

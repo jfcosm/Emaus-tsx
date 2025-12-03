@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ViewName, NavItem } from '../types';
 import { 
@@ -11,7 +10,8 @@ import {
   Cross,
   MessageCircle,
   Lock,
-  Users
+  Users,
+  Banknote
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
   { name: ViewName.SACRAMENTS, icon: BookOpen, description: 'Libros y registros' },
   { name: ViewName.DOCUMENTS, icon: FileText, description: 'Editor y certificados' },
   { name: ViewName.MESSAGES, icon: MessageCircle, description: 'Comunidad' },
+  { name: ViewName.FINANCES, icon: Banknote, description: 'Ingresos y Gastos' },
   { name: ViewName.SETTINGS, icon: Settings, description: 'Configuración general' },
 ];
 
@@ -45,6 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
        case ViewName.SACRAMENTS: return t('sidebar.sacraments');
        case ViewName.DOCUMENTS: return t('sidebar.documents');
        case ViewName.MESSAGES: return t('sidebar.messages');
+       case ViewName.FINANCES: return t('sidebar.finances');
        case ViewName.SETTINGS: return t('sidebar.settings');
        case ViewName.USERS: return t('sidebar.users');
        default: return name;
@@ -87,7 +89,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
           {navItems.map((item) => {
             const isMessages = item.name === ViewName.MESSAGES;
             const isDocuments = item.name === ViewName.DOCUMENTS;
-            const isLocked = isBasicPlan && (isMessages || isDocuments);
+            const isFinances = item.name === ViewName.FINANCES;
+            const isLocked = isBasicPlan && (isMessages || isDocuments || isFinances);
 
             return (
               <button

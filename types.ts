@@ -1,4 +1,3 @@
-
 import { LucideIcon } from 'lucide-react';
 
 export enum ViewName {
@@ -7,6 +6,7 @@ export enum ViewName {
   AGENDA = 'Agenda',
   DOCUMENTS = 'Documentos',
   MESSAGES = 'Mensajes',
+  FINANCES = 'Finanzas',
   SETTINGS = 'Configuración',
   USERS = 'Usuarios'
 }
@@ -174,4 +174,17 @@ export interface ChatThread {
   // Metadata for UI (Simulated for this demo since we don't have a user db)
   contactName?: string;
   contactAvatar?: string;
+}
+
+// --- FINANCE INTERFACES ---
+
+export interface FinanceTransaction {
+  id: string;
+  date: string;
+  type: 'income' | 'expense';
+  category: string;
+  amount: number;
+  description: string;
+  paymentMethod: 'Efectivo' | 'Transferencia' | 'Cheque' | 'Otro';
+  relatedSacramentId?: string; // Optional link to sacrament
 }

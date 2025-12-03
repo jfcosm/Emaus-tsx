@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -6,6 +5,7 @@ import Sacraments from './components/Sacraments';
 import Agenda from './components/Agenda';
 import DocumentEditor from './components/DocumentEditor';
 import Messages from './components/Messages';
+import Finances from './components/Finances';
 import LandingPage from './components/LandingPage';
 import Settings from './components/Settings';
 import UserManagement from './components/UserManagement';
@@ -50,6 +50,8 @@ const App: React.FC = () => {
         return <DocumentEditor />;
       case ViewName.MESSAGES:
         return <Messages />;
+      case ViewName.FINANCES:
+        return <Finances />;
       case ViewName.SETTINGS:
         return <Settings />;
       case ViewName.USERS:
@@ -90,6 +92,7 @@ const App: React.FC = () => {
               {currentView === ViewName.AGENDA && t('sidebar.agenda')}
               {currentView === ViewName.DOCUMENTS && t('sidebar.documents')}
               {currentView === ViewName.MESSAGES && t('sidebar.messages')}
+              {currentView === ViewName.FINANCES && t('sidebar.finances')}
               {currentView === ViewName.SETTINGS && t('sidebar.settings')}
               {currentView === ViewName.USERS && t('sidebar.users')}
             </h1>
