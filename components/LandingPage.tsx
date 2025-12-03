@@ -28,7 +28,8 @@ import {
   Moon,
   MessageCircle,
   Users,
-  FileCheck
+  FileCheck,
+  Banknote
 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
@@ -107,6 +108,11 @@ const LandingPage: React.FC = () => {
         desc: "Conecte directamente con otras secretarías para solicitar traslados y resolver dudas mediante un chat seguro y exclusivo."
       },
       {
+        icon: Banknote,
+        title: "Finanzas y Contabilidad",
+        desc: "Lleve el control de caja, ingresos por estipendios, colectas y gastos operativos. Obtenga balances mensuales automáticos."
+      },
+      {
         icon: Shield,
         title: "Seguridad y Privacidad",
         desc: "Datos encriptados y respaldos automáticos diarios. Acceso diferenciado para párroco, secretaria y consejos pastorales."
@@ -158,7 +164,7 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {allFeatures.map((feat, idx) => (
               <div key={idx} className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:border-gold-300 dark:hover:border-gold-700 transition-all group">
                 <div className="w-14 h-14 bg-emaus-50 dark:bg-emaus-900/30 text-emaus-700 dark:text-emaus-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -595,6 +601,9 @@ const LandingPage: React.FC = () => {
                   <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
                     <X className="w-5 h-5" /> Chat Interparroquial
                   </li>
+                  <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
+                    <X className="w-5 h-5" /> Módulo de Finanzas
+                  </li>
                 </ul>
                 <button 
                   onClick={() => setIsLoginModalOpen(true)}
@@ -626,6 +635,9 @@ const LandingPage: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.chat')}
+                  </li>
+                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.finance')}
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.reports')}

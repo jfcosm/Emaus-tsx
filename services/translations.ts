@@ -1,3 +1,4 @@
+
 export const translations = {
   es: {
     sidebar: {
@@ -299,6 +300,7 @@ export const translations = {
             basic_features: 'Todo lo del Plan Básico',
             word_editor: 'Editor de Documentos tipo Word',
             chat: 'Mensajería Instantánea',
+            finance: 'Módulo de Finanzas',
             reports: 'Reportes y Estadísticas',
             support: 'Soporte Prioritario'
           },
@@ -649,6 +651,7 @@ export const translations = {
             basic_features: 'Everything in Basic',
             word_editor: 'Word-like Document Editor',
             chat: 'Inter-parish Chat & Directory',
+            finance: 'Finance Module',
             reports: 'Reports & Analytics',
             support: 'Priority Support'
           },
