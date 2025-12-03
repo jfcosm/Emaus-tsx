@@ -163,6 +163,10 @@ export interface ChatMessage {
   text: string;
   timestamp: any; // Firestore Timestamp
   read: boolean;
+  // Attachment fields
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: 'image' | 'file';
 }
 
 export interface ChatThread {

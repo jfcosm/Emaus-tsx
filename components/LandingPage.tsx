@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
@@ -595,11 +594,11 @@ const LandingPage: React.FC = () => {
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-gold-500" /> Certificados Automáticos
                   </li>
-                  <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
-                    <X className="w-5 h-5" /> Editor Tipo Word
+                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <Check className="w-5 h-5 text-gold-500" /> Chat Interparroquial
                   </li>
                   <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
-                    <X className="w-5 h-5" /> Chat Interparroquial
+                    <X className="w-5 h-5" /> Editor Tipo Word
                   </li>
                   <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
                     <X className="w-5 h-5" /> Módulo de Finanzas
@@ -634,10 +633,10 @@ const LandingPage: React.FC = () => {
                     <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.word_editor')}
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.chat')}
+                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.finance')}
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.finance')}
+                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.chat')}
                   </li>
                   <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.reports')}

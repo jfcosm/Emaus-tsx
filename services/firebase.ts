@@ -1,6 +1,7 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import 'firebase/compat/storage';
 
 // ⚠️ IMPORTANTE: REEMPLAZA ESTOS VALORES CON LOS DE TU CONSOLA DE FIREBASE
 // Ve a Project Settings -> General -> Your Apps -> SDK Setup and Configuration
@@ -20,5 +21,6 @@ const app = firebase.apps.length === 0 ? firebase.initializeApp(firebaseConfig) 
 // Export Services
 export const auth = firebase.auth();
 export const db = firebase.firestore();
+export const storage = firebase.storage();
 
 export default app;

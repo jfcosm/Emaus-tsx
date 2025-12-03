@@ -87,10 +87,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
-            const isMessages = item.name === ViewName.MESSAGES;
             const isDocuments = item.name === ViewName.DOCUMENTS;
             const isFinances = item.name === ViewName.FINANCES;
-            const isLocked = isBasicPlan && (isMessages || isDocuments || isFinances);
+            // Removed isMessages check to unlock chat for basic plan
+            const isLocked = isBasicPlan && (isDocuments || isFinances);
 
             return (
               <button

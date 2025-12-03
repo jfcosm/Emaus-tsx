@@ -289,7 +289,12 @@ export const translations = {
         basic: {
           name: 'Plan Básico',
           desc: 'Para parroquias pequeñas o capillas.',
-          items: ['Agenda Parroquial', 'Registro de Sacramentos', 'Certificados Automáticos'],
+          items: [
+            'Agenda Parroquial', 
+            'Registro de Sacramentos', 
+            'Certificados Automáticos',
+            'Chat Interparroquial (Nuevo)'
+          ],
           btn: 'Comenzar'
         },
         advanced: {
@@ -299,8 +304,8 @@ export const translations = {
           items: {
             basic_features: 'Todo lo del Plan Básico',
             word_editor: 'Editor de Documentos tipo Word',
-            chat: 'Mensajería Instantánea',
-            finance: 'Módulo de Finanzas',
+            finance: 'Módulo de Finanzas y Caja',
+            chat: 'Chat y Directorio Ilimitado',
             reports: 'Reportes y Estadísticas',
             support: 'Soporte Prioritario'
           },
@@ -640,7 +645,7 @@ export const translations = {
         basic: {
           name: 'Basic Plan',
           desc: 'For small parishes or chapels.',
-          items: ['Parish Calendar', 'Sacrament Registry', 'Automatic Certificates'],
+          items: ['Parish Calendar', 'Sacrament Registry', 'Automatic Certificates', 'Inter-parish Chat (New)'],
           btn: 'Get Started'
         },
         advanced: {
@@ -650,7 +655,7 @@ export const translations = {
           items: {
             basic_features: 'Everything in Basic',
             word_editor: 'Word-like Document Editor',
-            chat: 'Inter-parish Chat & Directory',
+            chat: 'Chat & Directory',
             finance: 'Finance Module',
             reports: 'Reports & Analytics',
             support: 'Priority Support'

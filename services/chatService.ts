@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, storage } from './firebase';
 import { 
   collection, 
   query, 
@@ -13,6 +13,7 @@ import {
   Timestamp,
   orderBy
 } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ChatThread, ChatMessage } from '../types';
 
 const CHATS_COLLECTION = 'chats';
@@ -59,9 +60,15 @@ export const subscribeToMessages = (chatId: string, callback: (messages: ChatMes
   });
 };
 
-// Enviar un mensaje
-export const sendMessage = async (chatId: string, senderEmail: string, text: string) => {
-  if (!text.trim()) return;
+// Enviar un mensaje (Texto o Archivo)
+export const sendMessage = async (
+  chatId: string, 
+  senderEmail: string, 
+  text: string, 
+  attachment?: { url: string, name: string, type: 'image' | 'file' }
+) => {
+  // Permitir enviar si hay texto O si hay adjunto
+  if (!text.trim() && !attachment) return;
 
   const timestamp = serverTimestamp();
 
@@ -70,25 +77,40 @@ export const sendMessage = async (chatId: string, senderEmail: string, text: str
     senderId: senderEmail,
     text,
     timestamp,
-    read: false
+    read: false,
+    ...(attachment && {
+        attachmentUrl: attachment.url,
+        attachmentName: attachment.name,
+        attachmentType: attachment.type
+    })
   });
 
   // 2. Actualizar el documento padre (ChatThread) para la vista previa
   const chatRef = doc(db, CHATS_COLLECTION, chatId);
   await updateDoc(chatRef, {
-    lastMessage: text,
+    lastMessage: attachment ? (attachment.type === 'image' ? '📷 Imagen' : '📎 Archivo adjunto') : text,
     lastMessageTime: timestamp
     // Aquí podríamos incrementar contadores de no leídos
   });
 };
 
+// Subir Archivo Adjunto
+export const uploadChatAttachment = async (chatId: string, file: File): Promise<string> => {
+    try {
+        const timestamp = Date.now();
+        const storageRef = ref(storage, `chat_attachments/${chatId}/${timestamp}_${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading file:", error);
+        throw error;
+    }
+};
+
 // Crear o recuperar un chat existente
 export const createOrGetChat = async (currentUserEmail: string, otherUserEmail: string): Promise<string> => {
   // Buscar si ya existe un chat entre estos dos
-  // Nota: Firebase no soporta consultas array-contains múltiples nativas fácilmente para "exact match", 
-  // así que consultamos por uno y filtramos en cliente si la base es pequeña, 
-  // o usamos un ID compuesto si queremos ser estrictos. Para demo, consultamos por currentUser.
-  
   const q = query(
     collection(db, CHATS_COLLECTION),
     where('participants', 'array-contains', currentUserEmail)

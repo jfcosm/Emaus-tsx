@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,7 +8,8 @@ import {
   subscribeToMessages, 
   sendMessage, 
   createOrGetChat,
-  initSupportChat 
+  initSupportChat,
+  uploadChatAttachment
 } from '../services/chatService';
 import { getParishDirectory } from '../services/settingsService';
 import { 
@@ -25,12 +25,16 @@ import {
   MapPin,
   CheckCircle,
   Lock,
-  ArrowRight
+  ArrowRight,
+  File as FileIcon,
+  Download,
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
 
 const Messages: React.FC = () => {
   const { t } = useLanguage();
-  const { currentUser, logout } = useAuth();
+  const { currentUser } = useAuth();
   const { settings } = useSettings();
   
   // State
@@ -40,6 +44,10 @@ const Messages: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   
+  // File Upload State
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Directory & New Chat State
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [directory, setDirectory] = useState<ParishDirectoryEntry[]>([]);
@@ -47,82 +55,9 @@ const Messages: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // --- UPSELL LOCK FOR BASIC PLANS ---
-  if (settings.planType === 'basic') {
-    return (
-      <div className="h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-fade-in">
-        {/* Blurred Content Background (Simulating the App) */}
-        <div className="absolute inset-0 filter blur-md opacity-30 pointer-events-none flex">
-            {/* Fake Sidebar */}
-            <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hidden md:block">
-                <div className="p-4 border-b border-slate-200 dark:border-slate-800 h-16 flex items-center justify-between">
-                    <div className="h-6 w-24 bg-slate-300 dark:bg-slate-700 rounded"></div>
-                    <div className="h-8 w-8 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
-                </div>
-                <div className="p-4 space-y-4">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="flex gap-3">
-                            <div className="w-12 h-12 bg-slate-300 dark:bg-slate-700 rounded-full shrink-0"></div>
-                            <div className="flex-1 space-y-2">
-                                <div className="h-4 w-3/4 bg-slate-300 dark:bg-slate-700 rounded"></div>
-                                <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-800 rounded"></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            {/* Fake Chat Window */}
-            <div className="flex-1 bg-white dark:bg-slate-900 flex flex-col">
-                <div className="h-16 border-b border-slate-200 dark:border-slate-800"></div>
-                <div className="flex-1 p-6 space-y-6">
-                    <div className="flex justify-start"><div className="h-12 w-64 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div></div>
-                    <div className="flex justify-end"><div className="h-16 w-56 bg-slate-200 dark:bg-slate-700 rounded-2xl"></div></div>
-                    <div className="flex justify-start"><div className="h-10 w-48 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div></div>
-                </div>
-            </div>
-        </div>
-
-        {/* Upsell Card */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 max-w-md w-full p-8 rounded-3xl shadow-2xl border border-gold-200 dark:border-gold-800 text-center relative overflow-hidden transform hover:scale-105 transition-transform duration-500">
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gold-300 to-gold-500"></div>
-                
-                <div className="w-20 h-20 bg-gold-50 dark:bg-gold-900/20 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-gold-50/50 dark:ring-gold-900/10">
-                    <Lock className="w-10 h-10 text-gold-600 dark:text-gold-400" />
-                </div>
-                
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('messages.upsell.title')}</h2>
-                <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed text-sm">{t('messages.upsell.desc')}</p>
-                
-                <ul className="text-left space-y-4 mb-8 max-w-xs mx-auto bg-slate-50 dark:bg-slate-950/50 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
-                        <div className="bg-emaus-100 dark:bg-emaus-900/30 p-1 rounded-full"><CheckCircle className="w-4 h-4 text-emaus-600 dark:text-emaus-400" /></div>
-                        {t('messages.upsell.benefit1')}
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
-                        <div className="bg-emaus-100 dark:bg-emaus-900/30 p-1 rounded-full"><CheckCircle className="w-4 h-4 text-emaus-600 dark:text-emaus-400" /></div>
-                        {t('messages.upsell.benefit2')}
-                    </li>
-                </ul>
-
-                <button 
-                    onClick={async () => {
-                        await logout();
-                        window.location.href = window.location.origin + '/#plans';
-                    }} 
-                    className="w-full py-3.5 bg-emaus-700 text-white rounded-xl font-bold hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20 flex items-center justify-center gap-2 group"
-                >
-                    {t('messages.upsell.cta')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-            </div>
-        </div>
-      </div>
-    );
-  }
-
   // Initial Data Load (Threads)
   useEffect(() => {
-    if (!currentUser?.email || settings.planType === 'basic') return;
+    if (!currentUser?.email) return;
 
     // Initialize support chat just so user has someone to talk to
     initSupportChat(currentUser.email);
@@ -132,7 +67,7 @@ const Messages: React.FC = () => {
     });
 
     return () => unsubscribe();
-  }, [currentUser, settings.planType]);
+  }, [currentUser]);
 
   // Load Directory when modal opens
   useEffect(() => {
@@ -165,9 +100,9 @@ const Messages: React.FC = () => {
     }, 100);
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeThreadId || !currentUser?.email || !newMessage.trim()) return;
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!activeThreadId || !currentUser?.email || (!newMessage.trim() && !isUploading)) return;
 
     try {
       await sendMessage(activeThreadId, currentUser.email, newMessage);
@@ -175,6 +110,29 @@ const Messages: React.FC = () => {
     } catch (error) {
       console.error("Failed to send", error);
     }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !activeThreadId || !currentUser?.email) return;
+
+      setIsUploading(true);
+      try {
+          const downloadUrl = await uploadChatAttachment(activeThreadId, file);
+          const type = file.type.startsWith('image/') ? 'image' : 'file';
+          
+          await sendMessage(activeThreadId, currentUser.email, '', {
+              url: downloadUrl,
+              name: file.name,
+              type: type
+          });
+      } catch (error) {
+          alert("Error al subir archivo");
+      } finally {
+          setIsUploading(false);
+          // Clear input so same file can be selected again
+          if (fileInputRef.current) fileInputRef.current.value = '';
+      }
   };
 
   const handleStartChatFromDirectory = async (email: string) => {
@@ -190,19 +148,15 @@ const Messages: React.FC = () => {
 
   // Helper to get contact name from thread
   const getContactName = (thread: ChatThread) => {
-    // In a real app, we would map email to User Profile
     const otherEmail = thread.participants.find(p => p !== currentUser?.email);
     if (otherEmail === 'soporte@emaus.app') return t('messages.support');
     
-    // Try to find name in directory if available locally, else fallback
-    // Note: Ideally we would sync contact profiles in the thread metadata
     const dirMatch = directory.find(d => d.email === otherEmail);
     if (dirMatch) return dirMatch.parishName;
 
     return otherEmail?.split('@')[0] || 'Usuario';
   };
 
-  // Helper to format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -211,7 +165,6 @@ const Messages: React.FC = () => {
 
   const activeThread = threads.find(t => t.id === activeThreadId);
 
-  // Filter Directory
   const filteredDirectory = directory.filter(p => 
      p.parishName.toLowerCase().includes(directorySearch.toLowerCase()) || 
      p.city.toLowerCase().includes(directorySearch.toLowerCase())
@@ -246,7 +199,7 @@ const Messages: React.FC = () => {
            </div>
         </div>
 
-        {/* Threads List - FIX: Added flex-col and w-full explicitly */}
+        {/* Threads List */}
         <div className="flex-1 overflow-y-auto flex flex-col w-full">
            {threads.length === 0 ? (
              <div className="p-8 text-center text-slate-400 text-sm">
@@ -269,7 +222,6 @@ const Messages: React.FC = () => {
                      <div className="w-12 h-12 bg-gradient-to-br from-emaus-400 to-emaus-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                         {getContactName(thread).charAt(0).toUpperCase()}
                      </div>
-                     {/* Online Indicator (Fake) */}
                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-50 dark:border-slate-900 rounded-full"></div>
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -291,8 +243,6 @@ const Messages: React.FC = () => {
       <div 
         className={`${!activeThreadId ? 'hidden md:flex' : 'flex'} flex-1 flex-col`}
         style={{
-          // Minimalist Ecclesial Cross Pattern (SVG Data URI)
-          // 7% Opacity Burgundy Crosses on transparent background
           backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239f1843' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
           backgroundRepeat: 'repeat'
         }}
@@ -332,7 +282,37 @@ const Messages: React.FC = () => {
                               : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none'}
                           `}
                         >
-                           <p className="leading-relaxed">{msg.text}</p>
+                           {/* ATTACHMENT RENDERING */}
+                           {msg.attachmentUrl && (
+                               <div className="mb-2">
+                                   {msg.attachmentType === 'image' ? (
+                                       <a href={msg.attachmentUrl} target="_blank" rel="noopener noreferrer">
+                                           <img 
+                                               src={msg.attachmentUrl} 
+                                               alt="Adjunto" 
+                                               className="max-w-full rounded-lg max-h-48 object-cover border border-white/20 hover:opacity-90 transition-opacity"
+                                           />
+                                       </a>
+                                   ) : (
+                                       <a 
+                                           href={msg.attachmentUrl} 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           className={`flex items-center gap-2 p-3 rounded-lg ${isMe ? 'bg-emaus-800 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'} hover:opacity-80 transition-opacity`}
+                                       >
+                                           <div className="p-2 bg-white/20 rounded-full"><FileIcon className="w-4 h-4" /></div>
+                                           <div className="flex-1 min-w-0">
+                                               <p className="font-bold truncate text-xs">{msg.attachmentName || 'Archivo'}</p>
+                                               <p className="text-[10px] opacity-70">Clic para descargar</p>
+                                           </div>
+                                           <Download className="w-4 h-4" />
+                                       </a>
+                                   )}
+                               </div>
+                           )}
+
+                           {msg.text && <p className="leading-relaxed">{msg.text}</p>}
+                           
                            <div className={`text-[10px] mt-1 flex items-center justify-end gap-1 ${isMe ? 'text-emaus-200' : 'text-slate-400'}`}>
                               {formatTime(msg.timestamp)}
                               {isMe && <CheckCheck className="w-3 h-3" />}
@@ -346,10 +326,24 @@ const Messages: React.FC = () => {
 
               {/* Input Area */}
               <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+                 {/* Hidden File Input */}
+                 <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    onChange={handleFileSelect}
+                 />
+                 
                  <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-                    <button type="button" className="p-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                       <Paperclip className="w-5 h-5" />
+                    <button 
+                        type="button" 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative"
+                        disabled={isUploading}
+                    >
+                       {isUploading ? <Loader2 className="w-5 h-5 animate-spin text-emaus-600" /> : <Paperclip className="w-5 h-5" />}
                     </button>
+                    
                     <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center px-4 py-2 border border-transparent focus-within:border-emaus-300 dark:focus-within:border-emaus-700 transition-colors">
                        <input 
                          type="text"
@@ -357,6 +351,7 @@ const Messages: React.FC = () => {
                          onChange={(e) => setNewMessage(e.target.value)}
                          placeholder={t('messages.type_message')}
                          className="flex-1 bg-transparent border-none focus:ring-0 text-slate-800 dark:text-white placeholder-slate-400"
+                         disabled={isUploading}
                        />
                        <button type="button" className="ml-2 text-slate-400 hover:text-slate-600">
                           <Smile className="w-5 h-5" />
@@ -364,7 +359,7 @@ const Messages: React.FC = () => {
                     </div>
                     <button 
                       type="submit"
-                      disabled={!newMessage.trim()}
+                      disabled={(!newMessage.trim() && !isUploading) || isUploading}
                       className="p-3 bg-emaus-700 text-white rounded-full hover:bg-emaus-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all hover:scale-105"
                     >
                        <Send className="w-5 h-5" />
@@ -424,9 +419,7 @@ const Messages: React.FC = () => {
                        <p>No se encontraron parroquias.</p>
                     </div>
                  ) : (
-                    filteredDirectory.map((parish) => {
-                       const isBasic = parish.planType === 'basic';
-                       return (
+                    filteredDirectory.map((parish) => (
                        <div key={parish.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                           <div className="flex items-center gap-4">
                              <div className="w-12 h-12 bg-gradient-to-br from-emaus-500 to-emaus-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -450,26 +443,13 @@ const Messages: React.FC = () => {
                           </div>
                           
                           <button 
-                             disabled={isBasic}
-                             onClick={() => !isBasic && handleStartChatFromDirectory(parish.email)}
-                             className={`px-4 py-2 border rounded-lg font-bold text-sm transition-all shadow-sm flex items-center gap-2
-                                ${isBasic 
-                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 cursor-not-allowed' 
-                                    : 'bg-white dark:bg-slate-900 text-emaus-700 dark:text-emaus-400 border-slate-200 dark:border-slate-700 hover:bg-emaus-50 dark:hover:bg-emaus-900/20 group-hover:border-emaus-200'
-                                }
-                             `}
+                             onClick={() => handleStartChatFromDirectory(parish.email)}
+                             className="px-4 py-2 border rounded-lg font-bold text-sm transition-all shadow-sm flex items-center gap-2 bg-white dark:bg-slate-900 text-emaus-700 dark:text-emaus-400 border-slate-200 dark:border-slate-700 hover:bg-emaus-50 dark:hover:bg-emaus-900/20 group-hover:border-emaus-200"
                           >
-                             {isBasic ? (
-                                 <>
-                                    <Lock className="w-3 h-3" />
-                                    {t('messages.directory.unavailable_basic')}
-                                 </>
-                             ) : (
-                                 t('messages.directory.start_conversation')
-                             )}
+                             {t('messages.directory.start_conversation')}
                           </button>
                        </div>
-                    );})
+                    ))
                  )}
               </div>
            </div>
