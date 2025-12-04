@@ -112,6 +112,27 @@ const NotificationCenter: React.FC = () => {
                     </div>
                 </div>
             )}
+
+
+ 
+
+
+
+            <button 
+    onClick={() => createNotification(
+        currentUser?.email || '', 
+        NotificationType.SYSTEM, 
+        "Prueba de Sistema", 
+        "Si ves esto, la lectura funciona."
+    )}
+    className="fixed bottom-4 right-4 bg-red-500 text-white p-2 rounded z-50 text-xs"
+>
+    Test Notificación
+</button>
+
+
+
+
         </div>
     );
 };
