@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, Info, MessageCircle, Heart, Calendar } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { subscribeToNotifications, markAsRead } from '../services/notificationService';
+import { subscribeToNotifications, markAsRead, createNotification } from '../services/notificationService';
 import { AppNotification, NotificationType } from '../types';
 
 const NotificationCenter: React.FC = () => {
