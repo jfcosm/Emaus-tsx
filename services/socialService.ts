@@ -32,7 +32,7 @@ export const subscribeToAuthorPosts = (authorId: string, callback: (posts: Socia
     });
 };
 
-// Crear Post (Actualizado con Identidad Dual)
+// Crear Post
 export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => {
     try {
         console.log("Creating post with dual identity...", postData);

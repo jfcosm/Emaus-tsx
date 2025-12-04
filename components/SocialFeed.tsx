@@ -87,7 +87,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
         setCommenting(true);
         try {
             await addComment(post.id, {
-                authorId: currentUser?.email || 'unknown', // Essential for edit permissions
+                authorId: currentUser?.email || 'unknown',
                 authorName: settings.parishName,
                 authorPersonName: settings.secretaryName || 'Usuario',
                 authorParishName: settings.parishName,
@@ -127,9 +127,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
         toggleLike(post.id, currentUser.email, isLiked);
     };
 
-    // Determine Display Names
-    const displayName = post.authorPersonName || post.authorName || 'Usuario Emaús'; 
-    const secondaryName = post.authorParishName || post.authorRole || 'Parroquia';
+    // Determine Display Names (Prioritize Person Name)
+    // Fallback logic: If Person Name is missing (legacy post), use Role or Default, but NEVER Parish Name as primary title.
+    const displayName = post.authorPersonName || post.authorRole || 'Usuario Emaús'; 
+    const secondaryName = post.authorParishName || post.authorName || 'Parroquia';
 
     return (
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in mb-6 relative">
@@ -145,7 +146,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
                   </button>
                   
                   {showPostMenu && (
-                      <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 py-1 overflow-hidden animate-fade-in">
+                      <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 py-1 overflow-hidden animate-fade-in z-20">
                           <button 
                             onClick={() => { setIsEditingPost(true); setShowPostMenu(false); }}
                             className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
@@ -176,7 +177,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
                       <span className="font-medium text-slate-400 dark:text-slate-500">{secondaryName}</span>
                       <span className="text-slate-300">•</span>
                       <span>{new Date(post.timestamp).toLocaleDateString()}</span>
-                      {post.isEdited && <span className="italic text-slate-400">(editado)</span>}
+                      {post.isEdited && <span className="italic text-slate-400 ml-1">(editado)</span>}
                   </div>
               </div>
           </div>
@@ -232,9 +233,9 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
 
               <div className="space-y-3 mb-4">
                   {comments.map(comment => { 
-                      const commentName = comment.authorPersonName || comment.authorName || 'Usuario';
+                      const commentName = comment.authorPersonName || comment.authorRole || 'Usuario';
                       const commentParish = comment.authorParishName || '';
-                      const isCommentAuthor = currentUser?.email === comment.authorId; // Requires saving ID in comment
+                      const isCommentAuthor = currentUser?.email === comment.authorId;
 
                       return (
                           <div key={comment.id} className="flex gap-3 items-start text-sm group">
@@ -260,16 +261,18 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
                                       <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-700 relative group">
                                           {/* Comment Actions (Hover) */}
                                           {isCommentAuthor && (
-                                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white dark:bg-slate-800 p-1 rounded-md shadow-sm border border-slate-100">
+                                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white dark:bg-slate-800 p-1 rounded-md shadow-sm border border-slate-100 dark:border-slate-700">
                                                   <button 
                                                     onClick={() => { setEditingCommentId(comment.id); setEditedCommentContent(comment.content); }}
-                                                    className="p-1 hover:bg-slate-100 text-slate-400 hover:text-blue-500 rounded"
+                                                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-blue-500 rounded"
+                                                    title="Editar"
                                                   >
                                                       <Edit2 className="w-3 h-3" />
                                                   </button>
                                                   <button 
                                                     onClick={() => handleDeleteComment(comment.id)}
-                                                    className="p-1 hover:bg-slate-100 text-slate-400 hover:text-red-500 rounded"
+                                                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 rounded"
+                                                    title="Eliminar"
                                                   >
                                                       <Trash2 className="w-3 h-3" />
                                                   </button>
@@ -576,4 +579,3 @@ const SocialFeed: React.FC = () => {
 };
 
 export default SocialFeed;
-// Force Update
