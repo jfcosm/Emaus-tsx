@@ -228,3 +228,23 @@ export interface SocialPost {
   commentsCount?: number;
   lastEdited?: string; // Forced update field
 }
+// ... (existing types)
+
+export enum NotificationType {
+    SYSTEM = 'system',
+    MESSAGE = 'message',
+    SOCIAL_LIKE = 'social_like',
+    SOCIAL_COMMENT = 'social_comment',
+    AGENDA = 'agenda'
+}
+
+export interface AppNotification {
+    id: string;
+    recipientId: string;
+    type: NotificationType;
+    title: string;
+    message: string;
+    link?: string;
+    read: boolean;
+    timestamp: any;
+}

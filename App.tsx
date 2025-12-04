@@ -11,6 +11,7 @@ import Community from './components/SocialFeed';
 import LandingPage from './components/LandingPage';
 import Settings from './components/Settings';
 import UserManagement from './components/UserManagement';
+import NotificationCenter from './components/NotificationCenter';
 import { ViewName } from './types';
 import { Menu, Bell, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
@@ -124,12 +125,8 @@ const App: React.FC = () => {
             >
                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-
-            {/* Notifications */}
-            <button className="relative p-2 text-slate-400 hover:text-emaus-700 dark:hover:text-emaus-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-600 rounded-full border-2 border-white dark:border-slate-900"></span>
-            </button>
+              {/* Notifications */}
+            <NotificationCenter />
 
             {/* Logout Button (Visible only in header on larger screens, duplicate of sidebar but useful) */}
             <button 
