@@ -1,88 +1,6 @@
 import { db, storage } from './firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, where, deleteDoc, getDoc } from 'firebase/firestore';
 import { SocialPost, SocialComment, NotificationType } from '../types';
-// IMPORTAR EL SERVICIO DE NOTIFICACIONES
-import { createNotification } from './notificationService'; 
-
-const COLLECTION_NAME = 'social_posts';
-
-// ... (subscribeToPosts, subscribeToAuthorPosts, createPost, updatePost, deletePost, uploadPostImage - SIN CAMBIOS)
-
-// Toggle Like (MODIFICADO para notificar)
-export const toggleLike = async (postId: string, userId: string, isLiked: boolean) => {
-    try {
-        const postRef = doc(db, COLLECTION_NAME, postId);
-        if (isLiked) {
-            await updateDoc(postRef, {
-                likes: arrayRemove(userId)
-            });
-        } else {
-            await updateDoc(postRef, {
-                likes: arrayUnion(userId)
-            });
-            
-            // --- TRIGGER NOTIFICATION ---
-            // 1. Get post author
-            const postSnap = await getDoc(postRef);
-            if (postSnap.exists()) {
-                const post = postSnap.data() as SocialPost;
-                // Don't notify if liking own post
-                if (post.authorId !== userId) {
-                    await createNotification(
-                        post.authorId,
-                        NotificationType.SOCIAL_LIKE,
-                        'Nuevo Me Gusta',
-                        'A alguien le gustó tu publicación.',
-                        `/community` // Link stub
-                    );
-                }
-            }
-        }
-    } catch (error) {
-        console.error("Error toggling like:", error);
-    }
-};
-
-// ... (subscribeToComments - SIN CAMBIOS)
-
-// Add Comment (MODIFICADO para notificar)
-export const addComment = async (postId: string, comment: Omit<SocialComment, 'id'>) => {
-    try {
-        await addDoc(collection(db, COLLECTION_NAME, postId, 'comments'), {
-            ...comment,
-            timestamp: new Date().toISOString()
-        });
-
-        // --- TRIGGER NOTIFICATION ---
-        const postRef = doc(db, COLLECTION_NAME, postId);
-        const postSnap = await getDoc(postRef);
-        
-        if (postSnap.exists()) {
-            const post = postSnap.data() as SocialPost;
-            // Don't notify if commenting on own post (comment.authorId is not explicitly passed here but we can infer logic or update types later. 
-            // For now, let's assume we notify the post author always unless it's strictly same email if we had it available easily here.
-            // Better: update addComment to take currentUserId for checking)
-            
-            // Assuming post.authorId is the target
-            await createNotification(
-                post.authorId,
-                NotificationType.SOCIAL_COMMENT,
-                'Nuevo Comentario',
-                `${comment.authorPersonName || 'Alguien'} comentó tu publicación.`,
-                `/community`
-            );
-        }
-
-    } catch (error) {
-        console.error("Error adding comment:", error);
-        throw error;
-    }
-};
-
-
-import { db, storage } from './firebase';
-import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, where, deleteDoc, getDoc } from 'firebase/firestore';
-import { SocialPost, SocialComment, NotificationType } from '../types';
 import { createNotification } from './notificationService'; 
 
 const COLLECTION_NAME = 'social_posts';
@@ -100,7 +18,7 @@ export const subscribeToPosts = (callback: (posts: SocialPost[]) => void) => {
   });
 };
 
-// Obtener posts de un autor específico
+// Obtener posts de un autor específico (para perfil de parroquia)
 export const subscribeToAuthorPosts = (authorId: string, callback: (posts: SocialPost[]) => void) => {
     const q = query(collection(db, COLLECTION_NAME), where('authorId', '==', authorId));
     
@@ -109,13 +27,13 @@ export const subscribeToAuthorPosts = (authorId: string, callback: (posts: Socia
           id: doc.id,
           ...doc.data()
       } as SocialPost));
-      // Client sort
+      // Client-side sort to be safe without index
       posts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       callback(posts);
     });
 };
 
-// Crear Post
+// Crear Post (Actualizado con Identidad Dual)
 export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => {
     try {
         await addDoc(collection(db, COLLECTION_NAME), {
@@ -130,7 +48,7 @@ export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => 
     }
 };
 
-// Actualizar Post
+// Actualizar Post (NUEVO)
 export const updatePost = async (postId: string, updates: Partial<SocialPost>) => {
     try {
         const postRef = doc(db, COLLECTION_NAME, postId);
@@ -141,7 +59,7 @@ export const updatePost = async (postId: string, updates: Partial<SocialPost>) =
     }
 };
 
-// Eliminar Post
+// Eliminar Post (NUEVO)
 export const deletePost = async (postId: string) => {
     try {
         const postRef = doc(db, COLLECTION_NAME, postId);
@@ -152,7 +70,7 @@ export const deletePost = async (postId: string) => {
     }
 };
 
-// Toggle Like (CON NOTIFICACIÓN)
+// Toggle Like
 export const toggleLike = async (postId: string, userId: string, isLiked: boolean) => {
     try {
         const postRef = doc(db, COLLECTION_NAME, postId);
@@ -165,17 +83,18 @@ export const toggleLike = async (postId: string, userId: string, isLiked: boolea
                 likes: arrayUnion(userId)
             });
             
-            // Notification Trigger
+            // --- TRIGGER NOTIFICATION ---
             const postSnap = await getDoc(postRef);
             if (postSnap.exists()) {
                 const post = postSnap.data() as SocialPost;
+                // Don't notify if liking own post
                 if (post.authorId !== userId) {
                     await createNotification(
                         post.authorId,
                         NotificationType.SOCIAL_LIKE,
                         'Nuevo Me Gusta',
                         'A alguien le gustó tu publicación.',
-                        '/community'
+                        '/community' 
                     );
                 }
             }
@@ -185,7 +104,7 @@ export const toggleLike = async (postId: string, userId: string, isLiked: boolea
     }
 };
 
-// Upload Image
+// Upload Image for Post
 export const uploadPostImage = async (file: File): Promise<string> => {
     try {
         const timestamp = Date.now();
@@ -198,8 +117,9 @@ export const uploadPostImage = async (file: File): Promise<string> => {
     }
 };
 
-// --- COMMENTS SYSTEM (EXPORTS QUE FALTABAN) ---
+// --- COMMENTS SYSTEM ---
 
+// Subscribe to comments of a post
 export const subscribeToComments = (postId: string, callback: (comments: SocialComment[]) => void) => {
     const commentsRef = collection(db, COLLECTION_NAME, postId, 'comments');
     const q = query(commentsRef, orderBy('timestamp', 'asc'));
@@ -213,6 +133,7 @@ export const subscribeToComments = (postId: string, callback: (comments: SocialC
     });
 };
 
+// Add Comment
 export const addComment = async (postId: string, comment: Omit<SocialComment, 'id'>) => {
     try {
         await addDoc(collection(db, COLLECTION_NAME, postId, 'comments'), {
@@ -220,13 +141,13 @@ export const addComment = async (postId: string, comment: Omit<SocialComment, 'i
             timestamp: new Date().toISOString()
         });
 
-        // Notification Trigger
+        // --- TRIGGER NOTIFICATION ---
         const postRef = doc(db, COLLECTION_NAME, postId);
         const postSnap = await getDoc(postRef);
         
         if (postSnap.exists()) {
             const post = postSnap.data() as SocialPost;
-            // Notify author (simple logic, assuming notificationService handles self-send check or we ignore it for MVP simplicity)
+            // Notify author
             await createNotification(
                 post.authorId,
                 NotificationType.SOCIAL_COMMENT,
@@ -235,12 +156,14 @@ export const addComment = async (postId: string, comment: Omit<SocialComment, 'i
                 `/community`
             );
         }
+
     } catch (error) {
         console.error("Error adding comment:", error);
         throw error;
     }
 };
 
+// Update Comment (NUEVO)
 export const updateComment = async (postId: string, commentId: string, updates: Partial<SocialComment>) => {
     try {
         const commentRef = doc(db, COLLECTION_NAME, postId, 'comments', commentId);
@@ -251,6 +174,7 @@ export const updateComment = async (postId: string, commentId: string, updates: 
     }
 };
 
+// Delete Comment (NUEVO)
 export const deleteComment = async (postId: string, commentId: string) => {
     try {
         const commentRef = doc(db, COLLECTION_NAME, postId, 'comments', commentId);
@@ -260,4 +184,3 @@ export const deleteComment = async (postId: string, commentId: string) => {
         throw error;
     }
 };
-// ... (updateComment, deleteComment - SIN CAMBIOS)
