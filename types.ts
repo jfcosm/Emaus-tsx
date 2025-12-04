@@ -45,18 +45,18 @@ export interface SacramentRecord {
   parish?: string;
   observations?: string;
 
-  // Common Fields (Single Person Sacraments: Baptism, Confirmation, Communion, Death)
+  // Common Fields
   personName?: string;
   fatherName?: string;
   motherName?: string;
 
-  // BAPTISM Specific
+  // BAPTISM
   godparents?: string;
   birthDate?: string;
   birthPlace?: string;
-  catechesisDone?: boolean; // Check for catechesis (replaces baptismalTalksDone)
+  catechesisDone?: boolean;
 
-  // MARRIAGE Specific
+  // MARRIAGE
   groomName?: string;
   brideName?: string;
   groomFather?: string;
@@ -65,11 +65,11 @@ export interface SacramentRecord {
   brideMother?: string;
   witnesses?: string;
 
-  // CONFIRMATION Specific
-  confirmationSponsor?: string; // Padrino/Madrina
-  baptismParish?: string; // Where they were baptized
+  // CONFIRMATION
+  confirmationSponsor?: string;
+  baptismParish?: string;
 
-  // DEATH Specific
+  // DEATH
   age?: number;
   spouseName?: string;
   cemetery?: string;
@@ -94,13 +94,13 @@ export interface DocumentTemplate {
 
 export interface SavedDocument {
   id: string;
-  parentId?: string | null; // null means root
+  parentId?: string | null;
   name: string;
   type: 'folder' | 'file';
   templateUsed?: string;
   lastModified: string;
   size?: string;
-  content?: string; // HTML Content
+  content?: string;
 }
 
 export interface PosterElement {
@@ -139,17 +139,21 @@ export interface ParishSettings {
   parishAddress: string;
   parishPhone: string;
   parishEmail: string;
-  diocese: string; // Added: Important for documents
-  priestName: string; // Default celebrant
-  secretaryName: string; // App operator name
-  userRole?: string; // New: User Role (Secretary, Deacon, Priest, etc.)
+  diocese: string;
+  priestName: string;
+  secretaryName: string;
+  userRole?: string;
   city: string;
   planType?: 'basic' | 'advanced';
+  // Visual Identity
+  avatarIcon?: string; // 'church', 'cross', 'dove', etc.
+  avatarColor?: string; // hex code
+  coverImage?: string; // URL
 }
 
 export interface ParishDirectoryEntry {
-  id: string; // usually email (doc ID)
-  uid?: string; // Auth User ID (crucial for admin updates)
+  id: string;
+  uid?: string;
   parishName: string;
   city: string;
   diocese: string;
@@ -157,15 +161,12 @@ export interface ParishDirectoryEntry {
   planType: 'basic' | 'advanced';
 }
 
-// --- CHAT INTERFACES ---
-
 export interface ChatMessage {
   id: string;
-  senderId: string; // User Email or ID
+  senderId: string;
   text: string;
-  timestamp: any; // Firestore Timestamp
+  timestamp: any;
   read: boolean;
-  // Attachment fields
   attachmentUrl?: string;
   attachmentName?: string;
   attachmentType?: 'image' | 'file';
@@ -173,16 +174,13 @@ export interface ChatMessage {
 
 export interface ChatThread {
   id: string;
-  participants: string[]; // Array of emails
+  participants: string[];
   lastMessage: string;
-  lastMessageTime: any; // Firestore Timestamp
+  lastMessageTime: any;
   unreadCount: number;
-  // Metadata for UI (Simulated for this demo since we don't have a user db)
   contactName?: string;
   contactAvatar?: string;
 }
-
-// --- FINANCE INTERFACES ---
 
 export interface FinanceTransaction {
   id: string;
@@ -192,18 +190,28 @@ export interface FinanceTransaction {
   amount: number;
   description: string;
   paymentMethod: 'Efectivo' | 'Transferencia' | 'Cheque' | 'Otro';
-  relatedSacramentId?: string; // Optional link to sacrament
+  relatedSacramentId?: string;
 }
 
-// --- COMMUNITY (SOCIAL) INTERFACES ---
+export interface SocialComment {
+  id: string;
+  authorName: string;
+  authorRole: string;
+  content: string;
+  timestamp: any;
+}
 
 export interface SocialPost {
   id: string;
-  authorId: string; // User Email
-  authorName: string; // Parish Name
-  authorRole: string; // "Secretaria"
+  authorId: string;
+  authorName: string;
+  authorRole: string;
+  // Snapshot of author visual identity at posting time
+  authorAvatarIcon?: string; 
+  authorAvatarColor?: string;
   content: string;
   imageUrl?: string;
   timestamp: any;
-  likes: string[]; // Array of emails/ids who liked
+  likes: string[];
+  commentsCount?: number;
 }

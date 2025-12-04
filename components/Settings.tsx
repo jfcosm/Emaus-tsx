@@ -1,13 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Database } from 'lucide-react';
+import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Image as ImageIcon, Camera, Loader2, Cross, Book, Church, Heart, Sun, Star, Music, Users } from 'lucide-react';
 import { ParishSettings } from '../types';
-import { getSettings, saveSettings, initializeParishDb } from '../services/settingsService';
+import { getSettings, saveSettings, initializeParishDb, uploadParishImage } from '../services/settingsService';
 
-// Import Firebase Compat to create a secondary app instance
+// Import Firebase Compat for Admin tools
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
@@ -28,6 +28,10 @@ const Settings: React.FC = () => {
   const [creatingUser, setCreatingUser] = useState(false);
   const [adminMsg, setAdminMsg] = useState('');
   
+  // Visual Identity State
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState<ParishSettings>({
     parishName: '',
     parishAddress: '',
@@ -38,8 +42,33 @@ const Settings: React.FC = () => {
     secretaryName: '',
     userRole: '',
     city: '',
-    planType: 'advanced' // Default for current view
+    planType: 'advanced',
+    avatarIcon: 'church',
+    avatarColor: 'bg-emaus-600',
+    coverImage: ''
   });
+
+  const avatarIcons = [
+      { id: 'cross', icon: Cross, label: 'Cruz' },
+      { id: 'church', icon: Church, label: 'Iglesia' },
+      { id: 'book', icon: Book, label: 'Biblia' },
+      { id: 'heart', icon: Heart, label: 'Corazón' },
+      { id: 'sun', icon: Sun, label: 'Luz' },
+      { id: 'star', icon: Star, label: 'Estrella' },
+      { id: 'music', icon: Music, label: 'Música' },
+      { id: 'users', icon: Users, label: 'Comunidad' },
+  ];
+
+  const avatarColors = [
+      'bg-emaus-600', // Burdeos
+      'bg-gold-500',  // Dorado
+      'bg-blue-600',  // Mariano
+      'bg-green-600', // Tiempo Ordinario
+      'bg-purple-600', // Adviento/Cuaresma
+      'bg-red-600',    // Mártires/Espíritu
+      'bg-slate-700',  // Neutro
+      'bg-orange-500', // Vivo
+  ];
 
   useEffect(() => {
     loadSettings();
@@ -51,7 +80,12 @@ const Settings: React.FC = () => {
   const loadSettings = async () => {
     setLoading(true);
     const data = await getSettings();
-    setFormData(data);
+    // Ensure defaults for visual identity
+    setFormData({
+        ...data,
+        avatarIcon: data.avatarIcon || 'church',
+        avatarColor: data.avatarColor || 'bg-emaus-600'
+    });
     setLoading(false);
   };
 
@@ -60,13 +94,36 @@ const Settings: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleAvatarIconChange = (iconId: string) => {
+      setFormData(prev => ({ ...prev, avatarIcon: iconId }));
+  };
+
+  const handleAvatarColorChange = (colorClass: string) => {
+      setFormData(prev => ({ ...prev, avatarColor: colorClass }));
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setUploadingCover(true);
+      try {
+          const url = await uploadParishImage(file, 'cover');
+          setFormData(prev => ({ ...prev, coverImage: url }));
+      } catch (error) {
+          alert("Error al subir imagen");
+      } finally {
+          setUploadingCover(false);
+      }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setSuccessMsg('');
     try {
       await saveSettings(formData);
-      await refreshSettings(); // Update global context immediately
+      await refreshSettings();
       setSuccessMsg('Configuración guardada exitosamente.');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
@@ -76,30 +133,19 @@ const Settings: React.FC = () => {
     }
   };
 
-  // --- SUPER ADMIN: CREATE USER LOGIC ---
+  // --- SUPER ADMIN LOGIC ---
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreatingUser(true);
     setAdminMsg('');
-
     try {
-      // 1. Create a secondary Firebase App instance
-      // This allows us to create a user WITHOUT logging out the current admin
       const secondaryApp = firebase.initializeApp(firebase.app().options, "Secondary");
-      
-      // 2. Create the user on the secondary app
       const userCred = await secondaryApp.auth().createUserWithEmailAndPassword(newUserEmail, newUserPass);
-      
-      // 3. Initialize DB entry for this user (Public Directory)
-      // We use the MAIN app's database connection (imported services) because the admin has permissions
       if (userCred.user) {
          await initializeParishDb(userCred.user.uid, newUserEmail, newUserPlan);
       }
-
-      // 4. Logout and delete secondary app to clean up
       await secondaryApp.auth().signOut();
       await secondaryApp.delete();
-
       setAdminMsg(`Usuario creado: ${newUserEmail} (${newUserPlan})`);
       setNewUserEmail('');
       setNewUserPass('');
@@ -109,22 +155,6 @@ const Settings: React.FC = () => {
     } finally {
       setCreatingUser(false);
     }
-  };
-
-  // --- REPAIR DB LOGIC (Self-Fix) ---
-  const handleRepairDb = async () => {
-     setSaving(true);
-     try {
-         // Force save current settings ensuring planType is advanced (if admin) or existing
-         const fixedSettings = { ...formData, planType: formData.planType || 'advanced' };
-         await saveSettings(fixedSettings);
-         await refreshSettings();
-         alert("Base de datos reparada y sincronizada.");
-     } catch (e) {
-         alert("Error al reparar.");
-     } finally {
-         setSaving(false);
-     }
   };
 
   if (loading) {
@@ -153,8 +183,11 @@ const Settings: React.FC = () => {
              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Cuenta Actual</h3>
                 <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-emaus-100 dark:bg-emaus-900/30 rounded-full flex items-center justify-center text-emaus-700 dark:text-emaus-400">
-                        <User className="w-6 h-6" />
+                    <div className={`w-12 h-12 ${formData.avatarColor} rounded-full flex items-center justify-center text-white`}>
+                        {(() => {
+                            const Icon = avatarIcons.find(i => i.id === formData.avatarIcon)?.icon || Church;
+                            return <Icon className="w-6 h-6" />;
+                        })()}
                     </div>
                     <div>
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase">Usuario conectado</p>
@@ -232,10 +265,90 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Right Column: Settings Form */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
            <form onSubmit={handleSubmit} className="space-y-6">
               
-              {/* SECTION 1: INSTITUTIONAL DATA */}
+              {/* SECTION 1: VISUAL IDENTITY (NEW) */}
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                     <ImageIcon className="w-5 h-5 text-emaus-600" /> {t('settings.identity')}
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Avatar Selector */}
+                      <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-3">{t('settings.avatar_desc')}</label>
+                          
+                          <div className="mb-4">
+                              <p className="text-xs text-slate-400 mb-2">Icono</p>
+                              <div className="grid grid-cols-4 gap-2">
+                                  {avatarIcons.map(item => (
+                                      <button
+                                        type="button"
+                                        key={item.id}
+                                        onClick={() => handleAvatarIconChange(item.id)}
+                                        className={`p-2 rounded-lg flex items-center justify-center transition-all ${formData.avatarIcon === item.id ? 'bg-emaus-100 border-2 border-emaus-500 text-emaus-700' : 'bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                                      >
+                                          <item.icon className="w-6 h-6" />
+                                      </button>
+                                  ))}
+                              </div>
+                          </div>
+
+                          <div>
+                              <p className="text-xs text-slate-400 mb-2">Color Litúrgico</p>
+                              <div className="flex flex-wrap gap-2">
+                                  {avatarColors.map(color => (
+                                      <button
+                                        type="button"
+                                        key={color}
+                                        onClick={() => handleAvatarColorChange(color)}
+                                        className={`w-8 h-8 rounded-full border-2 transition-all ${formData.avatarColor === color ? 'border-slate-800 scale-110' : 'border-transparent hover:scale-105'}`}
+                                      >
+                                          <div className={`w-full h-full rounded-full ${color}`}></div>
+                                      </button>
+                                  ))}
+                              </div>
+                          </div>
+                      </div>
+
+                      {/* Cover Image Upload */}
+                      <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-3">{t('settings.cover_desc')}</label>
+                          <div className="relative aspect-video rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-700 group">
+                              {formData.coverImage ? (
+                                  <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                              ) : (
+                                  <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                                      <ImageIcon className="w-8 h-8 mb-2" />
+                                      <span className="text-xs">{t('settings.cover_image')}</span>
+                                  </div>
+                              )}
+                              
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => coverInputRef.current?.click()}
+                                    disabled={uploadingCover}
+                                    className="px-4 py-2 bg-white text-slate-900 rounded-lg text-sm font-bold flex items-center gap-2"
+                                  >
+                                      {uploadingCover ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                                      {t('settings.upload_cover')}
+                                  </button>
+                              </div>
+                              <input 
+                                ref={coverInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleCoverUpload}
+                              />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              {/* SECTION 2: INSTITUTIONAL DATA */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                      <Building className="w-5 h-5 text-emaus-600" /> Datos de la Parroquia
@@ -316,7 +429,7 @@ const Settings: React.FC = () => {
                   </div>
               </div>
 
-              {/* SECTION 2: STAFF & OPERATIONAL */}
+              {/* SECTION 3: STAFF */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                      <FileSignature className="w-5 h-5 text-emaus-600" /> Datos del Personal
@@ -333,7 +446,6 @@ const Settings: React.FC = () => {
                             placeholder="Ej: Pbro. Juan Pérez"
                             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white dark:border-slate-700"
                           />
-                          <p className="text-xs text-slate-400 mt-1">Este nombre aparecerá automáticamente al crear nuevos registros de sacramentos.</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -347,16 +459,15 @@ const Settings: React.FC = () => {
                                 placeholder="Ej: María González"
                                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white dark:border-slate-700"
                               />
-                              <p className="text-xs text-slate-400 mt-1">Nombre utilizado para firmas o pies de página.</p>
                           </div>
                           <div>
-                              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cargo / Rol en la Parroquia</label>
+                              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cargo / Rol</label>
                               <input 
                                 type="text"
                                 name="userRole"
                                 value={formData.userRole}
                                 onChange={handleInputChange}
-                                placeholder="Ej: Secretaria, Diácono, Párroco..."
+                                placeholder="Ej: Secretaria, Diácono..."
                                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white dark:border-slate-700"
                               />
                           </div>

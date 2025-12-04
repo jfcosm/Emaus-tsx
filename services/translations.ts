@@ -229,7 +229,20 @@ export const translations = {
       likes: 'Me gusta',
       comment: 'Comentar',
       no_posts: 'Aún no hay publicaciones. ¡Sé el primero en compartir algo!',
-      posting: 'Publicando...'
+      posting: 'Publicando...',
+      suggested_parishes: 'Parroquias Sugeridas',
+      visit_profile: 'Ver Perfil',
+      comments: 'Comentarios',
+      write_comment: 'Escribe un comentario...',
+      send: 'Enviar',
+      back_to_feed: 'Volver al Muro'
+    },
+    settings: {
+        identity: 'Identidad Visual',
+        avatar_desc: 'Personalice el ícono y color que representará a su parroquia en la comunidad.',
+        cover_image: 'Foto de Portada',
+        cover_desc: 'Imagen principal para su página de perfil pública.',
+        upload_cover: 'Subir Portada'
     },
     landing: {
       nav: {
@@ -598,7 +611,20 @@ export const translations = {
       likes: 'Likes',
       comment: 'Comment',
       no_posts: 'No posts yet. Be the first to share something!',
-      posting: 'Posting...'
+      posting: 'Posting...',
+      suggested_parishes: 'Suggested Parishes',
+      visit_profile: 'View Profile',
+      comments: 'Comments',
+      write_comment: 'Write a comment...',
+      send: 'Send',
+      back_to_feed: 'Back to Feed'
+    },
+    settings: {
+        identity: 'Visual Identity',
+        avatar_desc: 'Customize the icon and color that will represent your parish in the community.',
+        cover_image: 'Cover Photo',
+        cover_desc: 'Main image for your public profile page.',
+        upload_cover: 'Upload Cover'
     },
     landing: {
       nav: {
@@ -734,4 +760,4 @@ export const translations = {
     }
   }
 };
-// Updated v1.2.3
+// Updated v1.4.0

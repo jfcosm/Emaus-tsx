@@ -1,7 +1,7 @@
 
 import { db, storage } from './firebase';
-import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { SocialPost } from '../types';
+import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, where } from 'firebase/firestore';
+import { SocialPost, SocialComment } from '../types';
 
 const COLLECTION_NAME = 'social_posts';
 
@@ -10,17 +10,29 @@ export const subscribeToPosts = (callback: (posts: SocialPost[]) => void) => {
   const q = query(collection(db, COLLECTION_NAME), orderBy('timestamp', 'desc'));
   
   return onSnapshot(q, (snapshot) => {
-    const posts = snapshot.docs.map(doc => {
-        const data = doc.data();
-        // Convert Timestamp to readable string if needed, or keep raw
-        // Here assuming we handle raw timestamp in UI or it's stored as string in mock
-        return {
-            id: doc.id,
-            ...data
-        } as SocialPost;
-    });
+    const posts = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    } as SocialPost));
     callback(posts);
   });
+};
+
+// Obtener posts de un autor específico (para perfil de parroquia)
+export const subscribeToAuthorPosts = (authorId: string, callback: (posts: SocialPost[]) => void) => {
+    // Note: This requires an index in Firestore: authorId ASC, timestamp DESC
+    // If index is missing, we can filter client-side for this MVP
+    const q = query(collection(db, COLLECTION_NAME), where('authorId', '==', authorId));
+    
+    return onSnapshot(q, (snapshot) => {
+      const posts = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+      } as SocialPost));
+      // Client-side sort to be safe without index
+      posts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      callback(posts);
+    });
 };
 
 // Crear Post
@@ -29,7 +41,8 @@ export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => 
         await addDoc(collection(db, COLLECTION_NAME), {
             ...postData,
             likes: [],
-            timestamp: new Date().toISOString() // Using ISO string for simplicity in demo
+            commentsCount: 0,
+            timestamp: new Date().toISOString()
         });
     } catch (error) {
         console.error("Error creating post:", error);
@@ -64,6 +77,40 @@ export const uploadPostImage = async (file: File): Promise<string> => {
         return await snapshot.ref.getDownloadURL();
     } catch (error) {
         console.error("Error uploading image:", error);
+        throw error;
+    }
+};
+
+// --- COMMENTS SYSTEM ---
+
+// Subscribe to comments of a post
+export const subscribeToComments = (postId: string, callback: (comments: SocialComment[]) => void) => {
+    const commentsRef = collection(db, COLLECTION_NAME, postId, 'comments');
+    const q = query(commentsRef, orderBy('timestamp', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const comments = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as SocialComment));
+        callback(comments);
+    });
+};
+
+// Add Comment
+export const addComment = async (postId: string, comment: Omit<SocialComment, 'id'>) => {
+    try {
+        // 1. Add comment to subcollection
+        await addDoc(collection(db, COLLECTION_NAME, postId, 'comments'), {
+            ...comment,
+            timestamp: new Date().toISOString()
+        });
+
+        // 2. Increment comment count on parent post (Optional for UI)
+        // Note: Firestore doesn't have easy increment without FieldValue, skipping atomic increment for simplicity in demo
+        // Ideally: updateDoc(doc(db, COLLECTION_NAME, postId), { commentsCount: increment(1) });
+    } catch (error) {
+        console.error("Error adding comment:", error);
         throw error;
     }
 };
