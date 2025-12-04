@@ -195,8 +195,15 @@ export interface FinanceTransaction {
 
 export interface SocialComment {
   id: string;
-  authorName: string;
+  // Legacy support
+  authorName: string; 
+  // New Dual Identity
+  authorPersonName?: string;
+  authorParishName?: string;
+  
   authorRole: string;
+  authorAvatarIcon?: string;
+  authorAvatarColor?: string;
   content: string;
   timestamp: any;
 }
@@ -204,7 +211,12 @@ export interface SocialComment {
 export interface SocialPost {
   id: string;
   authorId: string;
-  authorName: string;
+  // Legacy support
+  authorName: string; 
+  // New Dual Identity
+  authorPersonName?: string;
+  authorParishName?: string;
+  
   authorRole: string;
   // Snapshot of author visual identity at posting time
   authorAvatarIcon?: string; 

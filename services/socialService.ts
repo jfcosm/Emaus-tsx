@@ -20,8 +20,6 @@ export const subscribeToPosts = (callback: (posts: SocialPost[]) => void) => {
 
 // Obtener posts de un autor específico (para perfil de parroquia)
 export const subscribeToAuthorPosts = (authorId: string, callback: (posts: SocialPost[]) => void) => {
-    // Note: This requires an index in Firestore: authorId ASC, timestamp DESC
-    // If index is missing, we can filter client-side for this MVP
     const q = query(collection(db, COLLECTION_NAME), where('authorId', '==', authorId));
     
     return onSnapshot(q, (snapshot) => {
@@ -35,7 +33,7 @@ export const subscribeToAuthorPosts = (authorId: string, callback: (posts: Socia
     });
 };
 
-// Crear Post
+// Crear Post (Actualizado con Identidad Dual)
 export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => {
     try {
         await addDoc(collection(db, COLLECTION_NAME), {
@@ -68,7 +66,7 @@ export const toggleLike = async (postId: string, userId: string, isLiked: boolea
     }
 };
 
-// Upload Image for Post (Using Compat API)
+// Upload Image for Post
 export const uploadPostImage = async (file: File): Promise<string> => {
     try {
         const timestamp = Date.now();
@@ -97,18 +95,13 @@ export const subscribeToComments = (postId: string, callback: (comments: SocialC
     });
 };
 
-// Add Comment
+// Add Comment (Actualizado con Identidad Dual)
 export const addComment = async (postId: string, comment: Omit<SocialComment, 'id'>) => {
     try {
-        // 1. Add comment to subcollection
         await addDoc(collection(db, COLLECTION_NAME, postId, 'comments'), {
             ...comment,
             timestamp: new Date().toISOString()
         });
-
-        // 2. Increment comment count on parent post (Optional for UI)
-        // Note: Firestore doesn't have easy increment without FieldValue, skipping atomic increment for simplicity in demo
-        // Ideally: updateDoc(doc(db, COLLECTION_NAME, postId), { commentsCount: increment(1) });
     } catch (error) {
         console.error("Error adding comment:", error);
         throw error;
