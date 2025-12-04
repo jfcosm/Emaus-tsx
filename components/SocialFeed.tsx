@@ -2,17 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { subscribeToPosts, createPost, toggleLike, uploadPostImage, subscribeToAuthorPosts, subscribeToComments, addComment } from '../services/socialService';
+import { subscribeToPosts, createPost, toggleLike, uploadPostImage, subscribeToAuthorPosts, subscribeToComments, addComment, updatePost, deletePost, updateComment, deleteComment } from '../services/socialService';
 import { getParishDirectory } from '../services/settingsService';
 import { SocialPost, ParishDirectoryEntry, SocialComment } from '../types';
-import { Heart, MessageSquare, Image as ImageIcon, Send, Loader2, User, Church, Cross, Book, Sun, Star, Music, Users, ArrowLeft, MapPin } from 'lucide-react';
+import { Heart, MessageSquare, Image as ImageIcon, Send, Loader2, User, Church, Cross, Book, Sun, Star, Music, Users, ArrowLeft, MapPin, MoreVertical, Edit2, Trash2, X, Check } from 'lucide-react';
 
 // Icon Map
 const iconMap: Record<string, any> = {
     church: Church, cross: Cross, book: Book, heart: Heart, sun: Sun, star: Star, music: Music, users: Users
 };
 
-// Helper to render avatars (flexible size)
+// Helper to render avatars
 const renderAvatar = (iconName?: string, colorClass?: string, size: 'sm' | 'md' = 'md') => {
     const Icon = iconMap[iconName || 'church'] || Church;
     const bg = colorClass || 'bg-emaus-600';
@@ -37,25 +37,60 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
     const { currentUser } = useAuth();
     const { settings } = useSettings();
 
-    // Comments are now always loaded and visible
+    // Comments State
     const [comments, setComments] = useState<SocialComment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [commenting, setCommenting] = useState(false);
+
+    // Edit State (Post)
+    const [isEditingPost, setIsEditingPost] = useState(false);
+    const [editedContent, setEditedContent] = useState(post.content);
+    const [showPostMenu, setShowPostMenu] = useState(false);
+
+    // Edit State (Comments)
+    const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+    const [editedCommentContent, setEditedCommentContent] = useState('');
+
+    const isAuthor = currentUser?.email === post.authorId;
 
     useEffect(() => {
         const unsub = subscribeToComments(post.id, setComments);
         return () => unsub();
     }, [post.id]);
 
+    // --- POST ACTIONS ---
+    const handleSavePost = async () => {
+        if (!editedContent.trim()) return;
+        try {
+            await updatePost(post.id, { content: editedContent, isEdited: true });
+            setIsEditingPost(false);
+            setShowPostMenu(false);
+        } catch (error) {
+            alert("Error al editar publicación");
+        }
+    };
+
+    const handleDeletePost = async () => {
+        if (confirm("¿Estás seguro de eliminar esta publicación?")) {
+            try {
+                await deletePost(post.id);
+            } catch (error) {
+                alert("Error al eliminar");
+            }
+        }
+    };
+
+    // --- COMMENT ACTIONS ---
     const handleAddComment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newComment.trim()) return;
         setCommenting(true);
         try {
             await addComment(post.id, {
-                authorName: settings.parishName, // Legacy fallback
-                authorPersonName: settings.secretaryName || 'Usuario', // New Personal ID
-                authorParishName: settings.parishName, // New Institutional ID
+                authorId: currentUser?.email || 'unknown', // Essential for edit permissions
+                authorName: settings.parishName,
+                authorPersonName: settings.secretaryName || 'Usuario',
+                authorParishName: settings.parishName,
                 authorRole: settings.userRole || '',
                 authorAvatarIcon: settings.avatarIcon,
                 authorAvatarColor: settings.avatarColor,
@@ -70,21 +105,65 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
         }
     };
 
+    const handleSaveComment = async (commentId: string) => {
+        if (!editedCommentContent.trim()) return;
+        try {
+            await updateComment(post.id, commentId, { content: editedCommentContent, isEdited: true });
+            setEditingCommentId(null);
+        } catch (error) {
+            alert("Error al editar comentario");
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        if (confirm("¿Eliminar comentario?")) {
+            await deleteComment(post.id, commentId);
+        }
+    };
+
     const handleLike = () => {
         if (!currentUser?.email) return;
         const isLiked = post.likes.includes(currentUser.email);
         toggleLike(post.id, currentUser.email, isLiked);
     };
 
-    // Determine Display Names (Dual Identity Logic)
-    // Priority: Person Name > Legacy Author Name
+    // Determine Display Names
     const displayName = post.authorPersonName || post.authorName || 'Usuario Emaús'; 
-    // Priority: Parish Name > Role > Default
     const secondaryName = post.authorParishName || post.authorRole || 'Parroquia';
 
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in mb-6">
-          {/* Header with Dual Identity */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in mb-6 relative">
+          
+          {/* Post Menu (Dropdown) */}
+          {isAuthor && (
+              <div className="absolute top-4 right-4 z-10">
+                  <button 
+                    onClick={() => setShowPostMenu(!showPostMenu)}
+                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                      <MoreVertical className="w-5 h-5" />
+                  </button>
+                  
+                  {showPostMenu && (
+                      <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 py-1 overflow-hidden animate-fade-in">
+                          <button 
+                            onClick={() => { setIsEditingPost(true); setShowPostMenu(false); }}
+                            className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                          >
+                              <Edit2 className="w-3 h-3" /> Editar
+                          </button>
+                          <button 
+                            onClick={handleDeletePost}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
+                              <Trash2 className="w-3 h-3" /> Eliminar
+                          </button>
+                      </div>
+                  )}
+              </div>
+          )}
+
+          {/* Header */}
           <div className="p-4 flex items-center gap-3">
               <div onClick={() => onAuthorClick(post.authorId)} className="cursor-pointer hover:opacity-80 transition-opacity">
                   {renderAvatar(post.authorAvatarIcon, post.authorAvatarColor, 'md')}
@@ -97,13 +176,28 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
                       <span className="font-medium text-slate-400 dark:text-slate-500">{secondaryName}</span>
                       <span className="text-slate-300">•</span>
                       <span>{new Date(post.timestamp).toLocaleDateString()}</span>
+                      {post.isEdited && <span className="italic text-slate-400">(editado)</span>}
                   </div>
               </div>
           </div>
 
           {/* Content */}
           <div className="px-4 pb-3">
-              <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed text-sm">{post.content}</p>
+              {isEditingPost ? (
+                  <div className="space-y-3">
+                      <textarea 
+                          value={editedContent}
+                          onChange={(e) => setEditedContent(e.target.value)}
+                          className="w-full p-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emaus-500 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm min-h-[100px]"
+                      />
+                      <div className="flex justify-end gap-2">
+                          <button onClick={() => setIsEditingPost(false)} className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                          <button onClick={handleSavePost} className="px-3 py-1.5 text-xs font-bold bg-emaus-600 text-white rounded-lg hover:bg-emaus-700">Guardar</button>
+                      </div>
+                  </div>
+              ) : (
+                  <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed text-sm">{post.content}</p>
+              )}
           </div>
 
           {/* Image */}
@@ -128,9 +222,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
               </div>
           </div>
 
-          {/* Comments Section (Always Visible) */}
+          {/* Comments Section */}
           <div className="bg-slate-50 dark:bg-slate-950/30 px-4 py-3 border-t border-slate-100 dark:border-slate-800">
-              {/* Header with Count */}
               {comments.length > 0 && (
                   <div className="text-xs font-bold text-slate-400 uppercase mb-3">
                       {t('community.comments')} ({comments.length})
@@ -138,36 +231,67 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
               )}
 
               <div className="space-y-3 mb-4">
-                  {comments.length > 0 ? (
-                      comments.slice(-3).map(comment => { // Show last 3 comments
-                          // Logic for Comment Author Identity
-                          const commentName = comment.authorPersonName || comment.authorName || 'Usuario';
-                          const commentParish = comment.authorParishName || '';
+                  {comments.map(comment => { 
+                      const commentName = comment.authorPersonName || comment.authorName || 'Usuario';
+                      const commentParish = comment.authorParishName || '';
+                      const isCommentAuthor = currentUser?.email === comment.authorId; // Requires saving ID in comment
 
-                          return (
-                              <div key={comment.id} className="flex gap-3 items-start text-sm group animate-fade-in">
-                                  <div className="mt-1">
-                                      {renderAvatar(comment.authorAvatarIcon, comment.authorAvatarColor, 'sm')}
-                                  </div>
-                                  <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-700 flex-1">
-                                      <div className="flex flex-wrap items-baseline gap-x-2 mb-1">
-                                          <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{commentName}</span>
-                                          {commentParish && (
-                                              <span className="text-[10px] text-slate-400">{commentParish}</span>
-                                          )}
-                                      </div>
-                                      <p className="text-slate-600 dark:text-slate-300 leading-snug">{comment.content}</p>
-                                  </div>
+                      return (
+                          <div key={comment.id} className="flex gap-3 items-start text-sm group">
+                              <div className="mt-1">
+                                  {renderAvatar(comment.authorAvatarIcon, comment.authorAvatarColor, 'sm')}
                               </div>
-                          );
-                      })
-                  ) : (
-                      <div className="text-xs text-slate-400 italic py-2">Sé el primero en comentar...</div>
-                  )}
-                  
-                  {comments.length > 3 && (
-                      <button className="text-xs text-emaus-600 hover:text-emaus-800 font-medium ml-11">Ver todos los comentarios...</button>
-                  )}
+                              <div className="flex-1">
+                                  {editingCommentId === comment.id ? (
+                                      <div className="bg-white dark:bg-slate-800 p-2 rounded-xl shadow-sm border border-emaus-300">
+                                          <input 
+                                              autoFocus
+                                              type="text"
+                                              value={editedCommentContent}
+                                              onChange={(e) => setEditedCommentContent(e.target.value)}
+                                              className="w-full bg-transparent border-none focus:ring-0 text-sm mb-2 text-slate-800 dark:text-white"
+                                          />
+                                          <div className="flex justify-end gap-2">
+                                              <button onClick={() => setEditingCommentId(null)} className="p-1 text-slate-400 hover:bg-slate-100 rounded"><X className="w-3 h-3"/></button>
+                                              <button onClick={() => handleSaveComment(comment.id)} className="p-1 text-green-600 hover:bg-green-50 rounded"><Check className="w-3 h-3"/></button>
+                                          </div>
+                                      </div>
+                                  ) : (
+                                      <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-700 relative group">
+                                          {/* Comment Actions (Hover) */}
+                                          {isCommentAuthor && (
+                                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white dark:bg-slate-800 p-1 rounded-md shadow-sm border border-slate-100">
+                                                  <button 
+                                                    onClick={() => { setEditingCommentId(comment.id); setEditedCommentContent(comment.content); }}
+                                                    className="p-1 hover:bg-slate-100 text-slate-400 hover:text-blue-500 rounded"
+                                                  >
+                                                      <Edit2 className="w-3 h-3" />
+                                                  </button>
+                                                  <button 
+                                                    onClick={() => handleDeleteComment(comment.id)}
+                                                    className="p-1 hover:bg-slate-100 text-slate-400 hover:text-red-500 rounded"
+                                                  >
+                                                      <Trash2 className="w-3 h-3" />
+                                                  </button>
+                                              </div>
+                                          )}
+                                          
+                                          <div className="flex flex-wrap items-baseline gap-x-2 mb-1 pr-6">
+                                              <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{commentName}</span>
+                                              {commentParish && (
+                                                  <span className="text-[10px] text-slate-400">{commentParish}</span>
+                                              )}
+                                          </div>
+                                          <p className="text-slate-600 dark:text-slate-300 leading-snug">
+                                              {comment.content}
+                                              {comment.isEdited && <span className="text-[10px] text-slate-400 italic ml-1">(editado)</span>}
+                                          </p>
+                                      </div>
+                                  )}
+                              </div>
+                          </div>
+                      );
+                  })}
               </div>
               
               <form onSubmit={handleAddComment} className="flex gap-2 items-center">
@@ -452,4 +576,3 @@ const SocialFeed: React.FC = () => {
 };
 
 export default SocialFeed;
-
