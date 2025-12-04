@@ -1,6 +1,5 @@
-
 import { db, storage } from './firebase';
-import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, where } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, where, deleteDoc } from 'firebase/firestore';
 import { SocialPost, SocialComment } from '../types';
 
 const COLLECTION_NAME = 'social_posts';
@@ -45,6 +44,28 @@ export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => 
         });
     } catch (error) {
         console.error("Error creating post:", error);
+        throw error;
+    }
+};
+
+// Actualizar Post (NUEVO)
+export const updatePost = async (postId: string, updates: Partial<SocialPost>) => {
+    try {
+        const postRef = doc(db, COLLECTION_NAME, postId);
+        await updateDoc(postRef, updates);
+    } catch (error) {
+        console.error("Error updating post:", error);
+        throw error;
+    }
+};
+
+// Eliminar Post (NUEVO)
+export const deletePost = async (postId: string) => {
+    try {
+        const postRef = doc(db, COLLECTION_NAME, postId);
+        await deleteDoc(postRef);
+    } catch (error) {
+        console.error("Error deleting post:", error);
         throw error;
     }
 };
@@ -96,7 +117,7 @@ export const subscribeToComments = (postId: string, callback: (comments: SocialC
     });
 };
 
-// Add Comment (Actualizado con Identidad Dual)
+// Add Comment
 export const addComment = async (postId: string, comment: Omit<SocialComment, 'id'>) => {
     try {
         await addDoc(collection(db, COLLECTION_NAME, postId, 'comments'), {
@@ -105,6 +126,28 @@ export const addComment = async (postId: string, comment: Omit<SocialComment, 'i
         });
     } catch (error) {
         console.error("Error adding comment:", error);
+        throw error;
+    }
+};
+
+// Update Comment (NUEVO)
+export const updateComment = async (postId: string, commentId: string, updates: Partial<SocialComment>) => {
+    try {
+        const commentRef = doc(db, COLLECTION_NAME, postId, 'comments', commentId);
+        await updateDoc(commentRef, updates);
+    } catch (error) {
+        console.error("Error updating comment:", error);
+        throw error;
+    }
+};
+
+// Delete Comment (NUEVO)
+export const deleteComment = async (postId: string, commentId: string) => {
+    try {
+        const commentRef = doc(db, COLLECTION_NAME, postId, 'comments', commentId);
+        await deleteDoc(commentRef);
+    } catch (error) {
+        console.error("Error deleting comment:", error);
         throw error;
     }
 };
