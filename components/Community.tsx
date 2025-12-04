@@ -129,6 +129,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
 
           {/* Comments Section (Always Visible) */}
           <div className="bg-slate-50 dark:bg-slate-950/30 px-4 py-3 border-t border-slate-100 dark:border-slate-800">
+              {/* Header with Count */}
+              <div className="text-xs font-bold text-slate-400 uppercase mb-3">
+                  {t('community.comments')} ({comments.length})
+              </div>
+
               <div className="space-y-3 mb-3">
                   {comments.length > 0 && comments.slice(-3).map(comment => { // Show last 3 comments
                       const commentName = comment.authorPersonName || comment.authorName;

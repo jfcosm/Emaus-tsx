@@ -226,4 +226,5 @@ export interface SocialPost {
   timestamp: any;
   likes: string[];
   commentsCount?: number;
+  lastEdited?: string; // Forced update field
 }
