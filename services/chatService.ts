@@ -1,14 +1,49 @@
 import { db, storage } from './firebase';
-import { collection, query, where, addDoc, updateDoc, serverTimestamp, doc, onSnapshot, getDocs } from 'firebase/firestore';
+import { collection, query, where, addDoc, updateDoc, serverTimestamp, doc, onSnapshot, getDocs, getDoc, orderBy } from 'firebase/firestore';
 import { ChatThread, ChatMessage, NotificationType } from '../types';
-// IMPORTAR EL SERVICIO DE NOTIFICACIONES
 import { createNotification } from './notificationService';
 
 const CHATS_COLLECTION = 'chats';
 
-// ... (subscribeToChats, subscribeToMessages - SIN CAMBIOS)
+// Escuchar lista de chats
+export const subscribeToChats = (userEmail: string, callback: (chats: ChatThread[]) => void) => {
+  const q = query(
+    collection(db, CHATS_COLLECTION), 
+    where('participants', 'array-contains', userEmail)
+  );
 
-// Enviar mensaje (MODIFICADO para notificar)
+  return onSnapshot(q, (snapshot) => {
+    const threads = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as ChatThread));
+    // Ordenar localmente
+    threads.sort((a, b) => {
+       const timeA = a.lastMessageTime?.toMillis ? a.lastMessageTime.toMillis() : 0;
+       const timeB = b.lastMessageTime?.toMillis ? b.lastMessageTime.toMillis() : 0;
+       return timeB - timeA;
+    });
+    callback(threads);
+  });
+};
+
+// Escuchar mensajes de un chat
+export const subscribeToMessages = (chatId: string, callback: (messages: ChatMessage[]) => void) => {
+  const q = query(
+    collection(db, CHATS_COLLECTION, chatId, 'messages'), 
+    orderBy('timestamp', 'asc')
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const msgs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as ChatMessage));
+    callback(msgs);
+  });
+};
+
+// Enviar mensaje
 export const sendMessage = async (
   chatId: string, 
   senderEmail: string, 
@@ -40,26 +75,93 @@ export const sendMessage = async (
   });
 
   // --- TRIGGER NOTIFICATION ---
-  // Find the OTHER participant to notify
-  // We need to fetch the thread to know who the participants are
-  // Optimization: Pass recipientId to sendMessage or fetch here. Let's fetch for robustness.
-  
-  // NOTE: In a real backend, this would be a Cloud Function. In client-side, we must read the chat doc.
-  // This is expensive but necessary for this architecture.
-  // Or better: Pass the recipient list if available in UI context.
-  
-  // Let's optimize: We assume a 2-person chat for now.
-  // We can't easily know who the other person is without reading the chat document.
-  // Let's do a quick read.
-  /* 
-     import { getDoc } from 'firebase/firestore'; 
+  try {
      const chatSnap = await getDoc(chatRef);
-     const participants = chatSnap.data()?.participants as string[];
-     const recipient = participants.find(p => p !== senderEmail);
-     if (recipient) {
-         createNotification(...)
+     if (chatSnap.exists()) {
+         const participants = chatSnap.data()?.participants as string[];
+         const recipient = participants.find(p => p !== senderEmail);
+         if (recipient) {
+             await createNotification(
+                 recipient,
+                 NotificationType.MESSAGE,
+                 'Nuevo Mensaje',
+                 'Has recibido un nuevo mensaje en Emaús.',
+                 '/messages'
+             );
+         }
      }
-  */
+  } catch (e) {
+      console.error("Error sending notification for chat", e);
+  }
 };
 
-// ... (uploadChatAttachment, createOrGetChat, checkDailyUploadLimit, initSupportChat - SIN CAMBIOS)
+// Crear o recuperar chat existente
+export const createOrGetChat = async (userEmail: string, otherEmail: string): Promise<string> => {
+  try {
+    // 1. Buscar si ya existe
+    const q = query(
+      collection(db, CHATS_COLLECTION), 
+      where('participants', 'array-contains', userEmail)
+    );
+    const snapshot = await getDocs(q);
+    
+    const existing = snapshot.docs.find(doc => {
+      const data = doc.data();
+      return data.participants.includes(otherEmail);
+    });
+
+    if (existing) return existing.id;
+
+    // 2. Crear nuevo
+    const newChatRef = await addDoc(collection(db, CHATS_COLLECTION), {
+      participants: [userEmail, otherEmail],
+      lastMessage: '',
+      lastMessageTime: serverTimestamp(),
+      unreadCount: 0
+    });
+    
+    return newChatRef.id;
+  } catch (error) {
+    console.error("Error creating chat:", error);
+    throw error;
+  }
+};
+
+// Inicializar chat de soporte (Automático)
+export const initSupportChat = async (userEmail: string) => {
+    try {
+        await createOrGetChat(userEmail, 'soporte@emaus.app');
+    } catch (e) {
+        // Silent fail if support chat exists
+    }
+};
+
+// Subir Adjunto (Compat API)
+export const uploadChatAttachment = async (chatId: string, file: File): Promise<string> => {
+    try {
+        const timestamp = Date.now();
+        const path = `chat_attachments/${chatId}/${timestamp}_${file.name}`;
+        
+        const ref = storage.ref(path);
+        const snapshot = await ref.put(file);
+        return await snapshot.ref.getDownloadURL();
+    } catch (error) {
+        console.error("Error uploading attachment:", error);
+        throw error;
+    }
+};
+
+// Validar límite diario (Local)
+export const checkDailyUploadLimit = (messages: ChatMessage[], userEmail: string): boolean => {
+    const oneDayAgo = new Date();
+    oneDayAgo.setHours(oneDayAgo.getHours() - 24);
+    
+    const uploads = messages.filter(m => 
+        m.senderId === userEmail && 
+        m.attachmentUrl && 
+        m.timestamp && 
+        (m.timestamp.toDate ? m.timestamp.toDate() : new Date(m.timestamp)) > oneDayAgo
+    );
+    
+    return uploads.length >= 20;
+};
