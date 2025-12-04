@@ -1,3 +1,4 @@
+
 import { db, storage } from './firebase';
 import { 
   collection, 
@@ -8,20 +9,14 @@ import {
   serverTimestamp, 
   doc, 
   onSnapshot, 
-  getDocs,
-  setDoc,
-  Timestamp,
-  orderBy
+  getDocs
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ChatThread, ChatMessage } from '../types';
 
 const CHATS_COLLECTION = 'chats';
 
 // Escuchar cambios en la lista de chats de un usuario
 export const subscribeToChats = (userEmail: string, callback: (chats: ChatThread[]) => void) => {
-  // NOTA: Se eliminó orderBy('lastMessageTime', 'desc') para evitar el error de "Missing Index"
-  // en Firestore. Se ordenará en el cliente.
   const q = query(
     collection(db, CHATS_COLLECTION),
     where('participants', 'array-contains', userEmail)
@@ -44,18 +39,25 @@ export const subscribeToChats = (userEmail: string, callback: (chats: ChatThread
   });
 };
 
-// Escuchar mensajes de un chat específico
+// Escuchar mensajes de un chat específico (Ordenados localmente si falla el índice)
 export const subscribeToMessages = (chatId: string, callback: (messages: ChatMessage[]) => void) => {
-  const q = query(
-    collection(db, CHATS_COLLECTION, chatId, 'messages'),
-    orderBy('timestamp', 'asc')
-  );
+  const messagesRef = collection(db, CHATS_COLLECTION, chatId, 'messages');
+  // Eliminamos orderBy de la query para evitar problemas de índices en modo desarrollo rápido
+  // const q = query(messagesRef, orderBy('timestamp', 'asc')); 
 
-  return onSnapshot(q, (snapshot) => {
+  return onSnapshot(messagesRef, (snapshot) => {
     const messages = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     } as ChatMessage));
+    
+    // Ordenar en cliente
+    messages.sort((a, b) => {
+       const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : (a.timestamp ? new Date(a.timestamp).getTime() : 0);
+       const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : (b.timestamp ? new Date(b.timestamp).getTime() : 0);
+       return timeA - timeB;
+    });
+    
     callback(messages);
   });
 };
@@ -90,27 +92,29 @@ export const sendMessage = async (
   await updateDoc(chatRef, {
     lastMessage: attachment ? (attachment.type === 'image' ? '📷 Imagen' : '📎 Archivo adjunto') : text,
     lastMessageTime: timestamp
-    // Aquí podríamos incrementar contadores de no leídos
   });
 };
 
-// Subir Archivo Adjunto
+// Subir Archivo Adjunto (USANDO API COMPAT PARA ESTABILIDAD)
 export const uploadChatAttachment = async (chatId: string, file: File): Promise<string> => {
     try {
         const timestamp = Date.now();
-        const storageRef = ref(storage, `chat_attachments/${chatId}/${timestamp}_${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // Usamos la referencia de storage importada de firebase.ts (Compat)
+        const storageRef = storage.ref(`chat_attachments/${chatId}/${timestamp}_${file.name}`);
+        
+        // Subir archivo
+        const snapshot = await storageRef.put(file);
+        
+        // Obtener URL
+        const downloadURL = await snapshot.ref.getDownloadURL();
         return downloadURL;
     } catch (error) {
-        console.error("Error uploading file:", error);
+        console.error("Error uploading file to storage:", error);
         throw error;
     }
 };
 
-// Crear o recuperar un chat existente
 export const createOrGetChat = async (currentUserEmail: string, otherUserEmail: string): Promise<string> => {
-  // Buscar si ya existe un chat entre estos dos
   const q = query(
     collection(db, CHATS_COLLECTION),
     where('participants', 'array-contains', currentUserEmail)
@@ -126,7 +130,6 @@ export const createOrGetChat = async (currentUserEmail: string, otherUserEmail: 
     return existingChat.id;
   }
 
-  // Si no existe, creamos uno nuevo
   const newChatData = {
     participants: [currentUserEmail, otherUserEmail],
     lastMessage: 'Chat iniciado',
@@ -138,7 +141,20 @@ export const createOrGetChat = async (currentUserEmail: string, otherUserEmail: 
   return newChatRef.id;
 };
 
-// Inicializar chat de soporte (Solo para demo)
+// Helper: Verificar límite diario de archivos (Simulado en cliente para demo)
+export const checkDailyUploadLimit = (messages: ChatMessage[], currentUserEmail: string): boolean => {
+    const now = new Date();
+    const startOfDay = new Date(now.setHours(0,0,0,0)).getTime();
+    
+    const myUploadsToday = messages.filter(m => 
+        m.senderId === currentUserEmail && 
+        m.attachmentUrl && 
+        (m.timestamp?.toMillis ? m.timestamp.toMillis() : Date.now()) > startOfDay
+    );
+    
+    return myUploadsToday.length >= 20;
+};
+
 export const initSupportChat = async (currentUserEmail: string) => {
   const supportEmail = 'soporte@emaus.app';
   if (currentUserEmail === supportEmail) return;

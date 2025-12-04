@@ -708,3 +708,4 @@ export const translations = {
     }
   }
 };
+/* Updated to version 1.2.1 */
