@@ -8,6 +8,7 @@ export const translations = {
       documents: 'Documentos',
       messages: 'Mensajes',
       finances: 'Finanzas',
+      community: 'Comunidad',
       settings: 'Configuración',
       users: 'Usuarios',
       logout: 'Cerrar Sesión',
@@ -219,6 +220,17 @@ export const translations = {
         other: 'Otro'
       }
     },
+    community: {
+      title: 'Comunidad Emaús',
+      subtitle: 'Espacio de encuentro y vida eclesial',
+      new_post_placeholder: '¿Qué está pasando en tu parroquia? Comparte novedades, eventos o reflexiones...',
+      publish: 'Publicar',
+      upload_photo: 'Subir Foto',
+      likes: 'Me gusta',
+      comment: 'Comentar',
+      no_posts: 'Aún no hay publicaciones. ¡Sé el primero en compartir algo!',
+      posting: 'Publicando...'
+    },
     landing: {
       nav: {
         features: 'Características',
@@ -365,6 +377,7 @@ export const translations = {
       documents: 'Documents',
       messages: 'Messages',
       finances: 'Finances',
+      community: 'Community',
       settings: 'Settings',
       users: 'Users',
       logout: 'Log Out',
@@ -576,6 +589,17 @@ export const translations = {
         other: 'Other'
       }
     },
+    community: {
+      title: 'Emaús Community',
+      subtitle: 'Meeting space and church life',
+      new_post_placeholder: 'What is happening in your parish? Share news, events or reflections...',
+      publish: 'Post',
+      upload_photo: 'Upload Photo',
+      likes: 'Likes',
+      comment: 'Comment',
+      no_posts: 'No posts yet. Be the first to share something!',
+      posting: 'Posting...'
+    },
     landing: {
       nav: {
         features: 'Features',
@@ -710,3 +734,4 @@ export const translations = {
     }
   }
 };
+// Updated v1.2.3

@@ -1,3 +1,4 @@
+
 import { LucideIcon } from 'lucide-react';
 
 export enum ViewName {
@@ -7,6 +8,7 @@ export enum ViewName {
   DOCUMENTS = 'Documentos',
   MESSAGES = 'Mensajes',
   FINANCES = 'Finanzas',
+  COMMUNITY = 'Comunidad',
   SETTINGS = 'Configuración',
   USERS = 'Usuarios'
 }
@@ -191,4 +193,17 @@ export interface FinanceTransaction {
   description: string;
   paymentMethod: 'Efectivo' | 'Transferencia' | 'Cheque' | 'Otro';
   relatedSacramentId?: string; // Optional link to sacrament
+}
+
+// --- COMMUNITY (SOCIAL) INTERFACES ---
+
+export interface SocialPost {
+  id: string;
+  authorId: string; // User Email
+  authorName: string; // Parish Name
+  authorRole: string; // "Secretaria"
+  content: string;
+  imageUrl?: string;
+  timestamp: any;
+  likes: string[]; // Array of emails/ids who liked
 }

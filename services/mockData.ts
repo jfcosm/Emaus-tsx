@@ -1,4 +1,5 @@
-import { SacramentType, SacramentRecord, CalendarEvent, DocumentTemplate, SavedDocument, PosterTemplate, SavedPoster, ParishDirectoryEntry, FinanceTransaction } from '../types';
+
+import { SacramentType, SacramentRecord, CalendarEvent, DocumentTemplate, SavedDocument, PosterTemplate, SavedPoster, ParishDirectoryEntry, FinanceTransaction, SocialPost } from '../types';
 
 export const dashboardStats = [
   { name: 'Total Bautizos', value: 124, trend: '+12%', color: 'bg-blue-500' },
@@ -235,4 +236,26 @@ export const mockTransactions: FinanceTransaction[] = [
   { id: '3', date: '2024-06-05', type: 'expense', category: 'Servicios Básicos', amount: 85000, description: 'Cuenta de Luz', paymentMethod: 'Transferencia' },
   { id: '4', date: '2024-06-10', type: 'expense', category: 'Insumos', amount: 30000, description: 'Velas y Flores', paymentMethod: 'Efectivo' },
   { id: '5', date: '2024-06-12', type: 'income', category: 'Donaciones', amount: 200000, description: 'Aporte anónimo reparación techo', paymentMethod: 'Transferencia' },
+];
+
+export const mockSocialPosts: SocialPost[] = [
+  {
+    id: '1',
+    authorId: 'p1',
+    authorName: 'Parroquia San Miguel',
+    authorRole: 'Secretaria',
+    content: 'Compartimos con alegría las fotos de la procesión del domingo pasado. ¡Gracias a todos por asistir!',
+    imageUrl: 'https://picsum.photos/600/300?random=100',
+    timestamp: 'Hace 2 horas',
+    likes: ['user1', 'user2']
+  },
+  {
+    id: '2',
+    authorId: 'p2',
+    authorName: 'Catedral de Valparaíso',
+    authorRole: 'Párroco',
+    content: 'Recordamos que este fin de semana tendremos la colecta especial para el techo del templo. Agradecemos su generosidad.',
+    timestamp: 'Hace 5 horas',
+    likes: []
+  }
 ];
