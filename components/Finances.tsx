@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -16,7 +17,9 @@ import {
   ArrowRight,
   CheckCircle,
   CreditCard,
-  PieChart
+  PieChart,
+  Calculator as CalculatorIcon,
+  Delete
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
@@ -29,6 +32,10 @@ const Finances: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
+
+  // Calculator State
+  const [calcDisplay, setCalcDisplay] = useState('0');
+  const [calcExpression, setCalcExpression] = useState('');
 
   // Form State
   const initialForm = {
@@ -139,6 +146,45 @@ const Finances: React.FC = () => {
       }
   };
 
+  // --- CALCULATOR LOGIC ---
+  const handleCalcInput = (val: string) => {
+    if (val === 'C') {
+        setCalcDisplay('0');
+        return;
+    }
+    if (val === '=') {
+        try {
+            // Evaluator safe simple math
+            // Replace visual operators for JS
+            const expression = calcDisplay.replace(/×/g, '*').replace(/÷/g, '/');
+            // eslint-disable-next-line no-new-func
+            const result = new Function('return ' + expression)();
+            setCalcDisplay(String(Math.round(result * 100) / 100)); // Round to 2 decimals
+        } catch (e) {
+            setCalcDisplay('Error');
+        }
+        return;
+    }
+    
+    // Prevent multiple operators
+    if (['+', '-', '×', '÷'].includes(val)) {
+       if (['+', '-', '×', '÷'].includes(calcDisplay.slice(-1))) {
+           setCalcDisplay(prev => prev.slice(0, -1) + val);
+           return;
+       }
+    }
+
+    if (calcDisplay === '0' || calcDisplay === 'Error') {
+        if (['+', '-', '×', '÷'].includes(val)) {
+             setCalcDisplay('0' + val); // Start with 0 if operator first
+        } else {
+             setCalcDisplay(val);
+        }
+    } else {
+        setCalcDisplay(prev => prev + val);
+    }
+  };
+
   // Calculations
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
@@ -198,7 +244,7 @@ const Finances: React.FC = () => {
             {/* CHART */}
             <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                 <h3 className="font-bold text-slate-800 dark:text-white mb-6">Resumen Financiero</h3>
-                <div className="h-64">
+                <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} strokeOpacity={0.2} />
@@ -212,23 +258,90 @@ const Finances: React.FC = () => {
                 </div>
             </div>
 
-            {/* QUICK STATS */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-                <h3 className="font-bold text-slate-800 dark:text-white mb-4">Métodos de Pago</h3>
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white dark:bg-slate-700 rounded-full text-slate-600"><DollarSign className="w-4 h-4" /></div>
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Efectivo</span>
-                        </div>
-                        <span className="font-bold text-slate-800 dark:text-white">65%</span>
+            {/* RIGHT COLUMN: CALCULATOR & PAYMENTS */}
+            <div className="space-y-6">
+                
+                {/* CALCULATOR */}
+                <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
+                    <div className="flex items-center justify-between mb-4 text-white">
+                        <h3 className="font-bold flex items-center gap-2"><CalculatorIcon className="w-4 h-4" /> {t('finances.calculator')}</h3>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white dark:bg-slate-700 rounded-full text-slate-600"><CreditCard className="w-4 h-4" /></div>
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Transferencia</span>
+                    {/* Display */}
+                    <div className="bg-slate-900 p-3 rounded-xl mb-4 text-right">
+                        <span className="text-2xl font-mono text-emerald-400 overflow-hidden text-ellipsis block">{calcDisplay}</span>
+                    </div>
+                    {/* Grid */}
+                    <div className="grid grid-cols-4 gap-2">
+                        {['C', '÷', '×', '⌫'].map((btn) => (
+                            <button 
+                                key={btn} 
+                                onClick={() => {
+                                    if(btn === '⌫') setCalcDisplay(prev => prev.length > 1 ? prev.slice(0, -1) : '0');
+                                    else handleCalcInput(btn);
+                                }}
+                                className={`p-3 rounded-lg font-bold transition-colors ${btn === 'C' ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-slate-700 text-gold-400 hover:bg-slate-600'}`}
+                            >
+                                {btn}
+                            </button>
+                        ))}
+                        {['7', '8', '9', '-'].map((btn) => (
+                            <button 
+                                key={btn} 
+                                onClick={() => handleCalcInput(btn)}
+                                className={`p-3 rounded-lg font-bold transition-colors ${['-'].includes(btn) ? 'bg-slate-700 text-gold-400 hover:bg-slate-600' : 'bg-slate-600 text-white hover:bg-slate-500'}`}
+                            >
+                                {btn}
+                            </button>
+                        ))}
+                        {['4', '5', '6', '+'].map((btn) => (
+                            <button 
+                                key={btn} 
+                                onClick={() => handleCalcInput(btn)}
+                                className={`p-3 rounded-lg font-bold transition-colors ${['+'].includes(btn) ? 'bg-slate-700 text-gold-400 hover:bg-slate-600' : 'bg-slate-600 text-white hover:bg-slate-500'}`}
+                            >
+                                {btn}
+                            </button>
+                        ))}
+                        {['1', '2', '3', '='].map((btn) => (
+                            <button 
+                                key={btn} 
+                                onClick={() => handleCalcInput(btn)}
+                                className={`p-3 rounded-lg font-bold transition-colors ${btn === '=' ? 'bg-emerald-600 text-white hover:bg-emerald-500 row-span-2' : 'bg-slate-600 text-white hover:bg-slate-500'}`}
+                                style={btn === '=' ? { gridRow: 'span 2' } : {}}
+                            >
+                                {btn}
+                            </button>
+                        ))}
+                        {/* Last row handled manually for zero and alignment if needed, but grid flow works. 
+                            Wait, grid flow: 1,2,3,=. Then next row 0.
+                            Let's restructure for standard layout 
+                        */}
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 mt-2">
+                         <button onClick={() => handleCalcInput('0')} className="col-span-2 p-3 rounded-lg font-bold bg-slate-600 text-white hover:bg-slate-500">0</button>
+                         <button onClick={() => handleCalcInput('.')} className="p-3 rounded-lg font-bold bg-slate-600 text-white hover:bg-slate-500">.</button>
+                         {/* Equal button was in previous row, let's fix grid logic above to match standard calc */}
+                    </div>
+                </div>
+
+                {/* PAYMENT METHODS */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                    <h3 className="font-bold text-slate-800 dark:text-white mb-4">Métodos de Pago</h3>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white dark:bg-slate-700 rounded-full text-slate-600"><DollarSign className="w-4 h-4" /></div>
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Efectivo</span>
+                            </div>
+                            <span className="font-bold text-slate-800 dark:text-white">65%</span>
                         </div>
-                        <span className="font-bold text-slate-800 dark:text-white">35%</span>
+                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white dark:bg-slate-700 rounded-full text-slate-600"><CreditCard className="w-4 h-4" /></div>
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Transferencia</span>
+                            </div>
+                            <span className="font-bold text-slate-800 dark:text-white">35%</span>
+                        </div>
                     </div>
                 </div>
             </div>

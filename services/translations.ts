@@ -181,6 +181,7 @@ export const translations = {
       new_transaction: 'Nueva Transacción',
       no_transactions: 'No hay transacciones registradas.',
       search: 'Buscar movimiento...',
+      calculator: 'Calculadora Rápida',
       upsell: {
         title: 'Funcionalidad Premium',
         desc: 'El módulo de Contabilidad y Finanzas está reservado para planes avanzados.',
@@ -537,6 +538,7 @@ export const translations = {
       new_transaction: 'New Transaction',
       no_transactions: 'No transactions found.',
       search: 'Search movement...',
+      calculator: 'Quick Calculator',
       upsell: {
         title: 'Premium Feature',
         desc: 'Accounting module is reserved for advanced plans.',
@@ -708,4 +710,3 @@ export const translations = {
     }
   }
 };
-/* Updated to version 1.2.1 */
