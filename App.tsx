@@ -7,7 +7,7 @@ import Agenda from './components/Agenda';
 import DocumentEditor from './components/DocumentEditor';
 import Messages from './components/Messages';
 import Finances from './components/Finances';
-import Community from './components/Community';
+import Community from './components/SocialFeed';
 import LandingPage from './components/LandingPage';
 import Settings from './components/Settings';
 import UserManagement from './components/UserManagement';
