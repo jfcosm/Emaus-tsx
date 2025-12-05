@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { ChatThread, ChatMessage, ParishDirectoryEntry } from '../types';
+import { ChatThread, ChatMessage, ParishDirectoryEntry, NotificationType } from '../types';
 import { 
   subscribeToChats, 
   subscribeToMessages, 
@@ -13,6 +13,7 @@ import {
   uploadChatAttachment,
   checkDailyUploadLimit
 } from '../services/chatService';
+import { markNotificationsReadByType } from '../services/notificationService';
 import { getParishDirectory } from '../services/settingsService';
 import { 
   Search, 
@@ -61,6 +62,9 @@ const Messages: React.FC = () => {
 
     // Initialize support chat just so user has someone to talk to
     initSupportChat(currentUser.email);
+
+    // Mark message notifications as read when entering this view
+    markNotificationsReadByType(currentUser.email, NotificationType.MESSAGE);
 
     const unsubscribe = subscribeToChats(currentUser.email, (updatedThreads) => {
       setThreads(updatedThreads);

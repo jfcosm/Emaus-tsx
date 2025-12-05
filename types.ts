@@ -1,4 +1,3 @@
-
 import { LucideIcon } from 'lucide-react';
 
 export enum ViewName {
@@ -195,6 +194,7 @@ export interface FinanceTransaction {
 
 export interface SocialComment {
   id: string;
+  authorId?: string; // Added to support new comment logic
   // Legacy support
   authorName: string; 
   // New Dual Identity
@@ -206,6 +206,7 @@ export interface SocialComment {
   authorAvatarColor?: string;
   content: string;
   timestamp: any;
+  isEdited?: boolean; // Added to support editing
 }
 
 export interface SocialPost {
@@ -227,8 +228,8 @@ export interface SocialPost {
   likes: string[];
   commentsCount?: number;
   lastEdited?: string; // Forced update field
+  isEdited?: boolean; // Added to support editing
 }
-// ... (existing types)
 
 export enum NotificationType {
     SYSTEM = 'system',

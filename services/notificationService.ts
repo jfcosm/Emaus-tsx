@@ -1,5 +1,6 @@
+
 import { db } from './firebase';
-import { collection, addDoc, onSnapshot, query, where, orderBy, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, where, orderBy, updateDoc, doc, serverTimestamp, writeBatch, getDocs } from 'firebase/firestore';
 import { AppNotification, NotificationType } from '../types';
 
 const COLLECTION = 'notifications';
@@ -24,6 +25,29 @@ export const subscribeToNotifications = (userEmail: string, callback: (notes: Ap
 export const markAsRead = async (notificationId: string) => {
   const ref = doc(db, COLLECTION, notificationId);
   await updateDoc(ref, { read: true });
+};
+
+// Mark all notifications of a specific type as read for a user
+export const markNotificationsReadByType = async (userId: string, type: NotificationType) => {
+    try {
+        const q = query(
+            collection(db, COLLECTION),
+            where('recipientId', '==', userId),
+            where('type', '==', type),
+            where('read', '==', false)
+        );
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) return;
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach(doc => {
+            batch.update(doc.ref, { read: true });
+        });
+        await batch.commit();
+    } catch (e) {
+        console.error("Error marking notifications as read", e);
+    }
 };
 
 export const markAllAsRead = async (userId: string) => {

@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { subscribeToPosts, createPost, toggleLike, uploadPostImage, subscribeToAuthorPosts, subscribeToComments, addComment, updatePost, deletePost, updateComment, deleteComment } from '../services/socialService';
+import { markNotificationsReadByType } from '../services/notificationService';
 import { getParishDirectory } from '../services/settingsService';
-import { SocialPost, ParishDirectoryEntry, SocialComment } from '../types';
+import { SocialPost, ParishDirectoryEntry, SocialComment, NotificationType } from '../types';
 import { Heart, MessageSquare, Image as ImageIcon, Send, Loader2, User, Church, Cross, Book, Sun, Star, Music, Users, ArrowLeft, MapPin, MoreVertical, Edit2, Trash2, X, Check } from 'lucide-react';
 
 // Icon Map
@@ -335,6 +337,17 @@ const SocialFeed: React.FC = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Clear relevant notifications when entering views
+  useEffect(() => {
+    if (currentUser?.email) {
+        if (view === 'feed') {
+            // Mark both likes and comments as read when viewing the main feed
+            markNotificationsReadByType(currentUser.email, NotificationType.SOCIAL_LIKE);
+            markNotificationsReadByType(currentUser.email, NotificationType.SOCIAL_COMMENT);
+        }
+    }
+  }, [view, currentUser]);
 
   useEffect(() => {
     if (view === 'feed') {
