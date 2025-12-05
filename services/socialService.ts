@@ -3,7 +3,7 @@ import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUn
 import { SocialPost, SocialComment, NotificationType } from '../types';
 import { createNotification } from './notificationService'; 
 
-// Force git sync v1.9.7
+// Version 1.9.9 - Force Sync
 const COLLECTION_NAME = 'social_posts';
 
 // Escuchar posts en tiempo real

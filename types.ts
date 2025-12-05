@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
-// Force git sync v1.9.7
+// Version 1.9.9 - Force Sync
 export enum ViewName {
   DASHBOARD = 'Dashboard',
   SACRAMENTS = 'Sacramentos',
@@ -196,7 +196,7 @@ export interface FinanceTransaction {
 
 export interface SocialComment {
   id: string;
-  authorId?: string; 
+  authorId?: string; // Added to support new comment logic
   // Legacy support
   authorName: string; 
   // New Dual Identity
@@ -209,7 +209,7 @@ export interface SocialComment {
   authorProfileImage?: string; // Added
   content: string;
   timestamp: any;
-  isEdited?: boolean; 
+  isEdited?: boolean; // Added to support editing
 }
 
 export interface SocialPost {
@@ -231,8 +231,8 @@ export interface SocialPost {
   timestamp: any;
   likes: string[];
   commentsCount?: number;
-  lastEdited?: string; 
-  isEdited?: boolean; 
+  lastEdited?: string; // Forced update field
+  isEdited?: boolean; // Added to support editing
 }
 
 export enum NotificationType {

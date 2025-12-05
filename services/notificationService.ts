@@ -2,7 +2,7 @@ import { db } from './firebase';
 import { collection, addDoc, onSnapshot, query, where, orderBy, updateDoc, doc, serverTimestamp, writeBatch, getDocs } from 'firebase/firestore';
 import { AppNotification, NotificationType } from '../types';
 
-// Force git sync v1.9.7
+// Version 1.9.9 - Force Sync
 const COLLECTION = 'notifications';
 
 export const subscribeToNotifications = (userEmail: string, callback: (notes: AppNotification[]) => void) => {

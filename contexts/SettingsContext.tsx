@@ -1,8 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ParishSettings } from '../types';
 import { getSettings } from '../services/settingsService';
 
+// Version 1.9.9 - Force Sync
 interface SettingsContextType {
   settings: ParishSettings;
   refreshSettings: () => Promise<void>;
@@ -17,7 +17,11 @@ const defaultSettings: ParishSettings = {
   diocese: '',
   priestName: '',
   secretaryName: '',
-  city: ''
+  city: '',
+  planType: 'advanced',
+  avatarIcon: 'church',
+  avatarColor: 'bg-emaus-600',
+  profileImage: '' // Ensure this field exists by default
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);

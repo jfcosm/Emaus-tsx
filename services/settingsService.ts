@@ -3,7 +3,7 @@ import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/fi
 import { ParishSettings, ParishDirectoryEntry } from '../types';
 import { mockDirectory } from './mockData';
 
-// Force git sync v1.9.7
+// Version 1.9.9 - Force Sync
 const COLLECTION_NAME = 'settings';
 // DEPRECATED: const DOC_ID = 'general'; -> Now we use auth.currentUser.uid
 const DIRECTORY_COLLECTION = 'public_directory';

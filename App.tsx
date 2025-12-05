@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -19,6 +18,7 @@ import { useAuth } from './contexts/AuthContext';
 import { useTheme } from './contexts/ThemeContext';
 import { useSettings } from './contexts/SettingsContext';
 
+// Version 1.9.9 - Force Sync
 const App: React.FC = () => {
   // Authentication State from Firebase
   const { currentUser, logout } = useAuth();
@@ -158,5 +158,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-// Force Update

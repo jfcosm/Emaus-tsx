@@ -32,7 +32,7 @@ import {
   Loader2
 } from 'lucide-react';
 
-// Force git sync v1.9.7
+// Version 1.9.9 - Force Sync
 const Messages: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();

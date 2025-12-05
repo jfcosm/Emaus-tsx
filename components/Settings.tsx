@@ -10,7 +10,7 @@ import { getSettings, saveSettings, initializeParishDb, uploadParishImage } from
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
-// Force git sync v1.9.7
+// Version 1.9.9 - Force Sync
 const Settings: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
@@ -112,7 +112,16 @@ const Settings: React.FC = () => {
       setUploadingCover(true);
       try {
           const url = await uploadParishImage(file, 'cover');
-          setFormData(prev => ({ ...prev, coverImage: url }));
+          // Update state
+          const updatedSettings = { ...formData, coverImage: url };
+          setFormData(updatedSettings);
+          
+          // AUTO SAVE: Save immediately after upload
+          await saveSettings(updatedSettings);
+          await refreshSettings();
+          
+          setSuccessMsg('Portada actualizada correctamente.');
+          setTimeout(() => setSuccessMsg(''), 3000);
       } catch (error) {
           alert("Error al subir imagen");
       } finally {
@@ -127,7 +136,16 @@ const Settings: React.FC = () => {
       setUploadingProfile(true);
       try {
           const url = await uploadParishImage(file, 'profile');
-          setFormData(prev => ({ ...prev, profileImage: url }));
+          // Update state
+          const updatedSettings = { ...formData, profileImage: url };
+          setFormData(updatedSettings);
+          
+          // AUTO SAVE: Save immediately after upload so it propagates to posts
+          await saveSettings(updatedSettings);
+          await refreshSettings();
+          
+          setSuccessMsg('Foto de perfil actualizada correctamente.');
+          setTimeout(() => setSuccessMsg(''), 3000);
       } catch (error) {
           alert("Error al subir imagen de perfil");
       } finally {

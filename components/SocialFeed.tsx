@@ -8,12 +8,11 @@ import { getParishDirectory } from '../services/settingsService';
 import { SocialPost, ParishDirectoryEntry, SocialComment, NotificationType } from '../types';
 import { Heart, MessageSquare, Image as ImageIcon, Send, Loader2, User, Church, Cross, Book, Sun, Star, Music, Users, ArrowLeft, MapPin, MoreVertical, Edit2, Trash2, X, Check } from 'lucide-react';
 
-// Icon Map
+// Version 1.9.9 - Force Sync
 const iconMap: Record<string, any> = {
     church: Church, cross: Cross, book: Book, heart: Heart, sun: Sun, star: Star, music: Music, users: Users
 };
 
-// Force git sync v1.9.7
 // Helper to render avatars
 const renderAvatar = (iconName?: string, colorClass?: string, imageUrl?: string, size: 'sm' | 'md' = 'md') => {
     const containerSize = size === 'md' ? 'w-10 h-10' : 'w-8 h-8';
