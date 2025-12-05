@@ -205,8 +205,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
 
           {/* Image */}
           {post.imageUrl && (
-              <div className="w-full bg-slate-100 dark:bg-slate-950 border-t border-b border-slate-100 dark:border-slate-800">
-                  <img src={post.imageUrl} alt="Post content" className="w-full h-auto max-h-[500px] object-contain" />
+              <div className="w-full bg-slate-100 dark:bg-slate-950 border-t border-b border-slate-100 dark:border-slate-800 flex justify-center">
+                  <img src={post.imageUrl} alt="Post content" className="w-full h-auto max-h-80 object-contain" />
               </div>
           )}
 
