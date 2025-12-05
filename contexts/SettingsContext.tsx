@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { ParishSettings } from '../types';
 import { getSettings } from '../services/settingsService';
 
-// Version 1.9.9 - Force Sync
+// Version 1.9.11 - Force Sync & Fix Cover Default
 interface SettingsContextType {
   settings: ParishSettings;
   refreshSettings: () => Promise<void>;
@@ -21,7 +21,8 @@ const defaultSettings: ParishSettings = {
   planType: 'advanced',
   avatarIcon: 'church',
   avatarColor: 'bg-emaus-600',
-  profileImage: '' // Ensure this field exists by default
+  profileImage: '', // Ensure this field exists by default
+  coverImage: '' // Ensure this field exists by default
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);

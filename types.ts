@@ -1,6 +1,6 @@
+// Version 1.9.10 - Force Sync
 import { LucideIcon } from 'lucide-react';
 
-// Version 1.9.9 - Force Sync
 export enum ViewName {
   DASHBOARD = 'Dashboard',
   SACRAMENTS = 'Sacramentos',
@@ -160,6 +160,9 @@ export interface ParishDirectoryEntry {
   diocese: string;
   email: string;
   planType: 'basic' | 'advanced';
+  // Added images for public profile view
+  coverImage?: string;
+  profileImage?: string;
 }
 
 export interface ChatMessage {

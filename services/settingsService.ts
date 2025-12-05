@@ -1,11 +1,10 @@
+// Version 1.9.11 - Fix Default Cover Image
 import { db, auth, storage } from './firebase';
 import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 import { ParishSettings, ParishDirectoryEntry } from '../types';
 import { mockDirectory } from './mockData';
 
-// Version 1.9.9 - Force Sync
 const COLLECTION_NAME = 'settings';
-// DEPRECATED: const DOC_ID = 'general'; -> Now we use auth.currentUser.uid
 const DIRECTORY_COLLECTION = 'public_directory';
 
 // Default settings if none exist
@@ -22,7 +21,8 @@ const DEFAULT_SETTINGS: ParishSettings = {
   planType: 'advanced', // Default fallback
   avatarIcon: 'church',
   avatarColor: 'bg-emaus-600',
-  profileImage: '' // Default empty
+  profileImage: '', // Default empty
+  coverImage: '' // Default empty to prevent undefined
 };
 
 export const getSettings = async (): Promise<ParishSettings> => {
@@ -125,7 +125,10 @@ export const saveSettings = async (settings: ParishSettings): Promise<void> => {
            parishName: settings.parishName,
            city: settings.city || 'Ubicación no definida',
            diocese: settings.diocese || '',
-           planType: settingsToSave.planType as 'basic' | 'advanced'
+           planType: settingsToSave.planType as 'basic' | 'advanced',
+           // Sync images to directory for public profile view
+           coverImage: settings.coverImage,
+           profileImage: settings.profileImage
        };
        await setDoc(doc(db, DIRECTORY_COLLECTION, user.email), directoryEntry);
     }

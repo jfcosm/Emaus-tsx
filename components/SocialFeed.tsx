@@ -1,3 +1,4 @@
+// Version 1.9.11 - Force Sync & Fix Directory Lookup
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -8,7 +9,7 @@ import { getParishDirectory } from '../services/settingsService';
 import { SocialPost, ParishDirectoryEntry, SocialComment, NotificationType } from '../types';
 import { Heart, MessageSquare, Image as ImageIcon, Send, Loader2, User, Church, Cross, Book, Sun, Star, Music, Users, ArrowLeft, MapPin, MoreVertical, Edit2, Trash2, X, Check } from 'lucide-react';
 
-// Version 1.9.9 - Force Sync
+// Icon Map
 const iconMap: Record<string, any> = {
     church: Church, cross: Cross, book: Book, heart: Heart, sun: Sun, star: Star, music: Music, users: Users
 };
@@ -382,9 +383,8 @@ const SocialFeed: React.FC = () => {
   useEffect(() => {
       const loadDir = async () => {
           const data = await getParishDirectory();
-          // Sort by planType to show advanced first, then slice
-          const sorted = data.sort((a, b) => (a.planType === 'advanced' ? -1 : 1));
-          setDirectory(sorted.slice(0, 5));
+          // Load ALL data for lookups, but only display 5 in sidebar
+          setDirectory(data);
       };
       loadDir();
   }, []);
@@ -434,9 +434,20 @@ const SocialFeed: React.FC = () => {
   // --- PROFILE VIEW ---
   if (view === 'profile' && selectedAuthorId) {
       const parishEntry = directory.find(p => p.email === selectedAuthorId);
-      // Fallback if not in top 5 directory
+      
+      const isMe = selectedAuthorId === currentUser?.email;
+      
+      // Determine Cover & Profile Image
+      // Priority: Settings (Local) if Me > Directory Entry > Post Data (Fallback)
+      const coverImage = isMe ? settings.coverImage : parishEntry?.coverImage;
+      const profileImage = isMe ? settings.profileImage : (parishEntry?.profileImage || profilePosts[0]?.authorProfileImage);
+
+      // Names
       const parishName = parishEntry ? parishEntry.parishName : (profilePosts[0]?.authorParishName || 'Parroquia'); 
       const parishCity = parishEntry ? parishEntry.city : 'Ubicación no definida';
+
+      // Fallback Icon data
+      const iconData = isMe ? { icon: settings.avatarIcon, color: settings.avatarColor } : { icon: profilePosts[0]?.authorAvatarIcon, color: profilePosts[0]?.authorAvatarColor };
 
       return (
           <div className="max-w-4xl mx-auto animate-fade-in pb-20">
@@ -448,20 +459,55 @@ const SocialFeed: React.FC = () => {
               </button>
 
               <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden mb-8 relative group">
-                  {/* Cover Image Placeholder */}
-                  <div className="h-48 bg-gradient-to-r from-emaus-800 to-emaus-600 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-black/10"></div>
-                      <div className="absolute inset-0 flex items-center justify-center text-white/20">
-                          <ImageIcon className="w-16 h-16" />
+                  {/* Cover Image */}
+                  {coverImage ? (
+                      <div className="h-48 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
+                          <img 
+                            src={coverImage} 
+                            alt="Portada" 
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/20"></div>
                       </div>
-                  </div>
-                  
-                  <div className="px-8 pb-8 relative">
-                      <div className="absolute -top-12 left-8 p-1.5 bg-white dark:bg-slate-900 rounded-full shadow-sm">
-                          <div className="w-24 h-24 bg-gold-500 rounded-full flex items-center justify-center text-white shadow-inner">
-                              <Church className="w-12 h-12" />
+                  ) : (
+                      <div className="h-48 bg-gradient-to-r from-emaus-800 to-emaus-600 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-black/10"></div>
+                          <div className="absolute inset-0 flex items-center justify-center text-white/20">
+                              <ImageIcon className="w-16 h-16" />
                           </div>
                       </div>
+                  )}
+                  
+                  <div className="px-8 pb-8 relative">
+                      <div className="absolute -top-12 left-8">
+                          {/* Profile Avatar Large */}
+                          {renderAvatar(iconData.icon, iconData.color, profileImage, 'md')}
+                          {/* We need a larger avatar here, so let's override with custom class if needed, or stick to 'md'/custom rendering */}
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                             {/* The helper renders 10x10 (w-10). We want bigger. 
+                                 Let's manually render the big avatar for the profile header.
+                             */}
+                          </div>
+                      </div>
+                      
+                      {/* Manual Big Avatar Overlay */}
+                      <div className="absolute -top-12 left-8">
+                          {profileImage ? (
+                              <img 
+                                src={profileImage} 
+                                className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-900 object-cover shadow-lg bg-white dark:bg-slate-800" 
+                                alt="Profile"
+                              />
+                          ) : (
+                              <div className={`w-24 h-24 ${iconData.color || 'bg-emaus-600'} rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white dark:border-slate-900`}>
+                                  {(() => {
+                                      const Icon = iconMap[iconData.icon || 'church'] || Church;
+                                      return <Icon className="w-12 h-12" />;
+                                  })()}
+                              </div>
+                          )}
+                      </div>
+
                       <div className="pt-16 pl-0 md:pl-36">
                           <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">{parishName}</h1>
                           <p className="text-slate-500 dark:text-slate-400 flex items-center gap-2 text-sm">
@@ -583,7 +629,8 @@ const SocialFeed: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 sticky top-6">
                 <h3 className="font-bold text-slate-800 dark:text-white mb-6 text-lg">{t('community.suggested_parishes')}</h3>
                 <div className="space-y-6">
-                    {directory.map(parish => (
+                    {/* Limit display to top 5 */}
+                    {directory.slice(0, 5).map(parish => (
                         <div key={parish.id} className="flex items-center justify-between group">
                             <div className="flex items-center gap-3 overflow-hidden">
                                 <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 font-bold shrink-0 border border-slate-200 dark:border-slate-700">
