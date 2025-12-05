@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -14,11 +13,25 @@ const iconMap: Record<string, any> = {
     church: Church, cross: Cross, book: Book, heart: Heart, sun: Sun, star: Star, music: Music, users: Users
 };
 
+// Force git sync v1.9.7
 // Helper to render avatars
-const renderAvatar = (iconName?: string, colorClass?: string, size: 'sm' | 'md' = 'md') => {
+const renderAvatar = (iconName?: string, colorClass?: string, imageUrl?: string, size: 'sm' | 'md' = 'md') => {
+    const containerSize = size === 'md' ? 'w-10 h-10' : 'w-8 h-8';
+    
+    // If Profile Image exists, render it
+    if (imageUrl) {
+        return (
+            <img 
+                src={imageUrl} 
+                alt="Avatar" 
+                className={`${containerSize} rounded-full object-cover shadow-sm shrink-0 border border-slate-200 dark:border-slate-700`} 
+            />
+        );
+    }
+
+    // Fallback to Icon
     const Icon = iconMap[iconName || 'church'] || Church;
     const bg = colorClass || 'bg-emaus-600';
-    const containerSize = size === 'md' ? 'w-10 h-10' : 'w-8 h-8';
     const iconSize = size === 'md' ? 'w-5 h-5' : 'w-4 h-4';
     
     return (
@@ -96,6 +109,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
                 authorRole: settings.userRole || '',
                 authorAvatarIcon: settings.avatarIcon,
                 authorAvatarColor: settings.avatarColor,
+                authorProfileImage: settings.profileImage, // SAVE PROFILE IMAGE
                 content: newComment,
                 timestamp: new Date().toISOString()
             });
@@ -130,7 +144,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
     };
 
     // Determine Display Names (Prioritize Person Name)
-    // Fallback logic: If Person Name is missing (legacy post), use Role or Default, but NEVER Parish Name as primary title.
     const displayName = post.authorPersonName || post.authorRole || 'Usuario Emaús'; 
     const secondaryName = post.authorParishName || post.authorName || 'Parroquia';
 
@@ -169,7 +182,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
           {/* Header */}
           <div className="p-4 flex items-center gap-3">
               <div onClick={() => onAuthorClick(post.authorId)} className="cursor-pointer hover:opacity-80 transition-opacity">
-                  {renderAvatar(post.authorAvatarIcon, post.authorAvatarColor, 'md')}
+                  {/* PASS PROFILE IMAGE TO RENDERER */}
+                  {renderAvatar(post.authorAvatarIcon, post.authorAvatarColor, post.authorProfileImage, 'md')}
               </div>
               <div className="flex-1">
                   <h3 onClick={() => onAuthorClick(post.authorId)} className="font-bold text-slate-900 dark:text-white text-sm cursor-pointer hover:underline">
@@ -204,6 +218,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
           </div>
 
           {/* Image */}
+          {/* Centered image container with fixed max-height of 320px (max-h-80) as requested */}
           {post.imageUrl && (
               <div className="w-full bg-slate-100 dark:bg-slate-950 border-t border-b border-slate-100 dark:border-slate-800 flex justify-center">
                   <img src={post.imageUrl} alt="Post content" className="w-full h-auto max-h-80 object-contain" />
@@ -242,7 +257,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
                       return (
                           <div key={comment.id} className="flex gap-3 items-start text-sm group">
                               <div className="mt-1">
-                                  {renderAvatar(comment.authorAvatarIcon, comment.authorAvatarColor, 'sm')}
+                                  {/* PASS COMMENT PROFILE IMAGE */}
+                                  {renderAvatar(comment.authorAvatarIcon, comment.authorAvatarColor, comment.authorProfileImage, 'sm')}
                               </div>
                               <div className="flex-1">
                                   {editingCommentId === comment.id ? (
@@ -301,7 +317,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, onAuthorClick }) => {
               
               <form onSubmit={handleAddComment} className="flex gap-2 items-center">
                   <div className="shrink-0 hidden md:block">
-                      {renderAvatar(settings.avatarIcon, settings.avatarColor, 'sm')}
+                      {/* PREVIEW CURRENT USER AVATAR IN INPUT */}
+                      {renderAvatar(settings.avatarIcon, settings.avatarColor, settings.profileImage, 'sm')}
                   </div>
                   <input 
                       type="text" 
@@ -393,6 +410,7 @@ const SocialFeed: React.FC = () => {
               authorRole: settings.userRole || 'Miembro',
               authorAvatarIcon: settings.avatarIcon,
               authorAvatarColor: settings.avatarColor,
+              authorProfileImage: settings.profileImage, // SAVE PROFILE IMAGE
               content: newContent,
               imageUrl: imageUrl,
               timestamp: new Date().toISOString()
@@ -492,7 +510,8 @@ const SocialFeed: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
                 <div className="flex gap-4">
                     <div className="shrink-0 hidden md:block">
-                        {renderAvatar(settings.avatarIcon, settings.avatarColor, 'md')}
+                        {/* CURRENT USER AVATAR IN POST WIDGET */}
+                        {renderAvatar(settings.avatarIcon, settings.avatarColor, settings.profileImage, 'md')}
                     </div>
                     <div className="flex-1">
                         <form onSubmit={handlePost}>

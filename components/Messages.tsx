@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -33,6 +32,7 @@ import {
   Loader2
 } from 'lucide-react';
 
+// Force git sync v1.9.7
 const Messages: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();

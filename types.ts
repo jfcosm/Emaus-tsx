@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
+// Force git sync v1.9.7
 export enum ViewName {
   DASHBOARD = 'Dashboard',
   SACRAMENTS = 'Sacramentos',
@@ -148,6 +149,7 @@ export interface ParishSettings {
   avatarIcon?: string; // 'church', 'cross', 'dove', etc.
   avatarColor?: string; // hex code
   coverImage?: string; // URL
+  profileImage?: string; // URL for circular profile picture
 }
 
 export interface ParishDirectoryEntry {
@@ -194,7 +196,7 @@ export interface FinanceTransaction {
 
 export interface SocialComment {
   id: string;
-  authorId?: string; // Added to support new comment logic
+  authorId?: string; 
   // Legacy support
   authorName: string; 
   // New Dual Identity
@@ -204,9 +206,10 @@ export interface SocialComment {
   authorRole: string;
   authorAvatarIcon?: string;
   authorAvatarColor?: string;
+  authorProfileImage?: string; // Added
   content: string;
   timestamp: any;
-  isEdited?: boolean; // Added to support editing
+  isEdited?: boolean; 
 }
 
 export interface SocialPost {
@@ -222,13 +225,14 @@ export interface SocialPost {
   // Snapshot of author visual identity at posting time
   authorAvatarIcon?: string; 
   authorAvatarColor?: string;
+  authorProfileImage?: string; // Added
   content: string;
   imageUrl?: string;
   timestamp: any;
   likes: string[];
   commentsCount?: number;
-  lastEdited?: string; // Forced update field
-  isEdited?: boolean; // Added to support editing
+  lastEdited?: string; 
+  isEdited?: boolean; 
 }
 
 export enum NotificationType {

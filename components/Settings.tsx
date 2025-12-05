@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Image as ImageIcon, Camera, Loader2, Cross, Book, Church, Heart, Sun, Star, Music, Users } from 'lucide-react';
+import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Image as ImageIcon, Camera, Loader2, Cross, Book, Church, Heart, Sun, Star, Music, Users, Upload } from 'lucide-react';
 import { ParishSettings } from '../types';
 import { getSettings, saveSettings, initializeParishDb, uploadParishImage } from '../services/settingsService';
 
@@ -11,6 +10,7 @@ import { getSettings, saveSettings, initializeParishDb, uploadParishImage } from
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
+// Force git sync v1.9.7
 const Settings: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
@@ -30,7 +30,9 @@ const Settings: React.FC = () => {
   
   // Visual Identity State
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingProfile, setUploadingProfile] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const profileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<ParishSettings>({
     parishName: '',
@@ -45,7 +47,8 @@ const Settings: React.FC = () => {
     planType: 'advanced',
     avatarIcon: 'church',
     avatarColor: 'bg-emaus-600',
-    coverImage: ''
+    coverImage: '',
+    profileImage: ''
   });
 
   const avatarIcons = [
@@ -117,6 +120,21 @@ const Settings: React.FC = () => {
       }
   };
 
+  const handleProfileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setUploadingProfile(true);
+      try {
+          const url = await uploadParishImage(file, 'profile');
+          setFormData(prev => ({ ...prev, profileImage: url }));
+      } catch (error) {
+          alert("Error al subir imagen de perfil");
+      } finally {
+          setUploadingProfile(false);
+      }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -183,12 +201,20 @@ const Settings: React.FC = () => {
              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Cuenta Actual</h3>
                 <div className="flex items-center gap-4 mb-4">
-                    <div className={`w-12 h-12 ${formData.avatarColor} rounded-full flex items-center justify-center text-white`}>
-                        {(() => {
-                            const Icon = avatarIcons.find(i => i.id === formData.avatarIcon)?.icon || Church;
-                            return <Icon className="w-6 h-6" />;
-                        })()}
-                    </div>
+                    {formData.profileImage ? (
+                        <img 
+                            src={formData.profileImage} 
+                            alt="Perfil" 
+                            className="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                        />
+                    ) : (
+                        <div className={`w-12 h-12 ${formData.avatarColor} rounded-full flex items-center justify-center text-white`}>
+                            {(() => {
+                                const Icon = avatarIcons.find(i => i.id === formData.avatarIcon)?.icon || Church;
+                                return <Icon className="w-6 h-6" />;
+                            })()}
+                        </div>
+                    )}
                     <div>
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase">Usuario conectado</p>
                         <p className="font-bold text-slate-800 dark:text-white truncate max-w-[200px]">{currentUser?.email}</p>
@@ -275,12 +301,57 @@ const Settings: React.FC = () => {
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {/* Avatar Selector */}
+                      {/* Avatar & Profile Photo */}
                       <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-3">Foto de Perfil</label>
+                          <div className="flex items-center gap-4 mb-6 bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                              <div className="relative group cursor-pointer" onClick={() => profileInputRef.current?.click()}>
+                                  {formData.profileImage ? (
+                                      <img 
+                                          src={formData.profileImage} 
+                                          alt="Profile" 
+                                          className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-slate-600 shadow-md" 
+                                      />
+                                  ) : (
+                                      <div className={`w-20 h-20 ${formData.avatarColor} rounded-full flex items-center justify-center text-white border-4 border-white dark:border-slate-600 shadow-md`}>
+                                          {(() => {
+                                              const Icon = avatarIcons.find(i => i.id === formData.avatarIcon)?.icon || Church;
+                                              return <Icon className="w-10 h-10" />;
+                                          })()}
+                                      </div>
+                                  )}
+                                  <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <Camera className="w-6 h-6 text-white" />
+                                  </div>
+                                  {uploadingProfile && (
+                                      <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                                          <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                      </div>
+                                  )}
+                              </div>
+                              <div className="flex-1">
+                                  <p className="text-sm font-medium text-slate-800 dark:text-white mb-1">Imagen de Perfil</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Aparecerá en tus comentarios y publicaciones.</p>
+                                  <button
+                                    type="button"
+                                    onClick={() => profileInputRef.current?.click()}
+                                    className="text-xs bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-3 py-1.5 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors flex items-center gap-2"
+                                  >
+                                      <Upload className="w-3 h-3" /> Subir Foto
+                                  </button>
+                                  <input 
+                                    ref={profileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleProfileUpload}
+                                  />
+                              </div>
+                          </div>
+
                           <label className="block text-xs font-bold text-slate-500 uppercase mb-3">{t('settings.avatar_desc')}</label>
-                          
                           <div className="mb-4">
-                              <p className="text-xs text-slate-400 mb-2">Icono</p>
+                              <p className="text-xs text-slate-400 mb-2">Icono (Se usa si no hay foto)</p>
                               <div className="grid grid-cols-4 gap-2">
                                   {avatarIcons.map(item => (
                                       <button

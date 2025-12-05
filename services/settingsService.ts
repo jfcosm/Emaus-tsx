@@ -1,9 +1,9 @@
-
 import { db, auth, storage } from './firebase';
 import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 import { ParishSettings, ParishDirectoryEntry } from '../types';
 import { mockDirectory } from './mockData';
 
+// Force git sync v1.9.7
 const COLLECTION_NAME = 'settings';
 // DEPRECATED: const DOC_ID = 'general'; -> Now we use auth.currentUser.uid
 const DIRECTORY_COLLECTION = 'public_directory';
@@ -21,7 +21,8 @@ const DEFAULT_SETTINGS: ParishSettings = {
   city: '',
   planType: 'advanced', // Default fallback
   avatarIcon: 'church',
-  avatarColor: 'bg-emaus-600'
+  avatarColor: 'bg-emaus-600',
+  profileImage: '' // Default empty
 };
 
 export const getSettings = async (): Promise<ParishSettings> => {
@@ -177,8 +178,8 @@ export const getParishDirectory = async (): Promise<ParishDirectoryEntry[]> => {
     }
 };
 
-// Subir Imagen de Parroquia (Cover/Avatar) - Compat API
-export const uploadParishImage = async (file: File, type: 'cover' | 'avatar'): Promise<string> => {
+// Subir Imagen de Parroquia (Cover/Avatar/Profile) - Compat API
+export const uploadParishImage = async (file: File, type: 'cover' | 'avatar' | 'profile'): Promise<string> => {
     try {
         const user = auth.currentUser;
         if (!user) throw new Error("No user");

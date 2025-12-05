@@ -3,6 +3,7 @@ import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUn
 import { SocialPost, SocialComment, NotificationType } from '../types';
 import { createNotification } from './notificationService'; 
 
+// Force git sync v1.9.7
 const COLLECTION_NAME = 'social_posts';
 
 // Escuchar posts en tiempo real
@@ -33,7 +34,7 @@ export const subscribeToAuthorPosts = (authorId: string, callback: (posts: Socia
     });
 };
 
-// Crear Post (Actualizado con Identidad Dual)
+// Crear Post (Actualizado con Identidad Dual y Profile Image)
 export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => {
     try {
         await addDoc(collection(db, COLLECTION_NAME), {
