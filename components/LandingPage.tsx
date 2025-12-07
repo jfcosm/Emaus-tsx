@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
@@ -31,10 +30,12 @@ import {
   FileCheck,
   Banknote
 } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 
+// Version 1.9.21 - Force Sync
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -69,7 +70,7 @@ const LandingPage: React.FC = () => {
     setError('');
 
     try {
-      await auth.signInWithEmailAndPassword(username, password);
+      await signInWithEmailAndPassword(auth, username, password);
     } catch (err: any) {
       console.error("Login error:", err);
       let msg = 'Error al iniciar sesión.';
@@ -257,6 +258,13 @@ const LandingPage: React.FC = () => {
                  {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
+              <button 
+                onClick={() => setIsLoginModalOpen(true)}
+                className="px-6 py-2.5 bg-emaus-700 text-white rounded-full font-medium hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20"
+              >
+                {t('landing.nav.login')}
+              </button>
+            </div>
 
             {/* Mobile Menu Button */}
             <div className="lg:hidden">
@@ -297,20 +305,8 @@ const LandingPage: React.FC = () => {
                 onClick={() => {
                   setIsMenuOpen(false);
                   setIsLoginModalOpen(true);
-                  setUsername('demo@emaus.app');
-                  setPassword('demo123');
                 }}
-                className="block w-full text-left font-bold text-gold-600 dark:text-gold-400 py-2 border-t border-slate-100 dark:border-slate-800 mt-2"
-             >
-               {t('landing.nav.demo_quick')}
-             </button>
-
-             <button 
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  setIsLoginModalOpen(true);
-                }}
-                className="w-full text-left font-bold text-emaus-700 dark:text-emaus-400"
+                className="w-full text-left font-bold text-emaus-700 dark:text-emaus-400 border-t border-slate-100 dark:border-slate-800 mt-2 pt-2"
              >
                {t('landing.nav.client_access')}
              </button>
