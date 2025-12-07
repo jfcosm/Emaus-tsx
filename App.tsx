@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Sacraments from './components/Sacraments';
@@ -17,8 +18,9 @@ import { useLanguage } from './contexts/LanguageContext';
 import { useAuth } from './contexts/AuthContext';
 import { useTheme } from './contexts/ThemeContext';
 import { useSettings } from './contexts/SettingsContext';
+import { analytics } from './services/firebase';
 
-// Version 1.9.9 - Force Sync
+// Version 1.9.17 - Analytics Enabled
 const App: React.FC = () => {
   // Authentication State from Firebase
   const { currentUser, logout } = useAuth();
@@ -31,6 +33,16 @@ const App: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   const { darkMode, toggleDarkMode } = useTheme();
   const { settings } = useSettings();
+
+  // Analytics Tracking for View Changes
+  useEffect(() => {
+    if (currentUser) {
+      (analytics as any).logEvent('screen_view', {
+        firebase_screen: currentView,
+        screen_name: currentView
+      });
+    }
+  }, [currentView, currentUser]);
 
   const handleLogout = async () => {
     try {
@@ -115,6 +127,7 @@ const App: React.FC = () => {
                >
                   <option value="es">ES</option>
                   <option value="en">EN</option>
+                  <option value="pt">PT</option>
                </select>
             </div>
 

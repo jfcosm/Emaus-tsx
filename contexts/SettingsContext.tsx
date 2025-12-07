@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { ParishSettings } from '../types';
 import { getSettings } from '../services/settingsService';
 
-// Version 1.9.11 - Force Sync & Fix Cover Default
+// Version 1.9.19 - Force Sync
 interface SettingsContextType {
   settings: ParishSettings;
   refreshSettings: () => Promise<void>;

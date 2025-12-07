@@ -758,6 +758,387 @@ export const translations = {
         secure: 'Secure SSL 256-bit encryption'
       }
     }
+  },
+  pt: {
+    sidebar: {
+      dashboard: 'Resumo',
+      agenda: 'Agenda',
+      sacraments: 'Sacramentos',
+      documents: 'Documentos',
+      messages: 'Mensagens',
+      finances: 'Finanças',
+      community: 'Comunidade',
+      settings: 'Configurações',
+      users: 'Usuários',
+      logout: 'Sair',
+      role: 'Secretaria',
+      parish: 'Gestão Paroquial'
+    },
+    users: {
+      title: 'Gestão de Usuários',
+      subtitle: 'Administração de contas e planos de assinatura',
+      create_user: 'Criar Usuário',
+      search_placeholder: 'Buscar por email, paróquia ou cidade...',
+      table: {
+        email: 'Usuário / Email',
+        parish: 'Paróquia',
+        city: 'Cidade',
+        plan: 'Plano',
+        actions: 'Ações'
+      },
+      actions: {
+        edit_plan: 'Editar Plano',
+        reset_pass: 'Redefinir Senha',
+        delete: 'Excluir'
+      },
+      modal: {
+        create_title: 'Novo Usuário',
+        edit_plan_title: 'Editar Plano',
+        email: 'Endereço de Email',
+        password: 'Senha',
+        plan: 'Plano Atribuído',
+        cancel: 'Cancelar',
+        create: 'Criar Usuário',
+        save: 'Salvar Alterações'
+      }
+    },
+    dashboard: {
+      stats: {
+        baptisms: 'Total Batismos',
+        marriages: 'Matrimônios',
+        certificates: 'Certificados Emitidos',
+        parishioners: 'Paroquianos Ativos',
+        vs_prev: 'vs mês anterior'
+      },
+      sacramental_activity: 'Atividade Sacramental',
+      upcoming_events: 'Próximos Eventos',
+      view_full_agenda: 'Ver agenda completa',
+      time_ranges: {
+        last_6_months: 'Últimos 6 meses',
+        this_year: 'Este ano'
+      }
+    },
+    sacraments: {
+      title: 'Livros Sacramentais',
+      subtitle: 'Gerencie os registros oficiais da paróquia',
+      search_placeholder: 'Buscar por nome, celebrante ou data...',
+      new_record: 'Novo Registro',
+      export: 'Exportar',
+      types: {
+        Bautizo: 'Batismo',
+        Confirmación: 'Crisma',
+        Matrimonio: 'Matrimônio',
+        Defunción: 'Óbito',
+        'Primera Comunión': 'Primeira Eucaristia'
+      },
+      table: {
+        name: 'Nome',
+        date: 'Data',
+        celebrant: 'Celebrante',
+        book_page: 'Livro / Pág',
+        actions: 'Ações',
+        view_details: 'Ver Ficha',
+        no_records: 'Nenhum registro encontrado.'
+      },
+      detail: {
+        record_card: 'Ficha de',
+        editing: 'Editando Registro',
+        record_id: 'ID do Registro',
+        edit: 'Editar Dados',
+        cancel: 'Cancelar',
+        save: 'Salvar Alterações',
+        parents: 'Pais',
+        godparents: 'Padrinhos / Testemunhas',
+        observations: 'Observações',
+        book_data: 'Dados do Registro',
+        book: 'Livro',
+        page: 'Página',
+        parish: 'Paróquia / Local'
+      }
+    },
+    agenda: {
+      title: 'Agenda Paroquial',
+      new_event: 'Novo Evento',
+      upcoming: 'Próximos Eventos',
+      no_events: 'Não há eventos próximos.',
+      modal: {
+        title: 'Novo Evento',
+        event_title: 'Título do Evento',
+        date: 'Data',
+        time: 'Hora',
+        type: 'Tipo',
+        location: 'Local',
+        cancel: 'Cancelar',
+        save: 'Salvar Evento',
+        types: {
+          Misa: 'Missa',
+          Bautizo: 'Batismo',
+          Matrimonio: 'Matrimônio',
+          Confirmación: 'Crisma',
+          'Primera Comunión': '1ª Eucaristia',
+          Reunión: 'Reunião',
+          Otro: 'Outro'
+        }
+      }
+    },
+    documents: {
+      title: 'Meus Documentos',
+      new_document: 'Novo Documento',
+      search: 'Buscar...',
+      items: 'itens',
+      empty_folder: 'Pasta vazia',
+      create_title: 'Criar Novo Documento',
+      create_subtitle: 'Selecione um modelo base ou comece do zero.',
+      blank_doc: 'Documento em Branco',
+      start_scratch: 'Começar do zero',
+      use_template: 'Usar Modelo',
+      cancel_back: 'Cancelar e voltar',
+      save: 'Salvar',
+      close: 'Fechar',
+      untitled: 'Documento sem título',
+      print: 'Imprimir',
+      upsell: {
+        title: 'Funcionalidade Premium',
+        desc: 'O editor de documentos tipo Word é reservado para planos avançados.',
+        benefit1: 'Editor completo sem Office',
+        benefit2: 'Modelos eclesiais oficiais',
+        cta: 'Conhecer Planos'
+      }
+    },
+    messages: {
+      title: 'Mensagens',
+      subtitle: 'Comunidade Paroquial',
+      search_placeholder: 'Buscar conversa...',
+      type_message: 'Digite uma mensagem...',
+      no_chat_selected: 'Selecione uma conversa para começar',
+      start_chat: 'Iniciar nova conversa',
+      empty_state: 'Você ainda não tem mensagens.',
+      new_chat_modal: 'Nova Conversa',
+      email_placeholder: 'Email da paróquia',
+      create_chat: 'Criar Conversa',
+      support: 'Suporte Emaús',
+      directory: {
+        title: 'Diretório de Paróquias',
+        subtitle: 'Conecte-se com outras paróquias da rede Emaús.',
+        search: 'Buscar paróquia ou cidade...',
+        start_conversation: 'Conversar',
+        unavailable_basic: 'Indisponível (Plano Básico)'
+      },
+      upsell: {
+        title: 'Funcionalidade Premium',
+        desc: 'A troca de mensagens interparoquial é reservada exclusivamente para planos avançados.',
+        benefit1: 'Chat direto com outras paróquias',
+        benefit2: 'Diretório nacional de contatos',
+        cta: 'Conhecer Planos'
+      }
+    },
+    finances: {
+      title: 'Finanças Paroquiais',
+      subtitle: 'Controle de receitas, despesas e balanço mensal.',
+      income: 'Receitas',
+      expense: 'Despesas',
+      balance: 'Balanço',
+      new_transaction: 'Nova Transação',
+      no_transactions: 'Não há transações registradas.',
+      search: 'Buscar movimento...',
+      calculator: 'Calculadora Rápida',
+      upsell: {
+        title: 'Funcionalidade Premium',
+        desc: 'O módulo de Contabilidade e Finanças é reservado para planos avançados.',
+        benefit1: 'Controle de caixa e receitas',
+        benefit2: 'Relatórios financeiros automáticos',
+        cta: 'Conhecer Planos'
+      },
+      table: {
+        date: 'Data',
+        type: 'Tipo',
+        category: 'Categoria',
+        description: 'Descrição',
+        amount: 'Valor',
+        actions: 'Ações'
+      },
+      modal: {
+        title: 'Registrar Movimento',
+        type: 'Tipo de Movimento',
+        amount: 'Valor',
+        date: 'Data',
+        category: 'Categoria',
+        desc: 'Descrição',
+        method: 'Método de Pagamento',
+        cancel: 'Cancelar',
+        save: 'Salvar'
+      },
+      categories: {
+        stipends: 'Estipêndios',
+        collection: 'Coleta',
+        donations: 'Doações',
+        services: 'Serviços Básicos',
+        maintenance: 'Manutenção',
+        supplies: 'Suprimentos',
+        personnel: 'Pessoal',
+        other: 'Outro'
+      }
+    },
+    community: {
+      title: 'Comunidade Emaús',
+      subtitle: 'Espaço de encontro e vida eclesial',
+      new_post_placeholder: 'O que está acontecendo na sua paróquia? Compartilhe novidades, eventos ou reflexões...',
+      publish: 'Publicar',
+      upload_photo: 'Subir Foto',
+      likes: 'Curtidas',
+      comment: 'Comentar',
+      no_posts: 'Ainda não há publicações. Seja o primeiro a compartilhar algo!',
+      posting: 'Publicando...',
+      suggested_parishes: 'Paróquias Sugeridas',
+      visit_profile: 'Ver Perfil',
+      comments: 'Comentários',
+      write_comment: 'Escreva um comentário...',
+      send: 'Enviar',
+      back_to_feed: 'Voltar ao Mural'
+    },
+    settings: {
+        identity: 'Identidade Visual',
+        avatar_desc: 'Personalize o ícone e a cor que representarão sua paróquia na comunidade.',
+        cover_image: 'Foto de Capa',
+        cover_desc: 'Imagem principal para sua página de perfil pública.',
+        upload_cover: 'Subir Capa'
+    },
+    landing: {
+      nav: {
+        features: 'Recursos',
+        benefits: 'Benefícios',
+        plans: 'Planos',
+        demo: 'Ver Demo',
+        login: 'Entrar',
+        client_access: 'Acesso Clientes',
+        demo_quick: 'Ver Demo (Acesso Rápido)'
+      },
+      hero: {
+        badge: 'Gestão Paroquial 2.0',
+        title_start: 'Digitalize a missão da sua',
+        title_highlight: 'Paróquia',
+        subtitle: 'O Emaús organiza o caos administrativo, protege a história sacramental e libera tempo para o que realmente importa: a pastoral.',
+        cta_access: 'Acessar a Plataforma',
+        cta_plans: 'Ver Planos'
+      },
+      mockup: {
+        sacrament: 'Sacramento',
+        baptism_card: 'Ficha de Batismo',
+        verified: 'VERIFICADO',
+        name_label: 'Nome do Batizado',
+        date_label: 'Data',
+        book_label: 'Livro / Pág',
+        parents_label: 'Pais',
+        generate_btn: 'Gerar Certificado Oficial',
+        popup_db: 'Banco de Dados',
+        popup_db_sub: 'Registro Digitalizado',
+        popup_search: 'Busca',
+        popup_search_sub: 'Ficha Encontrada',
+        popup_docs: 'Documentos',
+        popup_docs_sub: 'Certificado Gerado',
+        popup_chat: 'Ir. Maria',
+        popup_chat_sub: 'Registro enviado ✅'
+      },
+      features: {
+        title: 'Tudo o que sua secretaria precisa',
+        subtitle: 'O Emaús substitui várias ferramentas desconectadas por uma plataforma unificada projetada especificamente para a Igreja.',
+        digital_sacraments: 'Sacramentos Digitais',
+        digital_sacraments_desc: 'Digitalize Batismos, Matrimônios e Crismas. Buscas instantâneas por nome ou data.',
+        certs: 'Certificados em 1 Clique',
+        certs_desc: 'Geração automática de certificados oficiais prontos para imprimir e assinar.',
+        agenda: 'Agenda Pastoral',
+        agenda_desc: 'Coordene missas, confissões e reuniões paroquiais em um calendário centralizado.',
+        network: 'Rede Interparoquial',
+        network_desc: 'Conecte-se diretamente com outras secretarias para solicitar transferências e tirar dúvidas através de um chat seguro.',
+        btn_more: 'Conhecer mais recursos'
+      },
+      community: {
+        title: 'Nunca mais trabalhe sozinho',
+        subtitle: 'Junte-se ao diretório nacional de paróquias e agilize a burocracia eclesial com o Emaús.',
+        card_community: {
+          title: 'Comunidade Emaús',
+          desc: 'Centenas de secretarias conectadas'
+        },
+        card_chat: {
+          title: 'Comunicação Instantânea',
+          desc: 'Chat exclusivo entre paróquias'
+        },
+        card_docs: {
+          title: 'Documentação Ágil',
+          desc: 'Compartilhe arquivos eclesiais instantaneamente'
+        }
+      },
+      plans: {
+        title: 'Planos projetados para cada comunidade',
+        subtitle: 'Escolha a opção que melhor se adapta ao tamanho e necessidades da sua paróquia.',
+        basic: {
+          name: 'Plano Básico',
+          desc: 'Para pequenas paróquias ou capelas.',
+          items: [
+            'Agenda Paroquial', 
+            'Registro de Sacramentos', 
+            'Certificados Automáticos',
+            'Chat Interparoquial (Novo)'
+          ],
+          btn: 'Começar'
+        },
+        advanced: {
+          tag: 'Recomendado',
+          name: 'Plano Avançado',
+          desc: 'Gestão integral sem limites.',
+          items: {
+            basic_features: 'Tudo do Plano Básico',
+            word_editor: 'Editor de Documentos tipo Word',
+            finance: 'Módulo de Finanças e Caixa',
+            chat: 'Chat e Diretório Ilimitado',
+            reports: 'Relatórios e Estatísticas',
+            support: 'Suporte Prioritário'
+          },
+          btn: 'Obter Plano Completo'
+        }
+      },
+      testimonials: {
+        quote: '"O Emaús transformou nosso escritório paroquial"',
+        text: 'Antes passávamos horas procurando registros de batismo em livros antigos. Agora, com o Emaús, entregamos certificados em segundos.',
+        author_role: 'Pároco',
+        carousel: {
+          t1: {
+            quote: "É incrível como é fácil entrar em contato com outras paróquias para pedir transferências.",
+            author: "Ir. Lúcia",
+            role: "Secretaria, São Paulo"
+          },
+          t2: {
+            quote: "A ordem que nos deu na agenda de casamentos é impagável. Acabaram os conflitos de horário.",
+            author: "Pe. André",
+            role: "Pároco, Rio de Janeiro"
+          },
+          t3: {
+            quote: "Posso verificar os dados de um batismo pelo meu celular antes da missa. Muito prático.",
+            author: "Diác. Carlos",
+            role: "Diácono, Belo Horizonte"
+          },
+          t4: {
+            quote: "O suporte é excelente, sempre me ajudam quando tenho dúvidas com algum certificado.",
+            author: "Sra. Carmem",
+            role: "Administradora, Curitiba"
+          }
+        }
+      },
+      footer: {
+        designed: 'Projetado para servir à Igreja.',
+        developed: 'Emaús é um app desenvolvido por'
+      },
+      login: {
+        welcome: 'Bem-vindo ao Emaús',
+        subtitle: 'Insira suas credenciais para acessar a plataforma.',
+        user: 'Usuário (Email)',
+        pass: 'Senha',
+        btn: 'Entrar',
+        verifying: 'Verificando...',
+        forgot: 'Esqueceu sua senha?',
+        contact: 'Contate o Suporte',
+        secure: 'Acesso seguro criptografado SSL 256-bit'
+      }
+    }
   }
 };
-// Force update timestamp: 2024-06-25T12:00:00Z

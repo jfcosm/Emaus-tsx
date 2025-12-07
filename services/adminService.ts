@@ -1,7 +1,6 @@
 
 import { db, auth } from './firebase';
 import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
-import { sendPasswordResetEmail } from 'firebase/auth';
 import { ParishDirectoryEntry, ParishSettings } from '../types';
 import { initializeParishDb } from './settingsService';
 
@@ -73,7 +72,7 @@ export const createUserAsAdmin = async (email: string, password: string, plan: '
 // Send Password Reset
 export const sendUserPasswordReset = async (email: string): Promise<void> => {
     try {
-        await sendPasswordResetEmail(auth, email);
+        await auth.sendPasswordResetEmail(email);
     } catch (error) {
         console.error("Error sending reset email:", error);
         throw error;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
@@ -6,7 +7,7 @@ import {
   Shield, 
   CheckCircle, 
   ArrowRight, 
-  ArrowLeft,
+  ArrowLeft, 
   Menu, 
   X,
   Cross,
@@ -30,7 +31,6 @@ import {
   FileCheck,
   Banknote
 } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -69,7 +69,7 @@ const LandingPage: React.FC = () => {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, username, password);
+      await auth.signInWithEmailAndPassword(username, password);
     } catch (err: any) {
       console.error("Login error:", err);
       let msg = 'Error al iniciar sesión.';
@@ -245,6 +245,7 @@ const LandingPage: React.FC = () => {
                  >
                     <option value="es">ES</option>
                     <option value="en">EN</option>
+                    <option value="pt">PT</option>
                  </select>
               </div>
 
@@ -300,7 +301,7 @@ const LandingPage: React.FC = () => {
                 </button>
              </div>
              <div className="flex gap-2">
-                {['es', 'en'].map((lang) => (
+                {['es', 'en', 'pt'].map((lang) => (
                   <button 
                     key={lang}
                     onClick={() => { setLanguage(lang as any); setIsMenuOpen(false); }}

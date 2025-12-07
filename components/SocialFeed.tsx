@@ -1,4 +1,3 @@
-// Version 1.9.11 - Force Sync & Fix Directory Lookup
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -14,6 +13,7 @@ const iconMap: Record<string, any> = {
     church: Church, cross: Cross, book: Book, heart: Heart, sun: Sun, star: Star, music: Music, users: Users
 };
 
+// Version 1.9.19 - Force Sync
 // Helper to render avatars
 const renderAvatar = (iconName?: string, colorClass?: string, imageUrl?: string, size: 'sm' | 'md' = 'md') => {
     const containerSize = size === 'md' ? 'w-10 h-10' : 'w-8 h-8';
@@ -629,7 +629,7 @@ const SocialFeed: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 sticky top-6">
                 <h3 className="font-bold text-slate-800 dark:text-white mb-6 text-lg">{t('community.suggested_parishes')}</h3>
                 <div className="space-y-6">
-                    {/* Limit display to top 5 */}
+                    {/* Limit display to top 5 from the full loaded directory */}
                     {directory.slice(0, 5).map(parish => (
                         <div key={parish.id} className="flex items-center justify-between group">
                             <div className="flex items-center gap-3 overflow-hidden">

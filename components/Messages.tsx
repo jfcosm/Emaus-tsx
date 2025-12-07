@@ -32,7 +32,7 @@ import {
   Loader2
 } from 'lucide-react';
 
-// Version 1.9.9 - Force Sync
+// Version 1.9.19 - Force Sync
 const Messages: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
@@ -56,9 +56,16 @@ const Messages: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initial Data Load (Threads)
+  // Initial Data Load (Threads & Directory)
   useEffect(() => {
     if (!currentUser?.email) return;
+
+    // Load Directory immediately to have profile images available
+    const loadDir = async () => {
+        const data = await getParishDirectory();
+        setDirectory(data);
+    };
+    loadDir();
 
     // Initialize support chat just so user has someone to talk to
     initSupportChat(currentUser.email);
@@ -72,19 +79,6 @@ const Messages: React.FC = () => {
 
     return () => unsubscribe();
   }, [currentUser]);
-
-  // Load Directory when modal opens
-  useEffect(() => {
-    if (showNewChatModal) {
-      const loadDir = async () => {
-         const data = await getParishDirectory();
-         // Filter out myself
-         const filtered = data.filter(p => p.email !== currentUser?.email);
-         setDirectory(filtered);
-      };
-      loadDir();
-    }
-  }, [showNewChatModal, currentUser?.email]);
 
   // Load Messages when Active Thread Changes
   useEffect(() => {
@@ -120,21 +114,18 @@ const Messages: React.FC = () => {
       const file = e.target.files?.[0];
       if (!file || !activeThreadId || !currentUser?.email) return;
 
-      // 1. Check Plan
       if (settings.planType !== 'advanced') {
           alert("Función Premium: El envío de archivos está disponible solo en el Plan Avanzado.");
           if (fileInputRef.current) fileInputRef.current.value = '';
           return;
       }
 
-      // 2. Check File Size (Max 5MB)
       if (file.size > 5 * 1024 * 1024) {
           alert("El archivo es demasiado pesado. Límite: 5MB.");
           if (fileInputRef.current) fileInputRef.current.value = '';
           return;
       }
 
-      // 3. Check Daily Limit
       if (checkDailyUploadLimit(messages, currentUser.email)) {
           alert("Has alcanzado el límite diario de envío de archivos (20). Intenta mañana.");
           if (fileInputRef.current) fileInputRef.current.value = '';
@@ -156,7 +147,6 @@ const Messages: React.FC = () => {
           console.error(error);
       } finally {
           setIsUploading(false);
-          // Clear input so same file can be selected again
           if (fileInputRef.current) fileInputRef.current.value = '';
       }
   };
@@ -172,15 +162,22 @@ const Messages: React.FC = () => {
     }
   };
 
-  // Helper to get contact name from thread
-  const getContactName = (thread: ChatThread) => {
+  // Helper to get contact info (Name & Image)
+  const getContactInfo = (thread: ChatThread) => {
     const otherEmail = thread.participants.find(p => p !== currentUser?.email);
-    if (otherEmail === 'soporte@emaus.app') return t('messages.support');
+    if (otherEmail === 'soporte@emaus.app') return { name: t('messages.support'), image: null, initial: 'S' };
     
     const dirMatch = directory.find(d => d.email === otherEmail);
-    if (dirMatch) return dirMatch.parishName;
+    if (dirMatch) {
+        return { 
+            name: dirMatch.parishName, 
+            image: dirMatch.profileImage, 
+            initial: dirMatch.parishName.charAt(0).toUpperCase() 
+        };
+    }
 
-    return otherEmail?.split('@')[0] || 'Usuario';
+    const simpleName = otherEmail?.split('@')[0] || 'Usuario';
+    return { name: simpleName, image: null, initial: simpleName.charAt(0).toUpperCase() };
   };
 
   const formatTime = (timestamp: any) => {
@@ -190,10 +187,13 @@ const Messages: React.FC = () => {
   };
 
   const activeThread = threads.find(t => t.id === activeThreadId);
+  const activeContact = activeThread ? getContactInfo(activeThread) : null;
 
   const filteredDirectory = directory.filter(p => 
+     p.email !== currentUser?.email && (
      p.parishName.toLowerCase().includes(directorySearch.toLowerCase()) || 
      p.city.toLowerCase().includes(directorySearch.toLowerCase())
+     )
   );
 
   return (
@@ -233,8 +233,10 @@ const Messages: React.FC = () => {
              </div>
            ) : (
              threads
-              .filter(t => getContactName(t).toLowerCase().includes(searchTerm.toLowerCase()))
-              .map(thread => (
+              .filter(t => getContactInfo(t).name.toLowerCase().includes(searchTerm.toLowerCase()))
+              .map(thread => {
+               const contact = getContactInfo(thread);
+               return (
                <div 
                  key={thread.id}
                  onClick={() => setActiveThreadId(thread.id)}
@@ -245,14 +247,22 @@ const Messages: React.FC = () => {
                  `}
                >
                   <div className="relative shrink-0">
-                     <div className="w-12 h-12 bg-gradient-to-br from-emaus-400 to-emaus-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {getContactName(thread).charAt(0).toUpperCase()}
-                     </div>
+                     {contact.image ? (
+                         <img 
+                            src={contact.image} 
+                            alt={contact.name} 
+                            className="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-700" 
+                         />
+                     ) : (
+                         <div className="w-12 h-12 bg-gradient-to-br from-emaus-400 to-emaus-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {contact.initial}
+                         </div>
+                     )}
                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-50 dark:border-slate-900 rounded-full"></div>
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                      <div className="flex justify-between items-baseline mb-1">
-                        <h3 className="font-bold text-slate-800 dark:text-slate-200 truncate pr-2">{getContactName(thread)}</h3>
+                        <h3 className="font-bold text-slate-800 dark:text-slate-200 truncate pr-2">{contact.name}</h3>
                         <span className="text-xs text-slate-400 shrink-0">{formatTime(thread.lastMessageTime)}</span>
                      </div>
                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
@@ -260,7 +270,8 @@ const Messages: React.FC = () => {
                      </p>
                   </div>
                </div>
-             ))
+               );
+             })
            )}
         </div>
       </div>
@@ -281,11 +292,17 @@ const Messages: React.FC = () => {
                     <button onClick={() => setActiveThreadId(null)} className="md:hidden text-slate-500 mr-2">
                        <X className="w-6 h-6" />
                     </button>
-                    <div className="w-10 h-10 bg-gradient-to-br from-emaus-400 to-emaus-600 rounded-full flex items-center justify-center text-white font-bold">
-                       {activeThread ? getContactName(activeThread).charAt(0).toUpperCase() : '?'}
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800">
+                        {activeContact?.image ? (
+                            <img src={activeContact.image} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-emaus-400 to-emaus-600 flex items-center justify-center text-white font-bold">
+                                {activeContact?.initial || '?'}
+                            </div>
+                        )}
                     </div>
                     <div>
-                       <h3 className="font-bold text-slate-800 dark:text-white">{activeThread && getContactName(activeThread)}</h3>
+                       <h3 className="font-bold text-slate-800 dark:text-white">{activeContact?.name}</h3>
                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">En línea</p>
                     </div>
                  </div>
@@ -454,8 +471,14 @@ const Messages: React.FC = () => {
                     filteredDirectory.map((parish) => (
                        <div key={parish.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                           <div className="flex items-center gap-4">
-                             <div className="w-12 h-12 bg-gradient-to-br from-emaus-500 to-emaus-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                {parish.parishName.charAt(0)}
+                             <div className="w-12 h-12 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0">
+                                {parish.profileImage ? (
+                                    <img src={parish.profileImage} alt={parish.parishName} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-emaus-500 to-emaus-700 flex items-center justify-center text-white font-bold text-lg">
+                                        {parish.parishName.charAt(0)}
+                                    </div>
+                                )}
                              </div>
                              <div>
                                 <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">

@@ -1,4 +1,4 @@
-// Version 1.9.11 - Fix Default Cover Image
+// Version 1.9.19 - Force Sync
 import { db, auth, storage } from './firebase';
 import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 import { ParishSettings, ParishDirectoryEntry } from '../types';
