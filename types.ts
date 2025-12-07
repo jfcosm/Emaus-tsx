@@ -1,4 +1,4 @@
-// Version 1.9.10 - Force Sync
+// Version 1.10.1 - Critical Save Strategy
 import { LucideIcon } from 'lucide-react';
 
 export enum ViewName {
@@ -10,7 +10,8 @@ export enum ViewName {
   FINANCES = 'Finanzas',
   COMMUNITY = 'Comunidad',
   SETTINGS = 'Configuración',
-  USERS = 'Usuarios'
+  USERS = 'Usuarios',
+  SUPPORT = 'Soporte'
 }
 
 export enum SacramentType {
@@ -255,4 +256,31 @@ export interface AppNotification {
     link?: string;
     read: boolean;
     timestamp: any;
+}
+
+// --- SUPPORT TYPES ---
+export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+export interface TicketMessage {
+  id: string;
+  senderId: string;
+  text: string;
+  timestamp: any;
+  isAdmin: boolean;
+}
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  userEmail: string;
+  parishName?: string;
+  subject: string;
+  description: string;
+  priority: TicketPriority;
+  status: TicketStatus;
+  createdAt: any;
+  updatedAt: any;
+  unreadAdmin?: boolean;
+  unreadUser?: boolean;
 }

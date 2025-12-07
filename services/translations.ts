@@ -1,4 +1,5 @@
 
+// Version 1.10.1 - Critical Save Strategy
 export const translations = {
   es: {
     sidebar: {
@@ -11,6 +12,7 @@ export const translations = {
       community: 'Comunidad',
       settings: 'Configuración',
       users: 'Usuarios',
+      support: 'Soporte',
       logout: 'Cerrar Sesión',
       role: 'Secretaria',
       parish: 'Gestión Parroquial'
@@ -244,6 +246,45 @@ export const translations = {
         cover_desc: 'Imagen principal para su página de perfil pública.',
         upload_cover: 'Subir Portada'
     },
+    support: {
+      title: 'Centro de Soporte',
+      subtitle: '¿En qué podemos ayudarte hoy?',
+      create_ticket: 'Crear Ticket',
+      my_tickets: 'Mis Tickets',
+      admin_dashboard: 'Panel de Soporte',
+      status: {
+        open: 'Abierto',
+        in_progress: 'En Progreso',
+        resolved: 'Resuelto',
+        closed: 'Cerrado'
+      },
+      priority: {
+        low: 'Baja',
+        medium: 'Media',
+        high: 'Alta',
+        critical: 'Crítica'
+      },
+      form: {
+        subject: 'Asunto',
+        subject_ph: 'Breve resumen del problema...',
+        desc: 'Descripción',
+        desc_ph: 'Detalla lo que sucede...',
+        priority: 'Nivel de Prioridad',
+        cancel: 'Cancelar',
+        submit: 'Enviar Ticket'
+      },
+      chat: {
+        placeholder: 'Escribe una respuesta...',
+        send: 'Enviar',
+        history: 'Historial del Ticket'
+      },
+      columns: {
+        pending: 'Pendientes',
+        in_progress: 'En Proceso',
+        resolved: 'Resueltos'
+      },
+      empty: 'No hay tickets en esta categoría.'
+    },
     landing: {
       nav: {
         features: 'Características',
@@ -314,7 +355,7 @@ export const translations = {
         subtitle: 'Elija la opción que mejor se adapte al tamaño y necesidades de su parroquia.',
         basic: {
           name: 'Plan Básico',
-          desc: 'Para parroquias pequeñas o capillas.',
+          desc: 'Para parroquias pequeñas o capelas.',
           items: [
             'Agenda Parroquial', 
             'Registro de Sacramentos', 
@@ -393,6 +434,7 @@ export const translations = {
       community: 'Community',
       settings: 'Settings',
       users: 'Users',
+      support: 'Support',
       logout: 'Log Out',
       role: 'Secretary',
       parish: 'Parish Management'
@@ -626,6 +668,45 @@ export const translations = {
         cover_desc: 'Main image for your public profile page.',
         upload_cover: 'Upload Cover'
     },
+    support: {
+      title: 'Support Center',
+      subtitle: 'How can we help you today?',
+      create_ticket: 'Create Ticket',
+      my_tickets: 'My Tickets',
+      admin_dashboard: 'Support Dashboard',
+      status: {
+        open: 'Open',
+        in_progress: 'In Progress',
+        resolved: 'Resolved',
+        closed: 'Closed'
+      },
+      priority: {
+        low: 'Low',
+        medium: 'Medium',
+        high: 'High',
+        critical: 'Critical'
+      },
+      form: {
+        subject: 'Subject',
+        subject_ph: 'Brief summary of the issue...',
+        desc: 'Description',
+        desc_ph: 'Describe what is happening...',
+        priority: 'Priority Level',
+        cancel: 'Cancel',
+        submit: 'Submit Ticket'
+      },
+      chat: {
+        placeholder: 'Write a reply...',
+        send: 'Send',
+        history: 'Ticket History'
+      },
+      columns: {
+        pending: 'Pending',
+        in_progress: 'In Progress',
+        resolved: 'Resolved'
+      },
+      empty: 'No tickets in this category.'
+    },
     landing: {
       nav: {
         features: 'Features',
@@ -770,6 +851,7 @@ export const translations = {
       community: 'Comunidade',
       settings: 'Configurações',
       users: 'Usuários',
+      support: 'Suporte',
       logout: 'Sair',
       role: 'Secretaria',
       parish: 'Gestão Paroquial'
@@ -951,7 +1033,7 @@ export const translations = {
       },
       table: {
         date: 'Data',
-        type: 'Tipo',
+        type: 'Type',
         category: 'Categoria',
         description: 'Descrição',
         amount: 'Valor',
@@ -1002,6 +1084,45 @@ export const translations = {
         cover_image: 'Foto de Capa',
         cover_desc: 'Imagem principal para sua página de perfil pública.',
         upload_cover: 'Subir Capa'
+    },
+    support: {
+      title: 'Centro de Suporte',
+      subtitle: 'Como podemos ajudar hoje?',
+      create_ticket: 'Criar Ticket',
+      my_tickets: 'Meus Tickets',
+      admin_dashboard: 'Painel de Suporte',
+      status: {
+        open: 'Aberto',
+        in_progress: 'Em Andamento',
+        resolved: 'Resolvido',
+        closed: 'Fechado'
+      },
+      priority: {
+        low: 'Baixa',
+        medium: 'Média',
+        high: 'Alta',
+        critical: 'Crítica'
+      },
+      form: {
+        subject: 'Assunto',
+        subject_ph: 'Breve resumo do problema...',
+        desc: 'Descrição',
+        desc_ph: 'Detalhe o que está acontecendo...',
+        priority: 'Nível de Prioridade',
+        cancel: 'Cancelar',
+        submit: 'Enviar Ticket'
+      },
+      chat: {
+        placeholder: 'Escreva uma resposta...',
+        send: 'Enviar',
+        history: 'Histórico do Ticket'
+      },
+      columns: {
+        pending: 'Pendentes',
+        in_progress: 'Em Processo',
+        resolved: 'Resolvidos'
+      },
+      empty: 'Não há tickets nesta categoria.'
     },
     landing: {
       nav: {

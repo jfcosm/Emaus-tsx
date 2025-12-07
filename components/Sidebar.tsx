@@ -1,4 +1,4 @@
-
+// Version 1.10.1 - Critical Save Strategy
 import React from 'react';
 import { ViewName, NavItem } from '../types';
 import { 
@@ -13,7 +13,8 @@ import {
   Lock,
   Users,
   Banknote,
-  Globe
+  Globe,
+  LifeBuoy
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -34,6 +35,7 @@ const navItems: NavItem[] = [
   { name: ViewName.COMMUNITY, icon: Users, description: 'Vida Eclesial' },
   { name: ViewName.MESSAGES, icon: MessageCircle, description: 'Comunidad' },
   { name: ViewName.FINANCES, icon: Banknote, description: 'Ingresos y Gastos' },
+  { name: ViewName.SUPPORT, icon: LifeBuoy, description: 'Soporte Técnico' },
   { name: ViewName.SETTINGS, icon: Settings, description: 'Configuración general' },
 ];
 
@@ -51,6 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
        case ViewName.MESSAGES: return t('sidebar.messages');
        case ViewName.FINANCES: return t('sidebar.finances');
        case ViewName.COMMUNITY: return t('community.title');
+       case ViewName.SUPPORT: return t('sidebar.support');
        case ViewName.SETTINGS: return t('sidebar.settings');
        case ViewName.USERS: return t('sidebar.users');
        default: return name;
@@ -146,9 +149,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
         <div className="p-4 border-t border-emaus-800 dark:border-slate-800 bg-emaus-950 dark:bg-black/20">
           <button className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-emaus-800 dark:hover:bg-slate-800 transition-colors">
             <img 
-              src="https://picsum.photos/40/40" 
+              src={settings.profileImage || "https://picsum.photos/40/40"} 
               alt="User" 
-              className="w-10 h-10 rounded-full border-2 border-gold-500" 
+              className="w-10 h-10 rounded-full border-2 border-gold-500 object-cover" 
             />
             <div className="flex-1 text-left">
               <p className="text-sm font-medium text-white truncate max-w-[140px]">{settings.secretaryName || 'Usuario'}</p>
