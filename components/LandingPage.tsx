@@ -257,25 +257,6 @@ const LandingPage: React.FC = () => {
                  {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              {/* Demo Button */}
-              <button 
-                onClick={() => {
-                   setUsername('demo@emaus.app');
-                   setPassword('demo123');
-                   setIsLoginModalOpen(true);
-                }}
-                className="text-gold-600 dark:text-gold-400 font-bold border-2 border-gold-500/50 hover:border-gold-500 rounded-full px-5 py-2 transition-all hover:bg-gold-50 dark:hover:bg-gold-900/10 ml-2"
-              >
-                {t('landing.nav.demo')}
-              </button>
-
-              <button 
-                onClick={() => setIsLoginModalOpen(true)}
-                className="px-6 py-2.5 bg-emaus-700 text-white rounded-full font-medium hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20"
-              >
-                {t('landing.nav.login')}
-              </button>
-            </div>
 
             {/* Mobile Menu Button */}
             <div className="lg:hidden">
