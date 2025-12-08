@@ -1,4 +1,4 @@
-// Version 1.10.1 - Critical Save Strategy
+// Version 1.11.0 - Support Attachments UI
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -10,7 +10,8 @@ import {
   createTicket, 
   subscribeToTicketMessages,
   sendTicketMessage,
-  updateTicketStatus
+  updateTicketStatus,
+  uploadTicketAttachment
 } from '../services/supportService';
 import { 
   LifeBuoy, 
@@ -23,7 +24,12 @@ import {
   MessageSquare,
   AlertTriangle,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Paperclip,
+  Image as ImageIcon,
+  FileText,
+  Download,
+  Loader2
 } from 'lucide-react';
 
 const PRIORITY_COLORS = {
@@ -57,7 +63,9 @@ const Support: React.FC = () => {
   const [newSubject, setNewSubject] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newPriority, setNewPriority] = useState<TicketPriority>('medium');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -86,17 +94,54 @@ const Support: React.FC = () => {
     }
   }, [messages, selectedTicket]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validate size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+          alert("El archivo excede el límite de 5MB.");
+          if (fileInputRef.current) fileInputRef.current.value = '';
+          return;
+      }
+
+      // Validate type
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+          alert("Tipo de archivo no permitido. Solo JPG, PNG o PDF.");
+          if (fileInputRef.current) fileInputRef.current.value = '';
+          return;
+      }
+
+      setSelectedFile(file);
+  };
+
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await createTicket(newSubject, newDesc, newPriority, settings.parishName);
+      let attachment = undefined;
+
+      if (selectedFile) {
+          const url = await uploadTicketAttachment(selectedFile);
+          const type = selectedFile.type.startsWith('image/') ? 'image' : 'file';
+          attachment = {
+              url,
+              name: selectedFile.name,
+              type: type as 'image' | 'file'
+          };
+      }
+
+      await createTicket(newSubject, newDesc, newPriority, settings.parishName, attachment);
+      
       setShowCreateModal(false);
       setNewSubject('');
       setNewDesc('');
       setNewPriority('medium');
+      setSelectedFile(null);
     } catch (error) {
-      alert("Error creating ticket");
+      console.error(error);
+      alert("Error creando ticket");
     } finally {
       setIsSubmitting(false);
     }
@@ -172,7 +217,10 @@ const Support: React.FC = () => {
                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${PRIORITY_COLORS[ticket.priority]}`}>
                                         {t(`support.priority.${ticket.priority}`)}
                                     </span>
-                                    {ticket.unreadAdmin && <span className="w-2 h-2 bg-red-500 rounded-full"></span>}
+                                    <div className="flex gap-2">
+                                        {ticket.attachmentUrl && <Paperclip className="w-3 h-3 text-slate-400" />}
+                                        {ticket.unreadAdmin && <span className="w-2 h-2 bg-red-500 rounded-full"></span>}
+                                    </div>
                                 </div>
                                 <h4 className="font-bold text-sm text-slate-800 dark:text-white mb-1 leading-tight">{ticket.subject}</h4>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{ticket.description}</p>
@@ -220,6 +268,7 @@ const Support: React.FC = () => {
                                       <div className="flex items-center gap-2 mt-1">
                                           {renderStatusBadge(ticket.status)}
                                           <span className="text-xs text-slate-400">{new Date(ticket.createdAt?.toDate()).toLocaleDateString()}</span>
+                                          {ticket.attachmentUrl && <Paperclip className="w-3 h-3 text-slate-400" />}
                                       </div>
                                   </div>
                               </div>
@@ -305,7 +354,42 @@ const Support: React.FC = () => {
                               <p className="text-xs font-bold text-slate-400 mb-1">
                                   {selectedTicket.userEmail} • {new Date(selectedTicket.createdAt?.toDate()).toLocaleString()}
                               </p>
-                              <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{selectedTicket.description}</p>
+                              <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap mb-3">{selectedTicket.description}</p>
+                              
+                              {/* ATTACHMENT DISPLAY */}
+                              {selectedTicket.attachmentUrl && (
+                                  <div className="mt-2 border-t border-slate-100 dark:border-slate-700 pt-3">
+                                      <p className="text-xs font-bold text-slate-400 mb-2 uppercase flex items-center gap-1">
+                                          <Paperclip className="w-3 h-3" /> Adjunto
+                                      </p>
+                                      {selectedTicket.attachmentType === 'image' ? (
+                                          <a href={selectedTicket.attachmentUrl} target="_blank" rel="noopener noreferrer" className="block w-fit group">
+                                              <img 
+                                                src={selectedTicket.attachmentUrl} 
+                                                alt="Adjunto" 
+                                                className="max-h-48 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-opacity group-hover:opacity-90"
+                                              />
+                                          </a>
+                                      ) : (
+                                          <a 
+                                            href={selectedTicket.attachmentUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-fit"
+                                          >
+                                              <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded text-red-600 dark:text-red-400">
+                                                  <FileText className="w-5 h-5" />
+                                              </div>
+                                              <div>
+                                                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate max-w-[200px]">{selectedTicket.attachmentName || 'Documento'}</p>
+                                                  <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                                                      <Download className="w-3 h-3" /> Clic para descargar
+                                                  </p>
+                                              </div>
+                                          </a>
+                                      )}
+                                  </div>
+                              )}
                           </div>
                       </div>
 
@@ -404,6 +488,34 @@ const Support: React.FC = () => {
                           />
                       </div>
 
+                      {/* File Upload */}
+                      <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('support.form.attach')}</label>
+                           <input 
+                                type="file" 
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept="image/png, image/jpeg, image/jpg, application/pdf"
+                                onChange={handleFileSelect}
+                           />
+                           <div className="flex items-center gap-3">
+                               <button 
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="flex items-center gap-2 px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium"
+                               >
+                                   <Paperclip className="w-4 h-4" /> Seleccionar Archivo
+                               </button>
+                               {selectedFile && (
+                                   <div className="flex items-center gap-2 text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-full">
+                                       <span className="font-bold truncate max-w-[150px]">{selectedFile.name}</span>
+                                       <button type="button" onClick={() => {setSelectedFile(null); if(fileInputRef.current) fileInputRef.current.value=''}}><X className="w-3 h-3" /></button>
+                                   </div>
+                               )}
+                           </div>
+                           <p className="text-[10px] text-slate-400 mt-1">{t('support.form.max_size')}</p>
+                      </div>
+
                       <div className="pt-4 flex gap-3">
                           <button 
                             type="button" 
@@ -415,9 +527,9 @@ const Support: React.FC = () => {
                           <button 
                             type="submit" 
                             disabled={isSubmitting}
-                            className="flex-1 py-2 bg-emaus-700 text-white rounded-lg font-bold hover:bg-emaus-800 shadow-lg shadow-emaus-900/20 disabled:opacity-70"
+                            className="flex-1 py-2 bg-emaus-700 text-white rounded-lg font-bold hover:bg-emaus-800 shadow-lg shadow-emaus-900/20 disabled:opacity-70 flex justify-center items-center gap-2"
                           >
-                              {isSubmitting ? 'Enviando...' : t('support.form.submit')}
+                              {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin"/> Enviando...</> : t('support.form.submit')}
                           </button>
                       </div>
                   </form>

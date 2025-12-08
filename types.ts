@@ -1,4 +1,4 @@
-// Version 1.10.1 - Critical Save Strategy
+// Version 1.11.0 - Support Attachments
 import { LucideIcon } from 'lucide-react';
 
 export enum ViewName {
@@ -283,4 +283,8 @@ export interface SupportTicket {
   updatedAt: any;
   unreadAdmin?: boolean;
   unreadUser?: boolean;
+  // Attachments
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: 'image' | 'file';
 }

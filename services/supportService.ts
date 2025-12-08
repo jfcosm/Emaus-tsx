@@ -1,12 +1,36 @@
-// Version 1.10.1 - Critical Save Strategy
-import { db, auth } from './firebase';
+// Version 1.11.0 - Support Attachments
+import { db, auth, storage } from './firebase';
 import { collection, addDoc, onSnapshot, query, where, orderBy, updateDoc, doc, serverTimestamp, getDoc, getDocs } from 'firebase/firestore';
 import { SupportTicket, TicketMessage, TicketStatus, TicketPriority } from '../types';
 
 const TICKETS_COLLECTION = 'support_tickets';
 
+// --- ATTACHMENT UPLOAD ---
+export const uploadTicketAttachment = async (file: File): Promise<string> => {
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error("No user");
+        
+        const timestamp = Date.now();
+        const path = `support_attachments/${user.uid}/${timestamp}_${file.name}`;
+        
+        const ref = storage.ref(path);
+        const snapshot = await ref.put(file);
+        return await snapshot.ref.getDownloadURL();
+    } catch (error) {
+        console.error("Error uploading attachment:", error);
+        throw error;
+    }
+};
+
 // --- CREATE ---
-export const createTicket = async (subject: string, description: string, priority: TicketPriority, parishName?: string) => {
+export const createTicket = async (
+    subject: string, 
+    description: string, 
+    priority: TicketPriority, 
+    parishName?: string,
+    attachment?: { url: string, name: string, type: 'image' | 'file' }
+) => {
     const user = auth.currentUser;
     if (!user) throw new Error("No user authenticated");
 
@@ -21,7 +45,12 @@ export const createTicket = async (subject: string, description: string, priorit
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         unreadAdmin: true,
-        unreadUser: false
+        unreadUser: false,
+        ...(attachment && {
+            attachmentUrl: attachment.url,
+            attachmentName: attachment.name,
+            attachmentType: attachment.type
+        })
     };
 
     const docRef = await addDoc(collection(db, TICKETS_COLLECTION), newTicket);

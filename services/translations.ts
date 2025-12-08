@@ -1,5 +1,4 @@
-
-// Version 1.10.1 - Critical Save Strategy
+// Version 1.11.0 - Critical Save Strategy
 export const translations = {
   es: {
     sidebar: {
@@ -271,7 +270,9 @@ export const translations = {
         desc_ph: 'Detalla lo que sucede...',
         priority: 'Nivel de Prioridad',
         cancel: 'Cancelar',
-        submit: 'Enviar Ticket'
+        submit: 'Enviar Ticket',
+        attach: 'Adjuntar Imagen/PDF',
+        max_size: 'Máx 5MB (jpg, png, pdf)'
       },
       chat: {
         placeholder: 'Escribe una respuesta...',
@@ -356,12 +357,7 @@ export const translations = {
         basic: {
           name: 'Plan Básico',
           desc: 'Para parroquias pequeñas o capelas.',
-          items: [
-            'Agenda Parroquial', 
-            'Registro de Sacramentos', 
-            'Certificados Automáticos',
-            'Chat Interparroquial (Nuevo)'
-          ],
+          items: ['Parish Calendar', 'Sacrament Registry', 'Automatic Certificates', 'Inter-parish Chat (New)'],
           btn: 'Comenzar'
         },
         advanced: {
@@ -693,7 +689,9 @@ export const translations = {
         desc_ph: 'Describe what is happening...',
         priority: 'Priority Level',
         cancel: 'Cancel',
-        submit: 'Submit Ticket'
+        submit: 'Submit Ticket',
+        attach: 'Attach Image/PDF',
+        max_size: 'Max 5MB (jpg, png, pdf)'
       },
       chat: {
         placeholder: 'Write a reply...',
@@ -1110,7 +1108,9 @@ export const translations = {
         desc_ph: 'Detalhe o que está acontecendo...',
         priority: 'Nível de Prioridade',
         cancel: 'Cancelar',
-        submit: 'Enviar Ticket'
+        submit: 'Enviar Ticket',
+        attach: 'Anexar Imagem/PDF',
+        max_size: 'Máx 5MB (jpg, png, pdf)'
       },
       chat: {
         placeholder: 'Escreva uma resposta...',
