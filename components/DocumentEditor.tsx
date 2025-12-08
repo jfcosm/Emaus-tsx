@@ -32,13 +32,18 @@ import {
   FolderPlus,
   Lock,
   CheckCircle,
-  ArrowRight as ArrowRightIcon
+  ArrowRight as ArrowRightIcon,
+  FileDown,
+  Loader2
 } from 'lucide-react';
 import { SavedDocument } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
 import { getDocuments, createDocument, updateDocument, deleteFolderAndContents } from '../services/documentsService';
+
+// Declaration for html2pdf global
+declare var html2pdf: any;
 
 type EditorView = 'list' | 'templates' | 'editor';
 type DisplayMode = 'list' | 'grid';
@@ -60,6 +65,7 @@ const DocumentEditor: React.FC = () => {
   // Editor State
   const [activeDocument, setActiveDocument] = useState<SavedDocument | null>(null);
   const [docTitle, setDocTitle] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
   const editorContentRef = useRef<HTMLDivElement>(null); // Ref for contentEditable
 
   // Modal / Interaction State
@@ -93,6 +99,98 @@ const DocumentEditor: React.FC = () => {
        editorContentRef.current.innerHTML = activeDocument.content || '';
     }
   }, [view, activeDocument?.id]);
+
+  // --- PRINT FUNCTIONALITY (Optimized via Iframe) ---
+  const handlePrint = () => {
+    if (!editorContentRef.current) return;
+
+    // 1. Create a hidden iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    const content = editorContentRef.current.innerHTML;
+    const title = docTitle || 'Documento Emaús';
+
+    // 2. Write content into iframe
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+        doc.open();
+        doc.write(`
+            <html>
+                <head>
+                    <title>${title}</title>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { 
+                            font-family: 'Inter', sans-serif; 
+                            padding: 40px; 
+                            -webkit-print-color-adjust: exact; 
+                        }
+                        .font-serif { font-family: 'Cinzel', serif; }
+                        @media print {
+                            body { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>${content}</body>
+            </html>
+        `);
+        doc.close();
+
+        // 3. Wait for content (fonts/tailwind) to load then print
+        // Since we are using CDN tailwind, we need a small delay or onload check
+        iframe.onload = () => {
+            setTimeout(() => {
+                iframe.contentWindow?.focus();
+                iframe.contentWindow?.print();
+                // 4. Cleanup
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 1000);
+            }, 500);
+        };
+        
+        // Fallback in case onload doesn't trigger properly with doc.write
+        if (iframe.contentDocument?.readyState === 'complete') {
+             iframe.onload?.(new Event('load'));
+        }
+    }
+  };
+
+  // --- EXPORT TO PDF FUNCTIONALITY ---
+  const handleExportPdf = () => {
+      if (!editorContentRef.current || typeof html2pdf === 'undefined') {
+          alert("Librería de PDF no cargada. Por favor recargue la página.");
+          return;
+      }
+
+      setIsExporting(true);
+      const element = editorContentRef.current;
+      const fileName = `${docTitle || 'documento'}.pdf`;
+
+      const opt = {
+          margin:       [10, 10, 10, 10], // mm
+          filename:     fileName,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+          setIsExporting(false);
+      }).catch((err: any) => {
+          console.error("PDF Export Error:", err);
+          setIsExporting(false);
+          alert("Error al exportar PDF.");
+      });
+  };
 
   // --- UPSELL LOCK FOR BASIC PLANS ---
   if (settings.planType === 'basic') {
@@ -693,11 +791,19 @@ const DocumentEditor: React.FC = () => {
                   className="bg-transparent border-b border-transparent hover:border-slate-300 focus:border-emaus-500 text-sm font-bold text-slate-800 dark:text-white focus:outline-none w-32 md:w-48 text-right md:text-left transition-colors"
                />
               <button 
-                onClick={() => window.print()} 
+                onClick={handlePrint} 
                 className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
                 title={t('documents.print')}
               >
                   <Printer className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={handleExportPdf}
+                disabled={isExporting} 
+                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg disabled:opacity-50"
+                title="Exportar a PDF"
+              >
+                  {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
               </button>
               <button 
                 onClick={handleSaveDocument}
