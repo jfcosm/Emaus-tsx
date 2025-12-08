@@ -1,121 +1,232 @@
 
-import React from 'react';
-import { dashboardStats, sacramentChartData } from '../services/mockData';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Users, Book, ScrollText, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-
-const icons = [Users, Book, ScrollText, Calendar];
+import { useSettings } from '../contexts/SettingsContext';
+import { getSacraments } from '../services/sacramentsService';
+import { getEvents } from '../services/agendaService';
+import { subscribeToPosts } from '../services/socialService';
+import { SacramentRecord, CalendarEvent, SocialPost, SacramentType } from '../types';
+import { 
+  Users, 
+  BookOpen, 
+  Calendar, 
+  ArrowRight, 
+  MapPin, 
+  Clock, 
+  Heart, 
+  MessageSquare, 
+  Sparkles,
+  Baby,
+  Cross
+} from 'lucide-react';
+import AppTour from './AppTour';
 
 const Dashboard: React.FC = () => {
   const { t } = useLanguage();
+  const { settings } = useSettings();
+  
+  // Data State
+  const [sacramentCounts, setSacramentCounts] = useState({ baptisms: 0, marriages: 0, confirmations: 0 });
+  const [latestPost, setLatestPost] = useState<SocialPost | null>(null);
+  const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Tour State
+  const [showTour, setShowTour] = useState(false);
 
-  // Translate Stats Logic
-  const translatedStats = dashboardStats.map((stat, i) => {
-    let label = '';
-    switch(i) {
-      case 0: label = t('dashboard.stats.baptisms'); break;
-      case 1: label = t('dashboard.stats.marriages'); break;
-      case 2: label = t('dashboard.stats.certificates'); break;
-      case 3: label = t('dashboard.stats.parishioners'); break;
-      default: label = stat.name;
-    }
-    return { ...stat, name: label };
-  });
+  useEffect(() => {
+    loadData();
+    const unsub = subscribeToPosts((posts) => {
+        if (posts.length > 0) {
+            setLatestPost(posts[0]);
+        }
+    });
+    return () => unsub();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    
+    // 1. Fetch Sacraments for Stats
+    const sacraments = await getSacraments();
+    const counts = {
+        baptisms: sacraments.filter(s => s.type === SacramentType.BAUTIZO).length,
+        marriages: sacraments.filter(s => s.type === SacramentType.MATRIMONIO).length,
+        confirmations: sacraments.filter(s => s.type === SacramentType.CONFIRMACION).length
+    };
+    setSacramentCounts(counts);
+
+    // 2. Fetch Agenda for Upcoming
+    const events = await getEvents();
+    // Sort by date and take next 3
+    const sorted = events
+        .filter(e => new Date(e.date) >= new Date(new Date().setHours(0,0,0,0)))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(0, 3);
+    setUpcomingEvents(sorted);
+
+    setLoading(false);
+  };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {translatedStats.map((stat, index) => {
-          const Icon = icons[index % icons.length];
-          // Determine color based on index for the new theme
-          const iconColorClass = index === 0 ? 'text-blue-500' : index === 1 ? 'text-pink-500' : index === 2 ? 'text-emerald-500' : 'text-purple-500';
-          const bgIconClass = index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-pink-500' : index === 2 ? 'bg-emerald-500' : 'bg-purple-500';
-          
-          return (
-            <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">{stat.name}</p>
-                  <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{stat.value}</h3>
-                </div>
-                <div className={`p-3 rounded-xl ${bgIconClass} bg-opacity-10 dark:bg-opacity-20`}>
-                  <Icon className={`w-6 h-6 ${iconColorClass}`} />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm">
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
-                  {stat.trend}
-                </span>
-                <span className="text-slate-400 dark:text-slate-500 ml-2">{t('dashboard.stats.vs_prev')}</span>
-              </div>
-            </div>
-          );
-        })}
+    <div className="space-y-8 animate-fade-in pb-12">
+      {/* 1. WELCOME HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+         <div>
+            <h1 className="text-3xl font-serif font-bold text-slate-900 dark:text-white mb-2">
+               {t('dashboard.welcome')} <span className="text-emaus-700 dark:text-gold-400">{settings.secretaryName || 'Secretaria'}</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">{t('dashboard.welcome_subtitle')}</p>
+         </div>
+         <div className="hidden md:block text-right">
+            <p className="text-xs font-bold uppercase text-slate-400 tracking-widest mb-1">Parroquia</p>
+            <p className="font-bold text-slate-800 dark:text-white">{settings.parishName}</p>
+         </div>
       </div>
 
+      {/* 2. TOUR CARD & STATS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white">{t('dashboard.sacramental_activity')}</h2>
-            <select className="text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg focus:ring-emaus-500">
-              <option>{t('dashboard.time_ranges.last_6_months')}</option>
-              <option>{t('dashboard.time_ranges.this_year')}</option>
-            </select>
-          </div>
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={sacramentChartData}>
-                <defs>
-                  <linearGradient id="colorBautizos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#be2558" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#be2558" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" strokeOpacity={0.1} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  itemStyle={{ color: '#1e293b' }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="bautizos" 
-                  stroke="#be2558" 
-                  strokeWidth={3}
-                  fillOpacity={1} 
-                  fill="url(#colorBautizos)" 
-                />
-                <Area type="monotone" dataKey="matrimonios" stroke="#c5a059" strokeWidth={3} fill="none" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+         {/* Tour Card (Hero) */}
+         <div className="lg:col-span-2 bg-gradient-to-r from-emaus-800 to-emaus-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl group cursor-pointer transition-transform hover:scale-[1.01]" onClick={() => setShowTour(true)}>
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+               <Sparkles className="w-32 h-32 text-white" />
+            </div>
+            <div className="relative z-10 max-w-lg">
+               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                  <Sparkles className="w-3 h-3" /> Tour 2024
+               </div>
+               <h2 className="text-2xl font-bold mb-3">{t('dashboard.tour_card.title')}</h2>
+               <p className="text-emaus-100 mb-6 leading-relaxed">
+                  {t('dashboard.tour_card.subtitle')}
+               </p>
+               <button 
+                 onClick={(e) => { e.stopPropagation(); setShowTour(true); }}
+                 className="bg-white text-emaus-900 px-6 py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-gold-50 transition-colors flex items-center gap-2"
+               >
+                  {t('dashboard.tour_card.btn')} <ArrowRight className="w-4 h-4" />
+               </button>
+            </div>
+         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4">{t('dashboard.upcoming_events')}</h2>
-          <div className="space-y-4">
-            {[1, 2, 3].map((_, i) => (
-              <div key={i} className="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer group">
-                <div className="flex-shrink-0 w-12 h-12 bg-emaus-50 dark:bg-emaus-900/30 text-emaus-700 dark:text-emaus-400 rounded-xl flex flex-col items-center justify-center border border-emaus-100 dark:border-emaus-900/50 group-hover:border-emaus-200">
-                  <span className="text-xs font-bold uppercase">Jun</span>
-                  <span className="text-lg font-bold">{15 + i}</span>
-                </div>
-                <div>
-                  <h4 className="text-slate-800 dark:text-slate-200 font-semibold group-hover:text-emaus-700 dark:group-hover:text-emaus-400 transition-colors">
-                    {i === 0 ? 'Misa de Confirmación' : i === 1 ? 'Reunión Pastoral' : 'Bautizos Comunitarios'}
-                  </h4>
-                  <p className="text-sm text-slate-500 dark:text-slate-500">10:00 AM • Templo Mayor</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <button className="w-full mt-6 py-2.5 text-sm font-medium text-emaus-700 dark:text-emaus-300 bg-emaus-50 dark:bg-emaus-900/20 hover:bg-emaus-100 dark:hover:bg-emaus-900/40 rounded-xl transition-colors">
-            {t('dashboard.view_full_agenda')}
-          </button>
-        </div>
+         {/* Quick Stats (Simple Cards) */}
+         <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
+               <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 rounded-full flex items-center justify-center mb-2">
+                  <Baby className="w-5 h-5" />
+               </div>
+               <span className="text-3xl font-bold text-slate-800 dark:text-white">{sacramentCounts.baptisms}</span>
+               <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">{t('dashboard.stats.baptisms')}</span>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
+               <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-full flex items-center justify-center mb-2">
+                  <Heart className="w-5 h-5" />
+               </div>
+               <span className="text-3xl font-bold text-slate-800 dark:text-white">{sacramentCounts.marriages}</span>
+               <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">{t('dashboard.stats.marriages')}</span>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center col-span-2">
+               <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                  <span className="text-xs font-bold uppercase text-slate-400">Total Archivo</span>
+               </div>
+               <span className="text-4xl font-bold text-slate-800 dark:text-white">
+                  {sacramentCounts.baptisms + sacramentCounts.marriages + sacramentCounts.confirmations}
+               </span>
+               <span className="text-sm text-slate-500">Registros Digitalizados</span>
+            </div>
+         </div>
       </div>
+
+      {/* 3. SOCIAL & AGENDA SPLIT */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+         
+         {/* LATEST COMMUNITY POST */}
+         <div className="space-y-4">
+            <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center gap-2">
+               <Users className="w-5 h-5 text-emaus-600" /> {t('dashboard.community_highlight')}
+            </h3>
+            
+            {latestPost ? (
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-emaus-300 transition-colors group">
+                   {latestPost.imageUrl && (
+                      <div className="h-40 bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+                         <img src={latestPost.imageUrl} alt="Post" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                         <div className="absolute bottom-3 left-4 text-white text-xs font-bold drop-shadow-md">
+                            {new Date(latestPost.timestamp).toLocaleDateString()}
+                         </div>
+                      </div>
+                   )}
+                   <div className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                         {/* Simple Avatar */}
+                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${latestPost.authorAvatarColor || 'bg-emaus-600'}`}>
+                            {latestPost.authorName.charAt(0)}
+                         </div>
+                         <div className="flex-1">
+                            <p className="text-sm font-bold text-slate-800 dark:text-white">{latestPost.authorPersonName || latestPost.authorName}</p>
+                            <p className="text-xs text-slate-500">{latestPost.authorParishName || 'Parroquia'}</p>
+                         </div>
+                      </div>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed line-clamp-3 mb-4">
+                         {latestPost.content}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs font-medium text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-3">
+                         <div className="flex items-center gap-1"><Heart className="w-4 h-4" /> {latestPost.likes.length}</div>
+                         <div className="flex items-center gap-1"><MessageSquare className="w-4 h-4" /> Comentar</div>
+                      </div>
+                   </div>
+                </div>
+            ) : (
+                <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-slate-400">
+                   <p>{t('dashboard.no_posts')}</p>
+                </div>
+            )}
+         </div>
+
+         {/* UPCOMING AGENDA */}
+         <div className="space-y-4">
+            <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center gap-2">
+               <Calendar className="w-5 h-5 text-purple-600" /> {t('dashboard.upcoming_events')}
+            </h3>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+               {upcomingEvents.length > 0 ? (
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                     {upcomingEvents.map(event => (
+                        <div key={event.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-4">
+                           <div className="flex-shrink-0 w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                              <span className="text-xs font-bold uppercase">{new Date(event.date).toLocaleString('es-ES', { month: 'short' })}</span>
+                              <span className="text-xl font-bold">{new Date(event.date).getDate()}</span>
+                           </div>
+                           <div className="flex-1">
+                              <h4 className="font-bold text-slate-800 dark:text-white text-sm">{event.title}</h4>
+                              <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {event.time}</span>
+                                 <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {event.location}</span>
+                              </div>
+                           </div>
+                           <div className={`w-2 h-2 rounded-full ${event.type === 'Misa' ? 'bg-purple-500' : 'bg-gold-500'}`}></div>
+                        </div>
+                     ))}
+                  </div>
+               ) : (
+                  <div className="p-8 text-center text-slate-400 text-sm">
+                     {t('dashboard.no_events')}
+                  </div>
+               )}
+               <div className="p-3 bg-slate-50 dark:bg-slate-950/50 border-t border-slate-100 dark:border-slate-800 text-center">
+                  <button className="text-xs font-bold text-emaus-700 dark:text-emaus-400 hover:underline">
+                     {t('dashboard.view_full_agenda')}
+                  </button>
+               </div>
+            </div>
+         </div>
+
+      </div>
+
+      {/* TOUR COMPONENT */}
+      {showTour && <AppTour onClose={() => setShowTour(false)} />}
     </div>
   );
 };

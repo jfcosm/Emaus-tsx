@@ -1,20 +1,23 @@
 
-import React, { useState } from 'react';
-import { mockEvents } from '../services/mockData';
+import React, { useState, useEffect } from 'react';
 import { CalendarEvent } from '../types';
-import { Calendar as CalendarIcon, Clock, MapPin, ChevronLeft, ChevronRight, Plus, X, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, ChevronLeft, ChevronRight, Plus, X, Filter, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getEvents, addEvent, deleteEvent } from '../services/agendaService';
 
 const Agenda: React.FC = () => {
   const { t } = useLanguage();
-  // Local state to manage events (initialized with mock data)
-  const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
+  
+  // Data State
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Filter State
   const [filterType, setFilterType] = useState<string>('all');
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form State
   const initialFormState: Omit<CalendarEvent, 'id'> = {
@@ -26,21 +29,44 @@ const Agenda: React.FC = () => {
   };
   const [newEvent, setNewEvent] = useState(initialFormState);
 
+  // --- LOAD DATA ---
+  useEffect(() => {
+      loadData();
+  }, []);
+
+  const loadData = async () => {
+      setLoading(true);
+      const data = await getEvents();
+      setEvents(data);
+      setLoading(false);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewEvent(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const eventToAdd: CalendarEvent = {
-      id: Date.now().toString(),
-      ...newEvent
-    } as CalendarEvent;
+    setIsSubmitting(true);
+    try {
+        await addEvent(newEvent);
+        await loadData(); // Refresh list
+        setIsModalOpen(false);
+        setNewEvent(initialFormState);
+    } catch (error) {
+        alert("Error al guardar evento");
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
 
-    setEvents(prev => [...prev, eventToAdd].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-    setIsModalOpen(false);
-    setNewEvent(initialFormState);
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (confirm("¿Eliminar este evento?")) {
+          await deleteEvent(id);
+          setEvents(prev => prev.filter(ev => ev.id !== id));
+      }
   };
 
   // Filter Logic
@@ -125,7 +151,7 @@ const Agenda: React.FC = () => {
         {/* Calendar View Placeholder */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Junio 2024</h3>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Calendario</h3>
             <div className="flex gap-2">
               <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" /></button>
               <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-400" /></button>
@@ -140,27 +166,25 @@ const Agenda: React.FC = () => {
               </div>
             ))}
             {Array.from({ length: 35 }).map((_, i) => {
-               // Logic to simulate event dots on calendar days
                const dayNumber = i + 1;
-               // Check if day has event based on FILTERED events
-               const dayEvents = filteredEvents.filter(e => parseInt(e.date.split('-')[2]) === dayNumber);
+               // Check if day has event based on FILTERED events (Simple check on day number string match for demo visuals)
+               // In real app, proper date matching logic is needed
+               const dayEvents = filteredEvents.filter(e => {
+                   const d = new Date(e.date);
+                   // Offset logic is complex for static grid, simple mapping for demo visual
+                   return d.getDate() === (i % 30) + 1; 
+               });
                const hasEvent = dayEvents.length > 0;
                
                return (
-                <div key={i} className={`bg-white dark:bg-slate-900 h-24 p-2 relative hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${i === 15 ? 'bg-gold-50 dark:bg-gold-900/10' : ''}`}>
-                  <span className={`text-sm font-medium ${i === 15 ? 'text-gold-700 dark:text-gold-400' : 'text-slate-700 dark:text-slate-300'}`}>{i + 1}</span>
+                <div key={i} className={`bg-white dark:bg-slate-900 h-24 p-2 relative hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors`}>
+                  <span className={`text-sm font-medium text-slate-700 dark:text-slate-300`}>{(i % 30) + 1}</span>
                   {hasEvent && (
                     <div className="mt-1 flex gap-1 flex-wrap justify-center">
                        {dayEvents.slice(0, 4).map((e, idx) => (
                          <div key={idx} className={`w-1.5 h-1.5 rounded-full ${getTypeDotColor(e.type)}`}></div>
                        ))}
                     </div>
-                  )}
-                  {/* Show one concise label if filter is specific */}
-                  {hasEvent && filterType !== 'all' && (
-                     <div className="mt-1 text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1 rounded truncate hidden md:block">
-                        {dayEvents[0].time}
-                     </div>
                   )}
                 </div>
               );
@@ -175,10 +199,18 @@ const Agenda: React.FC = () => {
           </h3>
           
           <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-            {filteredEvents.length > 0 ? (
+            {loading ? (
+                <div className="text-center py-4 text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto"/></div>
+            ) : filteredEvents.length > 0 ? (
               filteredEvents.map((event) => (
-                <div key={event.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-emaus-200 dark:hover:border-emaus-800 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
+                <div key={event.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-emaus-200 dark:hover:border-emaus-800 transition-colors group relative">
+                  <button 
+                    onClick={(e) => handleDelete(event.id, e)}
+                    className="absolute top-2 right-2 p-1 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                      <Trash2 className="w-4 h-4" />
+                  </button>
+                  <div className="flex justify-between items-start mb-2 pr-4">
                     <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${getTypeColorClass(event.type)}`}>
                       {t(`agenda.modal.types.${event.type}`)}
                     </span>
@@ -211,7 +243,7 @@ const Agenda: React.FC = () => {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.event_title')}</label>
+                <label className="block text-xs font-bold text-slate-900 dark:text-slate-300 uppercase mb-1">{t('agenda.modal.event_title')}</label>
                 <input
                   type="text"
                   name="title"
@@ -219,43 +251,43 @@ const Agenda: React.FC = () => {
                   value={newEvent.title}
                   onChange={handleInputChange}
                   placeholder="Ej: Misa de Domingo"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white text-slate-900"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.date')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-300 uppercase mb-1">{t('agenda.modal.date')}</label>
                   <input
                     type="date"
                     name="date"
                     required
                     value={newEvent.date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white text-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.time')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-300 uppercase mb-1">{t('agenda.modal.time')}</label>
                   <input
                     type="time"
                     name="time"
                     required
                     value={newEvent.time}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white text-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.type')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-300 uppercase mb-1">{t('agenda.modal.type')}</label>
                   <select
                     name="type"
                     value={newEvent.type}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white text-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   >
                     {eventTypes.map(type => (
                        <option key={type} value={type}>{t(`agenda.modal.types.${type}`)}</option>
@@ -263,7 +295,7 @@ const Agenda: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-900 bg-white uppercase mb-1">{t('agenda.modal.location')}</label>
+                  <label className="block text-xs font-bold text-slate-900 dark:text-slate-300 uppercase mb-1">{t('agenda.modal.location')}</label>
                   <input
                     type="text"
                     name="location"
@@ -271,7 +303,7 @@ const Agenda: React.FC = () => {
                     value={newEvent.location}
                     onChange={handleInputChange}
                     placeholder="Ej: Templo"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white text-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -286,9 +318,10 @@ const Agenda: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-emaus-700 text-white rounded-lg hover:bg-emaus-800 font-medium shadow-sm transition-colors"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-emaus-700 text-white rounded-lg hover:bg-emaus-800 font-medium shadow-sm transition-colors flex justify-center"
                 >
-                  {t('agenda.modal.save')}
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : t('agenda.modal.save')}
                 </button>
               </div>
             </form>
