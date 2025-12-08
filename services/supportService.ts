@@ -1,9 +1,20 @@
+
 // Version 1.11.0 - Support Attachments
 import { db, auth, storage } from './firebase';
 import { collection, addDoc, onSnapshot, query, where, orderBy, updateDoc, doc, serverTimestamp, getDoc, getDocs } from 'firebase/firestore';
 import { SupportTicket, TicketMessage, TicketStatus, TicketPriority } from '../types';
 
 const TICKETS_COLLECTION = 'support_tickets';
+
+// Generate a random ticket code (e.g., TKT-A1B2)
+const generateTicketCode = (): string => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I, O, 1, 0 to avoid confusion
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `TKT-${result}`;
+};
 
 // --- ATTACHMENT UPLOAD ---
 export const uploadTicketAttachment = async (file: File): Promise<string> => {
@@ -34,7 +45,10 @@ export const createTicket = async (
     const user = auth.currentUser;
     if (!user) throw new Error("No user authenticated");
 
+    const ticketCode = generateTicketCode();
+
     const newTicket: Omit<SupportTicket, 'id'> = {
+        ticketCode, // Added code
         userId: user.uid,
         userEmail: user.email || 'unknown',
         parishName: parishName || 'Parroquia',

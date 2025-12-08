@@ -1,3 +1,4 @@
+
 // Version 1.11.0 - Support Attachments
 import { LucideIcon } from 'lucide-react';
 
@@ -272,6 +273,7 @@ export interface TicketMessage {
 
 export interface SupportTicket {
   id: string;
+  ticketCode: string; // New Alphanumeric ID
   userId: string;
   userEmail: string;
   parishName?: string;
