@@ -1,5 +1,5 @@
 
-// Version 1.12.0 - UI Revamp
+// Version 1.12.1 - Fix User Icon Import
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -32,7 +32,8 @@ import {
   Download,
   Loader2,
   Search,
-  Filter
+  Filter,
+  User // Added missing import
 } from 'lucide-react';
 
 const PRIORITY_COLORS = {
