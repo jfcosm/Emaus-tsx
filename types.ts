@@ -269,6 +269,7 @@ export interface TicketMessage {
   text: string;
   timestamp: any;
   isAdmin: boolean;
+  isSystem?: boolean; // New: For status change messages
 }
 
 export interface SupportTicket {

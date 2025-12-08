@@ -1,5 +1,5 @@
 
-// Version 1.12.1 - Fix User Icon Import
+// Version 1.13.0 - Fix User Import & System Messages
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -33,7 +33,8 @@ import {
   Loader2,
   Search,
   Filter,
-  User // Added missing import
+  User, // Added User import
+  Hash
 } from 'lucide-react';
 
 const PRIORITY_COLORS = {
@@ -273,14 +274,15 @@ const Support: React.FC = () => {
                                 className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-all border-l-4 ${selectedTicket?.id === ticket.id ? 'bg-slate-50 dark:bg-slate-800 border-l-emaus-600' : 'border-l-transparent'}`}
                             >
                                 <div className="flex justify-between items-start mb-1">
-                                    <span className="font-mono text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 rounded">
+                                    <span className="font-mono text-[10px] text-slate-500 bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-bold flex items-center gap-1">
+                                        <Hash className="w-3 h-3" />
                                         {ticket.ticketCode || 'N/A'}
                                     </span>
                                     {ticket.updatedAt && (
                                         <span className="text-[10px] text-slate-400">{formatDateTime(ticket.updatedAt)}</span>
                                     )}
                                 </div>
-                                <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-start justify-between gap-2 mt-2">
                                     <div>
                                         <h4 className={`text-sm mb-1 ${ticket.unreadUser || (isAdmin && ticket.unreadAdmin) ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300'}`}>
                                             {ticket.subject}
@@ -444,6 +446,17 @@ const Support: React.FC = () => {
                       </div>
 
                       {messages.map(msg => {
+                          // System messages render as a center badge
+                          if (msg.isSystem) {
+                              return (
+                                  <div key={msg.id} className="flex justify-center my-4">
+                                      <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-3 py-1 rounded-full font-medium border border-slate-300 dark:border-slate-700">
+                                          {msg.text} • {formatDateTime(msg.timestamp)}
+                                      </span>
+                                  </div>
+                              );
+                          }
+
                           const isMe = (isAdmin && msg.isAdmin) || (!isAdmin && !msg.isAdmin);
                           return (
                               <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>

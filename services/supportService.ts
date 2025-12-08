@@ -84,10 +84,11 @@ export const createTicket = async (
 
 // For regular users
 export const subscribeToUserTickets = (userId: string, callback: (tickets: SupportTicket[]) => void) => {
+    // FIX: Removing orderBy from the query prevents "Missing Index" errors on Firestore for simple queries
+    // We sort locally in the callback instead.
     const q = query(
         collection(db, TICKETS_COLLECTION),
-        where('userId', '==', userId),
-        orderBy('updatedAt', 'desc')
+        where('userId', '==', userId)
     );
 
     return onSnapshot(q, (snapshot) => {
@@ -95,6 +96,14 @@ export const subscribeToUserTickets = (userId: string, callback: (tickets: Suppo
             id: doc.id,
             ...doc.data()
         } as SupportTicket));
+        
+        // Client-side sort
+        tickets.sort((a, b) => {
+            const dateA = a.updatedAt?.toDate ? a.updatedAt.toDate() : new Date(a.updatedAt || 0);
+            const dateB = b.updatedAt?.toDate ? b.updatedAt.toDate() : new Date(b.updatedAt || 0);
+            return dateB.getTime() - dateA.getTime();
+        });
+
         callback(tickets);
     });
 };
@@ -140,7 +149,8 @@ export const sendTicketMessage = async (ticketId: string, text: string, isAdmin:
         senderId: user.uid,
         text,
         timestamp: serverTimestamp(),
-        isAdmin
+        isAdmin,
+        isSystem: false
     });
 
     // Update ticket metadata
@@ -156,8 +166,29 @@ export const sendTicketMessage = async (ticketId: string, text: string, isAdmin:
 // Update Status
 export const updateTicketStatus = async (ticketId: string, status: TicketStatus) => {
     const ticketRef = doc(db, TICKETS_COLLECTION, ticketId);
+    
+    // Status translation for message
+    const statusLabels: Record<string, string> = {
+        open: 'Abierto',
+        in_progress: 'En Progreso',
+        resolved: 'Resuelto',
+        closed: 'Cerrado'
+    };
+
+    const user = auth.currentUser;
+
+    // 1. Update Status
     await updateDoc(ticketRef, {
         status,
         updatedAt: serverTimestamp()
+    });
+
+    // 2. Add System Message
+    await addDoc(collection(db, TICKETS_COLLECTION, ticketId, 'messages'), {
+        senderId: user?.uid || 'system',
+        text: `Estado actualizado a: ${statusLabels[status] || status}`,
+        timestamp: serverTimestamp(),
+        isAdmin: true, // System messages act as admin messages visually
+        isSystem: true
     });
 };
