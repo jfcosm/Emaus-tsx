@@ -1,16 +1,18 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Image as ImageIcon, Camera, Loader2, Cross, Book, Church, Heart, Sun, Star, Music, Users, Upload } from 'lucide-react';
+import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Image as ImageIcon, Camera, Loader2, Cross, Book, Church, Heart, Sun, Star, Music, Users, Upload, Stamp, PenTool, Sparkles } from 'lucide-react';
 import { ParishSettings } from '../types';
 import { getSettings, saveSettings, initializeParishDb, uploadParishImage } from '../services/settingsService';
+import { processImageForDocument } from '../services/imageUtils';
 
 // Import Firebase Compat for Admin tools
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
-// Version 1.9.9 - Force Sync
+// Version 1.10.0 - Signatures & Seals
 const Settings: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
@@ -31,8 +33,11 @@ const Settings: React.FC = () => {
   // Visual Identity State
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingProfile, setUploadingProfile] = useState(false);
+  const [processingAsset, setProcessingAsset] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
+  const signatureInputRef = useRef<HTMLInputElement>(null);
+  const sealInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<ParishSettings>({
     parishName: '',
@@ -48,7 +53,9 @@ const Settings: React.FC = () => {
     avatarIcon: 'church',
     avatarColor: 'bg-emaus-600',
     coverImage: '',
-    profileImage: ''
+    profileImage: '',
+    celebrantSignature: '',
+    parishSeal: ''
   });
 
   const avatarIcons = [
@@ -103,6 +110,33 @@ const Settings: React.FC = () => {
 
   const handleAvatarColorChange = (colorClass: string) => {
       setFormData(prev => ({ ...prev, avatarColor: colorClass }));
+  };
+
+  const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'signature' | 'seal') => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setProcessingAsset(true);
+      try {
+          // 1. Client-side AI Process (Clean background)
+          const cleanBase64 = await processImageForDocument(file);
+          
+          // 2. Update State directly (Storing Base64 in settings for simplicity in this demo, 
+          // in prod better to upload blob to storage and get URL, but this works for "instant" feel)
+          setFormData(prev => ({
+              ...prev,
+              [type === 'signature' ? 'celebrantSignature' : 'parishSeal']: cleanBase64
+          }));
+
+          setSuccessMsg('Imagen procesada y limpia.');
+      } catch (error) {
+          console.error(error);
+          alert("Error al procesar la imagen.");
+      } finally {
+          setProcessingAsset(false);
+          // Reset input
+          e.target.value = '';
+      }
   };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -312,7 +346,7 @@ const Settings: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
            <form onSubmit={handleSubmit} className="space-y-6">
               
-              {/* SECTION 1: VISUAL IDENTITY (NEW) */}
+              {/* SECTION 1: VISUAL IDENTITY */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                      <ImageIcon className="w-5 h-5 text-emaus-600" /> {t('settings.identity')}
@@ -437,7 +471,79 @@ const Settings: React.FC = () => {
                   </div>
               </div>
 
-              {/* SECTION 2: INSTITUTIONAL DATA */}
+              {/* SECTION 2: DIGITAL ASSETS (NEW) */}
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                     <Stamp className="w-5 h-5 text-emaus-600" /> Firmas y Timbres Digitales
+                  </h3>
+                  <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl mb-6 flex items-start gap-3 border border-blue-100 dark:border-blue-900/30">
+                      <Sparkles className="w-5 h-5 text-blue-500 mt-0.5" />
+                      <div>
+                          <p className="text-sm font-bold text-blue-800 dark:text-blue-300">Procesamiento Inteligente Emaús</p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                              Sube una foto de la firma o el timbre en papel blanco. Nuestro sistema eliminará el fondo automáticamente para que se vea profesional en los certificados.
+                          </p>
+                      </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Signature Upload */}
+                      <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
+                              <PenTool className="w-4 h-4" /> Firma del Párroco
+                          </label>
+                          <div 
+                            className="relative h-32 rounded-xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-emaus-400 transition-colors group"
+                            onClick={() => signatureInputRef.current?.click()}
+                          >
+                              {formData.celebrantSignature ? (
+                                  <img src={formData.celebrantSignature} alt="Firma" className="h-full object-contain p-2" />
+                              ) : (
+                                  <span className="text-xs text-slate-400">Subir Firma (JPG/PNG)</span>
+                              )}
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                                  {processingAsset ? <Loader2 className="w-6 h-6 animate-spin text-emaus-600" /> : <Upload className="w-6 h-6 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                              </div>
+                          </div>
+                          <input 
+                            ref={signatureInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleAssetUpload(e, 'signature')}
+                          />
+                      </div>
+
+                      {/* Seal Upload */}
+                      <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
+                              <Stamp className="w-4 h-4" /> Timbre Parroquial
+                          </label>
+                          <div 
+                            className="relative h-32 rounded-xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-emaus-400 transition-colors group"
+                            onClick={() => sealInputRef.current?.click()}
+                          >
+                              {formData.parishSeal ? (
+                                  <img src={formData.parishSeal} alt="Timbre" className="h-full object-contain p-2" />
+                              ) : (
+                                  <span className="text-xs text-slate-400">Subir Timbre (JPG/PNG)</span>
+                              )}
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                                  {processingAsset ? <Loader2 className="w-6 h-6 animate-spin text-emaus-600" /> : <Upload className="w-6 h-6 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                              </div>
+                          </div>
+                          <input 
+                            ref={sealInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleAssetUpload(e, 'seal')}
+                          />
+                      </div>
+                  </div>
+              </div>
+
+              {/* SECTION 3: INSTITUTIONAL DATA */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                      <Building className="w-5 h-5 text-emaus-600" /> Datos de la Parroquia
@@ -518,7 +624,7 @@ const Settings: React.FC = () => {
                   </div>
               </div>
 
-              {/* SECTION 3: STAFF */}
+              {/* SECTION 4: STAFF */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                      <FileSignature className="w-5 h-5 text-emaus-600" /> Datos del Personal

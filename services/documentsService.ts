@@ -58,9 +58,7 @@ export const deleteDocument = async (id: string): Promise<void> => {
   }
 };
 
-// Eliminar carpeta y su contenido (Recursivo simple para 1 nivel o uso en UI para filtrar)
-// Nota: En una app real, esto debería ser una Cloud Function, pero aquí lo haremos en cliente si es necesario,
-// o simplemente borramos la carpeta y dejamos los archivos huérfanos (que no se verán).
+// Eliminar carpeta y su contenido
 export const deleteFolderAndContents = async (folderId: string): Promise<void> => {
     try {
         // 1. Borrar la carpeta
@@ -79,3 +77,34 @@ export const deleteFolderAndContents = async (folderId: string): Promise<void> =
         throw error;
     }
 }
+
+// Utility: Ensure folder structure exists
+export const ensureFolderStructure = async (path: string[]): Promise<string | null> => {
+    let parentId: string | null = null;
+
+    for (const folderName of path) {
+        // Find folder with this name and parentId
+        let q;
+        if (parentId === null) {
+             q = query(collection(db, COLLECTION_NAME), where('name', '==', folderName), where('type', '==', 'folder'), where('parentId', '==', null));
+        } else {
+             q = query(collection(db, COLLECTION_NAME), where('name', '==', folderName), where('type', '==', 'folder'), where('parentId', '==', parentId));
+        }
+        
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+            parentId = snapshot.docs[0].id;
+        } else {
+            // Create folder
+            parentId = await createDocument({
+                name: folderName,
+                type: 'folder',
+                parentId: parentId,
+                lastModified: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                size: '--'
+            });
+        }
+    }
+    return parentId;
+};

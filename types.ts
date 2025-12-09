@@ -152,6 +152,9 @@ export interface ParishSettings {
   avatarColor?: string; // hex code
   coverImage?: string; // URL
   profileImage?: string; // URL for circular profile picture
+  // Documents Assets
+  celebrantSignature?: string; // URL or Base64
+  parishSeal?: string; // URL or Base64
 }
 
 export interface ParishDirectoryEntry {
