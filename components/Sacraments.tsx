@@ -24,20 +24,7 @@ const RutInput: React.FC<RutInputProps> = ({ value, onChange, label, className, 
     const isEmpty = !value || value.trim() === '';
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // User types, we clean and format on the fly or just let them type and format on blur?
-        // Prompt says "el guion se escribira automaticamente".
-        // Let's format as they type (basic) or just handle raw input and format the display value.
         const raw = e.target.value;
-        // If user is deleting, allow it. If user types, enforce format.
-        // Simple approach: Format on every change if possible, but handle cursor.
-        // For simplicity in React without complex cursor management:
-        // We will just let them type and apply formatRut logic which is robust.
-        
-        // However, standard behavior is allowing typing and formatting. 
-        // Let's just update the value with formatted version if it looks like a RUT.
-        
-        // Edge case: don't double format if deleting.
-        // We will pass the formatted value back.
         const clean = cleanRut(raw);
         const formatted = formatRut(clean);
         onChange(formatted);
@@ -308,8 +295,11 @@ const Sacraments: React.FC = () => {
                       <script src="https://cdn.tailwindcss.com"></script>
                       <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
                       <style>
-                          body { -webkit-print-color-adjust: exact; font-family: 'Cinzel', serif; }
-                          @media print { body { padding: 0; margin: 0; } }
+                          body { -webkit-print-color-adjust: exact; font-family: 'Cinzel', serif; margin: 0; padding: 0; }
+                          @media print { 
+                              @page { size: A4; margin: 0; }
+                              body { padding: 0; margin: 0; } 
+                          }
                       </style>
                   </head>
                   <body>${content}</body>
@@ -329,10 +319,10 @@ const Sacraments: React.FC = () => {
       if (!certRef.current) return;
       const element = certRef.current;
       const opt = {
-          margin: 10,
+          margin: 0,
           filename: `Certificado_${selectedRecord?.personName || 'Sacramento'}.pdf`,
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2 },
+          html2canvas: { scale: 2, scrollY: 0 },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
       html2pdf().set(opt).from(element).save();
@@ -827,73 +817,86 @@ const Sacraments: React.FC = () => {
            </div>
         </div>
 
-        {/* HIDDEN CERTIFICATE TEMPLATE */}
+        {/* HIDDEN CERTIFICATE TEMPLATE - OPTIMIZED FOR A4 SINGLE PAGE */}
         <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-            <div ref={certRef} className="bg-white text-black p-12 max-w-[210mm] min-h-[297mm] relative font-serif">
-                <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold uppercase">{settings.parishName || 'Parroquia Santa María'}</h1>
-                    <p className="text-sm uppercase tracking-widest">{settings.diocese || 'Diócesis'}</p>
-                    <div className="w-20 h-1 bg-black mx-auto mt-4"></div>
-                </div>
-                
-                <h2 className="text-center text-3xl font-bold underline mb-12 uppercase mt-12">
-                    CERTIFICADO DE {selectedRecord.type}
-                </h2>
-
-                <div className="text-lg leading-loose text-justify px-8">
-                    <p className="mb-6">
-                        El Párroco que suscribe certifica que en el Libro de <strong>{selectedRecord.type}</strong> N° <strong>{selectedRecord.book}</strong>, 
-                        página <strong>{selectedRecord.page}</strong>, se encuentra inscrita la partida correspondiente a:
-                    </p>
-                    
-                    <h3 className="text-2xl font-bold text-center my-8 uppercase">{getDisplayName(selectedRecord)}</h3>
-                    
-                    {selectedRecord.rut && <p className="text-center mb-4">RUT: {selectedRecord.rut}</p>}
-
-                    <p>
-                        Quien recibió el sacramento el día <strong>{new Date(selectedRecord.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong>,
-                        administrado por el Reverendo <strong>{selectedRecord.celebrant}</strong>.
-                    </p>
-
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                        {selectedRecord.fatherName && <p><strong>Padre:</strong> {selectedRecord.fatherName}</p>}
-                        {selectedRecord.motherName && <p><strong>Madre:</strong> {selectedRecord.motherName}</p>}
-                        {selectedRecord.godparents && <p className="col-span-2"><strong>Padrinos:</strong> {selectedRecord.godparents}</p>}
+            <div ref={certRef} className="bg-white text-black w-[210mm] h-[297mm] p-12 font-serif flex flex-col justify-between box-border">
+                {/* CONTENT WRAPPER */}
+                <div className="flex flex-col items-center flex-1">
+                    {/* HEADER */}
+                    <div className="text-center mb-6 w-full">
+                        <h1 className="text-xl font-bold uppercase tracking-widest">{settings.parishName || 'Parroquia Santa María'}</h1>
+                        <p className="text-xs uppercase tracking-widest mt-1 text-gray-600">{settings.diocese || 'Diócesis'}</p>
+                        <div className="w-16 h-0.5 bg-black mx-auto mt-4"></div>
                     </div>
+                    
+                    {/* TITLE */}
+                    <h2 className="text-center text-3xl font-bold mb-8 uppercase tracking-wide">
+                        Certificado de {selectedRecord.type}
+                    </h2>
 
-                    <p className="mt-8 text-sm italic">
-                        {selectedRecord.observations ? `Nota Marginal: ${selectedRecord.observations}` : ''}
-                    </p>
-                </div>
+                    {/* BODY */}
+                    <div className="text-base leading-relaxed text-justify w-full px-4">
+                        <p className="mb-4">
+                            El Párroco que suscribe certifica que en el Libro de <strong>{selectedRecord.type}</strong> N° <strong>{selectedRecord.book}</strong>, 
+                            página <strong>{selectedRecord.page}</strong>, se encuentra inscrita la partida correspondiente a:
+                        </p>
+                        
+                        <div className="my-6 text-center">
+                            <h3 className="text-2xl font-bold uppercase">{getDisplayName(selectedRecord)}</h3>
+                            {selectedRecord.rut && <p className="text-sm mt-1">RUT: {selectedRecord.rut}</p>}
+                        </div>
 
-                <div className="mt-24 flex justify-between items-end px-12">
-                    {/* PARISH SEAL */}
-                    <div className="flex flex-col items-center justify-center w-40">
-                        {settings.parishSeal ? (
-                            <img src={settings.parishSeal} alt="Sello Parroquial" className="w-32 h-32 object-contain opacity-80" />
-                        ) : (
-                            <div className="w-24 h-24 border-4 border-double border-slate-300 rounded-full flex items-center justify-center text-xs text-center p-2 text-slate-300 font-bold uppercase transform -rotate-12">
-                                Sello Parroquial
-                            </div>
+                        <p className="mb-4">
+                            Quien recibió el sacramento el día <strong>{new Date(selectedRecord.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong>,
+                            administrado por el Reverendo <strong>{selectedRecord.celebrant}</strong>.
+                        </p>
+
+                        <div className="mt-6 grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+                            {selectedRecord.fatherName && <div className="col-span-1"><strong>Padre:</strong> {selectedRecord.fatherName}</div>}
+                            {selectedRecord.motherName && <div className="col-span-1"><strong>Madre:</strong> {selectedRecord.motherName}</div>}
+                            {selectedRecord.godparents && <div className="col-span-2 mt-2"><strong>Padrinos:</strong> {selectedRecord.godparents}</div>}
+                            {selectedRecord.witnesses && <div className="col-span-2 mt-2"><strong>Testigos:</strong> {selectedRecord.witnesses}</div>}
+                        </div>
+
+                        {selectedRecord.observations && (
+                            <p className="mt-6 text-sm italic border-l-2 border-gray-300 pl-3">
+                                Nota Marginal: {selectedRecord.observations}
+                            </p>
                         )}
                     </div>
-
-                    {/* PRIEST SIGNATURE */}
-                    <div className="text-center w-64">
-                        <div className="h-20 flex items-end justify-center mb-2">
-                            {settings.celebrantSignature ? (
-                                <img src={settings.celebrantSignature} alt="Firma" className="max-h-full max-w-full object-contain" />
-                            ) : null}
-                        </div>
-                        <div className="border-t border-black pt-2">
-                            <p className="font-bold">{settings.priestName}</p>
-                            <p className="text-sm">Párroco</p>
-                        </div>
-                    </div>
                 </div>
 
-                <div className="absolute bottom-12 left-0 right-0 text-center text-xs text-gray-500">
-                    Documento generado el {new Date().toLocaleDateString()} a través de Emaús Gestión Parroquial.
+                {/* FOOTER */}
+                <div className="w-full px-4 mb-4 mt-8">
+                    <div className="flex justify-between items-end">
+                        {/* PARISH SEAL */}
+                        <div className="flex flex-col items-center justify-center w-40 h-40 relative">
+                            {settings.parishSeal ? (
+                                <img src={settings.parishSeal} alt="Sello" className="w-32 h-32 object-contain opacity-90 mix-blend-multiply" />
+                            ) : (
+                                <div className="w-24 h-24 border-4 border-double border-gray-300 rounded-full flex items-center justify-center text-[10px] text-center p-2 text-gray-300 font-bold uppercase transform -rotate-12">
+                                    Sello Parroquial
+                                </div>
+                            )}
+                        </div>
+
+                        {/* PRIEST SIGNATURE */}
+                        <div className="text-center w-64">
+                            <div className="h-24 flex items-end justify-center mb-2">
+                                {settings.celebrantSignature && (
+                                    <img src={settings.celebrantSignature} alt="Firma" className="max-h-full max-w-full object-contain" />
+                                )}
+                            </div>
+                            <div className="border-t border-black pt-2">
+                                <p className="font-bold text-sm uppercase">{settings.priestName}</p>
+                                <p className="text-xs uppercase tracking-wide">Párroco</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="text-center text-[10px] text-gray-400 mt-8 uppercase tracking-wider">
+                        Documento generado el {new Date().toLocaleDateString()} • Emaús Gestión Parroquial
+                    </div>
                 </div>
             </div>
         </div>
