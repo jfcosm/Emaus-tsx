@@ -1,13 +1,139 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { SacramentType, SacramentRecord } from '../types';
-import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database, Heart, Cross, Baby, ArrowLeft, ChevronRight, Printer, Cloud, Check } from 'lucide-react';
+import { Search, Plus, Filter, Download, X, User, Users, Calendar, BookOpen, FileText, Edit2, Save, RotateCcw, Database, Heart, Cross, Baby, ArrowLeft, ChevronRight, Printer, Cloud, Check, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { getSacraments, updateSacrament, addSacrament, seedDatabase } from '../services/sacramentsService';
 import { createDocument, ensureFolderStructure } from '../services/documentsService';
+import { formatRut, validateRut, cleanRut } from '../services/rutUtils';
 
 declare var html2pdf: any;
+
+// --- REUSABLE RUT INPUT COMPONENT ---
+interface RutInputProps {
+    value: string;
+    onChange: (val: string) => void;
+    label?: string;
+    className?: string;
+    placeholder?: string;
+}
+
+const RutInput: React.FC<RutInputProps> = ({ value, onChange, label, className, placeholder = '12.345.678-9' }) => {
+    const isValid = validateRut(value);
+    const isEmpty = !value || value.trim() === '';
+    
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // User types, we clean and format on the fly or just let them type and format on blur?
+        // Prompt says "el guion se escribira automaticamente".
+        // Let's format as they type (basic) or just handle raw input and format the display value.
+        const raw = e.target.value;
+        // If user is deleting, allow it. If user types, enforce format.
+        // Simple approach: Format on every change if possible, but handle cursor.
+        // For simplicity in React without complex cursor management:
+        // We will just let them type and apply formatRut logic which is robust.
+        
+        // However, standard behavior is allowing typing and formatting. 
+        // Let's just update the value with formatted version if it looks like a RUT.
+        
+        // Edge case: don't double format if deleting.
+        // We will pass the formatted value back.
+        const clean = cleanRut(raw);
+        const formatted = formatRut(clean);
+        onChange(formatted);
+    };
+
+    return (
+        <div className={className}>
+            {label && <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{label}</label>}
+            <div className="relative">
+                <input 
+                    type="text" 
+                    value={value} 
+                    onChange={handleChange}
+                    placeholder={placeholder}
+                    maxLength={12}
+                    className={`w-full border rounded px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:outline-none pr-10 
+                        ${isEmpty ? 'border-slate-300 dark:border-slate-600 focus:ring-emaus-500' : 
+                          isValid ? 'border-green-500 focus:ring-green-500' : 'border-red-500 focus:ring-red-500'}`}
+                />
+                {!isEmpty && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        {isValid ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <X className="w-5 h-5 text-red-500" />}
+                    </div>
+                )}
+            </div>
+            {!isEmpty && !isValid && (
+                <p className="text-[10px] text-red-500 mt-1">RUT inválido</p>
+            )}
+        </div>
+    );
+};
+
+// --- REUSABLE NAME LIST INPUT (TAGS) ---
+interface NameListInputProps {
+    value: string; // Comma separated string from DB
+    onChange: (val: string) => void;
+    label: string;
+    placeholder?: string;
+    className?: string;
+}
+
+const NameListInput: React.FC<NameListInputProps> = ({ value, onChange, label, placeholder, className }) => {
+    const [inputValue, setInputValue] = useState('');
+    const names = value ? value.split(',').map(s => s.trim()).filter(s => s !== '') : [];
+
+    const addName = () => {
+        if (!inputValue.trim()) return;
+        const newNames = [...names, inputValue.trim()];
+        onChange(newNames.join(', '));
+        setInputValue('');
+    };
+
+    const removeName = (index: number) => {
+        const newNames = names.filter((_, i) => i !== index);
+        onChange(newNames.join(', '));
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            addName();
+        }
+        if (e.key === 'Backspace' && inputValue === '' && names.length > 0) {
+            removeName(names.length - 1);
+        }
+    };
+
+    return (
+        <div className={className}>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{label}</label>
+            <div className="w-full border border-slate-300 dark:border-slate-600 rounded px-2 py-2 bg-white dark:bg-slate-800 focus-within:ring-2 focus-within:ring-emaus-500 focus-within:border-transparent flex flex-wrap gap-2 min-h-[42px]">
+                {names.map((name, idx) => (
+                    <span key={idx} className="bg-emaus-100 dark:bg-emaus-900/40 text-emaus-800 dark:text-emaus-200 text-sm px-2 py-1 rounded-full flex items-center gap-1 animate-fade-in">
+                        {name}
+                        <button 
+                            onClick={() => removeName(idx)}
+                            className="hover:bg-emaus-200 dark:hover:bg-emaus-800 rounded-full p-0.5 transition-colors"
+                        >
+                            <X className="w-3 h-3" />
+                        </button>
+                    </span>
+                ))}
+                <input 
+                    type="text" 
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onBlur={addName} // Add on blur as well
+                    placeholder={names.length === 0 ? placeholder : ''}
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white min-w-[120px] text-sm p-1"
+                />
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">Presiona Enter o Coma para agregar nombres</p>
+        </div>
+    );
+};
 
 const Sacraments: React.FC = () => {
   const { t } = useLanguage();
@@ -21,6 +147,7 @@ const Sacraments: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<SacramentRecord | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   
   // Certificate State
   const [generatingCert, setGeneratingCert] = useState(false);
@@ -63,6 +190,7 @@ const Sacraments: React.FC = () => {
       page: '',
       parish: settings.parishName || 'Parroquia Santa María',
       personName: '',
+      rut: '', // Initialize generic RUT
       fatherName: '',
       motherName: '',
     };
@@ -79,13 +207,15 @@ const Sacraments: React.FC = () => {
       }
       const matchSearch = 
         nameToSearch.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        item.celebrant.toLowerCase().includes(searchTerm.toLowerCase());
+        item.celebrant.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.rut || '').includes(searchTerm);
       return matchType && matchSearch;
   });
 
   const handleCloseDetail = () => {
     setSelectedRecord(null);
     setIsEditing(false);
+    setValidationError(null);
   };
 
   const handleInputChange = (field: keyof SacramentRecord, value: any) => {
@@ -94,8 +224,35 @@ const Sacraments: React.FC = () => {
     }
   };
 
+  const validateForm = (): boolean => {
+      if (!editForm) return false;
+      
+      // Generic RUT check
+      if (editForm.rut && !validateRut(editForm.rut)) {
+          setValidationError("El RUT ingresado no es válido.");
+          return false;
+      }
+
+      // Marriage Specifics
+      if (editForm.type === SacramentType.MATRIMONIO) {
+          if (editForm.groomRut && !validateRut(editForm.groomRut)) {
+              setValidationError("El RUT del novio no es válido.");
+              return false;
+          }
+          if (editForm.brideRut && !validateRut(editForm.brideRut)) {
+              setValidationError("El RUT de la novia no es válido.");
+              return false;
+          }
+      }
+
+      setValidationError(null);
+      return true;
+  };
+
   const handleSave = async () => {
     if (editForm) {
+      if (!validateForm()) return; // Stop if validation fails
+
       try {
         if (editForm.id) {
           await updateSacrament(editForm.id, editForm);
@@ -116,6 +273,7 @@ const Sacraments: React.FC = () => {
   };
 
   const handleCancelEdit = () => {
+    setValidationError(null);
     if (!selectedRecord?.id) {
       setSelectedRecord(null);
     } else {
@@ -277,15 +435,22 @@ const Sacraments: React.FC = () => {
         return (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className={commonLabelClass}>Nombre Bautizado</label>
-                {isEditing ? (
-                  <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className={commonInputClass} />
-                ) : <p className={`text-lg font-bold ${commonTextClass}`}>{editForm.personName}</p>}
+              <div className="md:col-span-2 grid grid-cols-3 gap-4">
+                  <div className="col-span-2">
+                    <label className={commonLabelClass}>Nombre Bautizado</label>
+                    {isEditing ? (
+                      <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className={commonInputClass} />
+                    ) : <p className={`text-lg font-bold ${commonTextClass}`}>{editForm.personName}</p>}
+                  </div>
+                  <div>
+                    <label className={commonLabelClass}>RUT</label>
+                    {isEditing ? (
+                        <RutInput value={editForm.rut || ''} onChange={(val) => handleInputChange('rut', val)} />
+                    ) : <p className={commonTextClass}>{editForm.rut || '-'}</p>}
+                  </div>
               </div>
-              <CatechesisCheckbox />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                <div>
                  <label className={commonLabelClass}>Fecha Nacimiento</label>
                  {isEditing ? (
@@ -298,6 +463,7 @@ const Sacraments: React.FC = () => {
                     <input type="text" value={editForm.birthPlace || ''} onChange={(e) => handleInputChange('birthPlace', e.target.value)} className={commonInputClass} />
                  ) : <p className={commonTextClass}>{editForm.birthPlace || '-'}</p>}
                </div>
+               <CatechesisCheckbox />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                <div>
@@ -314,21 +480,178 @@ const Sacraments: React.FC = () => {
                </div>
             </div>
             <div className="mb-4">
-               <label className={commonLabelClass}>Padrinos</label>
                {isEditing ? (
-                 <textarea value={editForm.godparents || ''} onChange={(e) => handleInputChange('godparents', e.target.value)} className={`${commonInputClass} h-20`} />
-               ) : <p className={commonTextClass}>{editForm.godparents || '-'}</p>}
+                 <NameListInput 
+                    label="Padrinos" 
+                    value={editForm.godparents || ''} 
+                    onChange={(val) => handleInputChange('godparents', val)} 
+                    placeholder="Escriba un nombre y presione Enter..."
+                 />
+               ) : (
+                 <div>
+                    <label className={commonLabelClass}>Padrinos</label>
+                    <p className={commonTextClass}>{editForm.godparents || '-'}</p>
+                 </div>
+               )}
             </div>
           </>
         );
-      // ... (Other cases logic remains identical structurally but apply commonInputClass/commonTextClass for dark mode fix) ...
+
+      case SacramentType.MATRIMONIO:
+        return (
+            <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* GROOM */}
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                        <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-3 flex items-center gap-2"><User className="w-4 h-4" /> Datos del Novio</h4>
+                        <div className="space-y-3">
+                            <div>
+                                <label className={commonLabelClass}>Nombre Completo</label>
+                                {isEditing ? (
+                                    <input type="text" value={editForm.groomName || ''} onChange={(e) => handleInputChange('groomName', e.target.value)} className={commonInputClass} />
+                                ) : <p className="font-bold">{editForm.groomName}</p>}
+                            </div>
+                            <div>
+                                <label className={commonLabelClass}>RUT</label>
+                                {isEditing ? (
+                                    <RutInput value={editForm.groomRut || ''} onChange={(val) => handleInputChange('groomRut', val)} />
+                                ) : <p>{editForm.groomRut || '-'}</p>}
+                            </div>
+                            <div>
+                                <label className={commonLabelClass}>Padre</label>
+                                {isEditing ? (
+                                    <input type="text" value={editForm.groomFather || ''} onChange={(e) => handleInputChange('groomFather', e.target.value)} className={commonInputClass} />
+                                ) : <p>{editForm.groomFather || '-'}</p>}
+                            </div>
+                            <div>
+                                <label className={commonLabelClass}>Madre</label>
+                                {isEditing ? (
+                                    <input type="text" value={editForm.groomMother || ''} onChange={(e) => handleInputChange('groomMother', e.target.value)} className={commonInputClass} />
+                                ) : <p>{editForm.groomMother || '-'}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* BRIDE */}
+                    <div className="p-4 bg-pink-50 dark:bg-pink-900/10 rounded-lg border border-pink-100 dark:border-pink-900/30">
+                        <h4 className="font-bold text-pink-800 dark:text-pink-300 mb-3 flex items-center gap-2"><User className="w-4 h-4" /> Datos de la Novia</h4>
+                        <div className="space-y-3">
+                            <div>
+                                <label className={commonLabelClass}>Nombre Completo</label>
+                                {isEditing ? (
+                                    <input type="text" value={editForm.brideName || ''} onChange={(e) => handleInputChange('brideName', e.target.value)} className={commonInputClass} />
+                                ) : <p className="font-bold">{editForm.brideName}</p>}
+                            </div>
+                            <div>
+                                <label className={commonLabelClass}>RUT</label>
+                                {isEditing ? (
+                                    <RutInput value={editForm.brideRut || ''} onChange={(val) => handleInputChange('brideRut', val)} />
+                                ) : <p>{editForm.brideRut || '-'}</p>}
+                            </div>
+                            <div>
+                                <label className={commonLabelClass}>Padre</label>
+                                {isEditing ? (
+                                    <input type="text" value={editForm.brideFather || ''} onChange={(e) => handleInputChange('brideFather', e.target.value)} className={commonInputClass} />
+                                ) : <p>{editForm.brideFather || '-'}</p>}
+                            </div>
+                            <div>
+                                <label className={commonLabelClass}>Madre</label>
+                                {isEditing ? (
+                                    <input type="text" value={editForm.brideMother || ''} onChange={(e) => handleInputChange('brideMother', e.target.value)} className={commonInputClass} />
+                                ) : <p>{editForm.brideMother || '-'}</p>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        {isEditing ? (
+                            <NameListInput 
+                                label="Testigos" 
+                                value={editForm.witnesses || ''} 
+                                onChange={(val) => handleInputChange('witnesses', val)} 
+                                placeholder="Agregar testigo..."
+                            />
+                        ) : (
+                            <div>
+                                <label className={commonLabelClass}>Testigos</label>
+                                <p className={commonTextClass}>{editForm.witnesses || '-'}</p>
+                            </div>
+                        )}
+                    </div>
+                    <CatechesisCheckbox />
+                </div>
+            </>
+        );
+
+      case SacramentType.CONFIRMACION:
+      case SacramentType.PRIMERA_COMUNION:
+        return (
+            <>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="col-span-2">
+                        <label className={commonLabelClass}>Nombre Confirmado/a</label>
+                        {isEditing ? (
+                            <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className={commonInputClass} />
+                        ) : <p className={`text-lg font-bold ${commonTextClass}`}>{editForm.personName}</p>}
+                    </div>
+                    <div>
+                        <label className={commonLabelClass}>RUT</label>
+                        {isEditing ? (
+                            <RutInput value={editForm.rut || ''} onChange={(val) => handleInputChange('rut', val)} />
+                        ) : <p className={commonTextClass}>{editForm.rut || '-'}</p>}
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label className={commonLabelClass}>Padre</label>
+                        {isEditing ? (
+                            <input type="text" value={editForm.fatherName || ''} onChange={(e) => handleInputChange('fatherName', e.target.value)} className={commonInputClass} />
+                        ) : <p className={commonTextClass}>{editForm.fatherName || '-'}</p>}
+                    </div>
+                    <div>
+                        <label className={commonLabelClass}>Madre</label>
+                        {isEditing ? (
+                            <input type="text" value={editForm.motherName || ''} onChange={(e) => handleInputChange('motherName', e.target.value)} className={commonInputClass} />
+                        ) : <p className={commonTextClass}>{editForm.motherName || '-'}</p>}
+                    </div>
+                </div>
+                <div className="mb-4">
+                    {/* Using godparents field for generic "Padrinos" in UI for Confirmacion/Primera Comunion */}
+                    {isEditing ? (
+                        <NameListInput 
+                            label="Padrinos" 
+                            value={editForm.godparents || ''} 
+                            onChange={(val) => handleInputChange('godparents', val)} 
+                            placeholder="Agregar padrino..."
+                        />
+                    ) : (
+                        <div>
+                            <label className={commonLabelClass}>Padrinos</label>
+                            <p className={commonTextClass}>{editForm.godparents || '-'}</p>
+                        </div>
+                    )}
+                </div>
+                <CatechesisCheckbox />
+            </>
+        );
+
       default:
          return (
-          <div className="mb-4">
-            <label className={commonLabelClass}>Nombre</label>
-            {isEditing ? (
-              <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className={commonInputClass} />
-            ) : <p className={`text-lg font-bold ${commonTextClass}`}>{editForm.personName}</p>}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="col-span-2">
+              <label className={commonLabelClass}>Nombre</label>
+              {isEditing ? (
+                <input type="text" value={editForm.personName || ''} onChange={(e) => handleInputChange('personName', e.target.value)} className={commonInputClass} />
+              ) : <p className={`text-lg font-bold ${commonTextClass}`}>{editForm.personName}</p>}
+            </div>
+            <div>
+              <label className={commonLabelClass}>RUT</label>
+              {isEditing ? (
+                  <RutInput value={editForm.rut || ''} onChange={(val) => handleInputChange('rut', val)} />
+              ) : <p className={commonTextClass}>{editForm.rut || '-'}</p>}
+            </div>
           </div>
          );
     }
@@ -420,6 +743,27 @@ const Sacraments: React.FC = () => {
            </div>
         </div>
 
+        {/* VALIDATION ERROR MODAL */}
+        {validationError && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xl max-w-sm w-full border border-red-200 dark:border-red-900">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-500 mb-4">
+                            <AlertCircle className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">No se puede guardar</h3>
+                        <p className="text-slate-600 dark:text-slate-300 mb-6">{validationError}</p>
+                        <button 
+                            onClick={() => setValidationError(null)}
+                            className="w-full py-2 bg-slate-800 text-white rounded-lg font-bold hover:bg-slate-900"
+                        >
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
            <div className="lg:col-span-2 space-y-6">
               <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 relative">
@@ -504,6 +848,8 @@ const Sacraments: React.FC = () => {
                     
                     <h3 className="text-2xl font-bold text-center my-8 uppercase">{getDisplayName(selectedRecord)}</h3>
                     
+                    {selectedRecord.rut && <p className="text-center mb-4">RUT: {selectedRecord.rut}</p>}
+
                     <p>
                         Quien recibió el sacramento el día <strong>{new Date(selectedRecord.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong>,
                         administrado por el Reverendo <strong>{selectedRecord.celebrant}</strong>.

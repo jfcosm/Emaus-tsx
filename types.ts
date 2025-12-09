@@ -49,6 +49,7 @@ export interface SacramentRecord {
 
   // Common Fields
   personName?: string;
+  rut?: string; // Chile ID for the main person
   fatherName?: string;
   motherName?: string;
 
@@ -60,7 +61,9 @@ export interface SacramentRecord {
 
   // MARRIAGE
   groomName?: string;
+  groomRut?: string; // Chile ID for Groom
   brideName?: string;
+  brideRut?: string; // Chile ID for Bride
   groomFather?: string;
   groomMother?: string;
   brideFather?: string;
