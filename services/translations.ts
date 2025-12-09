@@ -1,5 +1,5 @@
 
-// Version 1.12.0 - Social Dashboard & Tour
+// Version 1.13.0 - Full Translations Update
 export const translations = {
   es: {
     sidebar: {
@@ -87,7 +87,7 @@ export const translations = {
       }
     },
     dashboard: {
-      welcome: 'Bienvenida,',
+      welcome: 'Bienvenido,',
       welcome_subtitle: 'Que la paz esté con esta casa. Aquí tienes un resumen de la actividad reciente.',
       tour_card: {
         title: '¿Nuevo en Emaús?',
@@ -472,7 +472,6 @@ export const translations = {
       }
     }
   },
-  // English and Portuguese translations are kept concise for brevity in this specific update but structure is preserved
   en: {
     sidebar: {
         dashboard: 'Dashboard',
@@ -481,7 +480,7 @@ export const translations = {
         documents: 'Documents',
         messages: 'Messages',
         finances: 'Finances',
-        community: 'Community',
+        community: 'Emaús Community',
         settings: 'Settings',
         users: 'Users',
         support: 'Support',
@@ -506,7 +505,34 @@ export const translations = {
             support: { title: 'Support', desc: 'We are here to help.' }
         }
     },
-    users: { /* ... existing users ... */ },
+    users: {
+        title: 'User Management',
+        subtitle: 'Manage accounts and subscription plans',
+        create_user: 'Create User',
+        search_placeholder: 'Search by email, parish or city...',
+        table: {
+            email: 'User / Email',
+            parish: 'Parish',
+            city: 'City',
+            plan: 'Plan',
+            actions: 'Actions'
+        },
+        actions: {
+            edit_plan: 'Edit Plan',
+            reset_pass: 'Reset Password',
+            delete: 'Delete'
+        },
+        modal: {
+            create_title: 'New User',
+            edit_plan_title: 'Edit Plan',
+            email: 'Email',
+            password: 'Password',
+            plan: 'Assigned Plan',
+            cancel: 'Cancel',
+            create: 'Create User',
+            save: 'Save Changes'
+        }
+    },
     dashboard: {
         welcome: 'Welcome,',
         welcome_subtitle: 'Peace be with this house. Here is a summary of recent activity.',
@@ -531,14 +557,232 @@ export const translations = {
         view_full_agenda: 'View full calendar',
         time_ranges: { last_6_months: 'Last 6 months', this_year: 'This year' }
     },
-    sacraments: { /* ... existing ... */ },
-    agenda: { /* ... existing ... */ },
-    documents: { /* ... existing ... */ },
-    messages: { /* ... existing ... */ },
-    finances: { /* ... existing ... */ },
-    community: { /* ... existing ... */ },
-    settings: { /* ... existing ... */ },
-    support: { /* ... existing ... */ },
+    sacraments: {
+        title: 'Sacramental Registers',
+        subtitle: 'Manage official parish records',
+        search_placeholder: 'Search by name, celebrant or date...',
+        new_record: 'New Record',
+        export: 'Export',
+        types: {
+            Bautizo: 'Baptism',
+            Confirmación: 'Confirmation',
+            Matrimonio: 'Marriage',
+            Defunción: 'Death',
+            'Primera Comunión': 'First Communion'
+        },
+        table: {
+            name: 'Name',
+            date: 'Date',
+            celebrant: 'Celebrant',
+            book_page: 'Book / Page',
+            actions: 'Actions',
+            view_details: 'View Card',
+            no_records: 'No records found.'
+        },
+        detail: {
+            record_card: 'Record Card',
+            editing: 'Editing Record',
+            record_id: 'Record ID',
+            edit: 'Edit Data',
+            cancel: 'Cancel',
+            save: 'Save Changes',
+            parents: 'Parents',
+            godparents: 'Godparents / Witnesses',
+            observations: 'Observations',
+            book_data: 'Registry Data',
+            book: 'Book',
+            page: 'Page',
+            parish: 'Parish / Place'
+        }
+    },
+    agenda: {
+        title: 'Parish Agenda',
+        new_event: 'New Event',
+        upcoming: 'Upcoming Events',
+        no_events: 'No upcoming events.',
+        modal: {
+            title: 'New Event',
+            event_title: 'Event Title',
+            date: 'Date',
+            time: 'Time',
+            type: 'Type',
+            location: 'Location',
+            cancel: 'Cancel',
+            save: 'Save Event',
+            types: {
+                Misa: 'Mass',
+                Bautizo: 'Baptism',
+                Matrimonio: 'Marriage',
+                Confirmación: 'Confirmation',
+                'Primera Comunión': '1st Communion',
+                Reunión: 'Meeting',
+                Otro: 'Other'
+            }
+        }
+    },
+    documents: {
+        title: 'My Documents',
+        new_document: 'New Document',
+        search: 'Search...',
+        items: 'items',
+        empty_folder: 'Empty folder',
+        create_title: 'Create New Document',
+        create_subtitle: 'Select a base template or start from scratch.',
+        blank_doc: 'Blank Document',
+        start_scratch: 'Start from scratch',
+        use_template: 'Use Template',
+        cancel_back: 'Cancel and return',
+        save: 'Save',
+        close: 'Close',
+        untitled: 'Untitled document',
+        print: 'Print',
+        upsell: {
+            title: 'Premium Feature',
+            desc: 'The Word-like document editor is reserved for advanced plans.',
+            benefit1: 'Full editor without Office',
+            benefit2: 'Official ecclesial templates',
+            cta: 'View Plans'
+        }
+    },
+    messages: {
+        title: 'Messages',
+        subtitle: 'Parish Community',
+        search_placeholder: 'Search chat...',
+        type_message: 'Type a message...',
+        no_chat_selected: 'Select a chat to start',
+        start_chat: 'Start new chat',
+        empty_state: 'You have no messages yet.',
+        new_chat_modal: 'New Chat',
+        email_placeholder: 'Parish email',
+        create_chat: 'Create Chat',
+        support: 'Emaús Support',
+        directory: {
+            title: 'Parish Directory',
+            subtitle: 'Connect with other parishes in the Emaús network.',
+            search: 'Search parish or city...',
+            start_conversation: 'Chat',
+            unavailable_basic: 'Not available (Basic Plan)'
+        },
+        upsell: {
+            title: 'Premium Feature',
+            desc: 'Inter-parish messaging is reserved exclusively for advanced plans.',
+            benefit1: 'Direct chat with other parishes',
+            benefit2: 'National contact directory',
+            cta: 'View Plans'
+        }
+    },
+    finances: {
+        title: 'Parish Finances',
+        subtitle: 'Control income, expenses and monthly balance.',
+        income: 'Income',
+        expense: 'Expenses',
+        balance: 'Balance',
+        new_transaction: 'New Transaction',
+        no_transactions: 'No transactions recorded.',
+        search: 'Search transaction...',
+        calculator: 'Quick Calculator',
+        upsell: {
+            title: 'Premium Feature',
+            desc: 'The Finance and Cash module is reserved for advanced plans.',
+            benefit1: 'Cash and income control',
+            benefit2: 'Automatic financial reports',
+            cta: 'View Plans'
+        },
+        table: {
+            date: 'Date',
+            type: 'Type',
+            category: 'Category',
+            description: 'Description',
+            amount: 'Amount',
+            actions: 'Actions'
+        },
+        modal: {
+            title: 'Register Transaction',
+            type: 'Transaction Type',
+            amount: 'Amount',
+            date: 'Date',
+            category: 'Category',
+            desc: 'Description',
+            method: 'Payment Method',
+            cancel: 'Cancel',
+            save: 'Save'
+        },
+        categories: {
+            stipends: 'Stipends',
+            collection: 'Collection',
+            donations: 'Donations',
+            services: 'Utilities',
+            maintenance: 'Maintenance',
+            supplies: 'Supplies',
+            personnel: 'Personnel',
+            other: 'Other'
+        }
+    },
+    community: {
+        title: 'Emaús Community',
+        subtitle: 'Space for meeting and ecclesial life',
+        new_post_placeholder: 'What is happening in your parish? Share news, events or reflections...',
+        publish: 'Post',
+        upload_photo: 'Upload Photo',
+        likes: 'Likes',
+        comment: 'Comment',
+        no_posts: 'No posts yet. Be the first to share something!',
+        posting: 'Posting...',
+        suggested_parishes: 'Suggested Parishes',
+        visit_profile: 'Visit Profile',
+        comments: 'Comments',
+        write_comment: 'Write a comment...',
+        send: 'Send',
+        back_to_feed: 'Back to Feed'
+    },
+    settings: {
+        identity: 'Visual Identity',
+        avatar_desc: 'Customize the icon and color representing your parish.',
+        cover_image: 'Cover Photo',
+        cover_desc: 'Main image for your public profile page.',
+        upload_cover: 'Upload Cover'
+    },
+    support: {
+        title: 'Support Center',
+        subtitle: 'How can we help you today?',
+        create_ticket: 'Create Ticket',
+        my_tickets: 'My Tickets',
+        admin_dashboard: 'Support Dashboard',
+        status: {
+            open: 'Open',
+            in_progress: 'In Progress',
+            resolved: 'Resolved',
+            closed: 'Closed'
+        },
+        priority: {
+            low: 'Low',
+            medium: 'Medium',
+            high: 'High',
+            critical: 'Critical'
+        },
+        form: {
+            subject: 'Subject',
+            subject_ph: 'Brief summary of the issue...',
+            desc: 'Description',
+            desc_ph: 'Details about what is happening...',
+            priority: 'Priority Level',
+            cancel: 'Cancel',
+            submit: 'Submit Ticket',
+            attach: 'Attach Image/PDF',
+            max_size: 'Max 5MB (jpg, png, pdf)'
+        },
+        chat: {
+            placeholder: 'Type a reply...',
+            send: 'Send',
+            history: 'Ticket History'
+        },
+        columns: {
+            pending: 'Pending',
+            in_progress: 'In Progress',
+            resolved: 'Resolved'
+        },
+        empty: 'No tickets in this category.'
+    },
     landing: { /* ... existing ... */ }
   },
   pt: {
@@ -549,7 +793,7 @@ export const translations = {
         documents: 'Documentos',
         messages: 'Mensagens',
         finances: 'Finanças',
-        community: 'Comunidade',
+        community: 'Comunidade Emaús',
         settings: 'Configurações',
         users: 'Usuários',
         support: 'Suporte',
@@ -574,7 +818,34 @@ export const translations = {
             support: { title: 'Suporte', desc: 'Estamos aqui para ajudar.' }
         }
     },
-    users: { /* ... existing users ... */ },
+    users: {
+        title: 'Gestão de Usuários',
+        subtitle: 'Administração de contas e planos',
+        create_user: 'Criar Usuário',
+        search_placeholder: 'Buscar por email, paróquia ou cidade...',
+        table: {
+            email: 'Usuário / Email',
+            parish: 'Paróquia',
+            city: 'Cidade',
+            plan: 'Plano',
+            actions: 'Ações'
+        },
+        actions: {
+            edit_plan: 'Editar Plano',
+            reset_pass: 'Redefinir Senha',
+            delete: 'Excluir'
+        },
+        modal: {
+            create_title: 'Novo Usuário',
+            edit_plan_title: 'Editar Plano',
+            email: 'Email',
+            password: 'Senha',
+            plan: 'Plano Atribuído',
+            cancel: 'Cancelar',
+            create: 'Criar Usuário',
+            save: 'Salvar Mudanças'
+        }
+    },
     dashboard: {
         welcome: 'Bem-vindo,',
         welcome_subtitle: 'A paz esteja nesta casa. Aqui está um resumo da atividade recente.',
@@ -599,14 +870,232 @@ export const translations = {
         view_full_agenda: 'Ver agenda completa',
         time_ranges: { last_6_months: 'Últimos 6 meses', this_year: 'Este ano' }
     },
-    sacraments: { /* ... existing ... */ },
-    agenda: { /* ... existing ... */ },
-    documents: { /* ... existing ... */ },
-    messages: { /* ... existing ... */ },
-    finances: { /* ... existing ... */ },
-    community: { /* ... existing ... */ },
-    settings: { /* ... existing ... */ },
-    support: { /* ... existing ... */ },
+    sacraments: {
+        title: 'Livros Sacramentais',
+        subtitle: 'Gerencie os registros oficiais da paróquia',
+        search_placeholder: 'Buscar por nome, celebrante ou data...',
+        new_record: 'Novo Registro',
+        export: 'Exportar',
+        types: {
+            Bautizo: 'Batismo',
+            Confirmación: 'Crisma',
+            Matrimonio: 'Matrimônio',
+            Defunción: 'Falecimento',
+            'Primera Comunión': 'Primeira Eucaristia'
+        },
+        table: {
+            name: 'Nome',
+            date: 'Data',
+            celebrant: 'Celebrante',
+            book_page: 'Livro / Pág',
+            actions: 'Ações',
+            view_details: 'Ver Ficha',
+            no_records: 'Nenhum registro encontrado.'
+        },
+        detail: {
+            record_card: 'Ficha de',
+            editing: 'Editando Registro',
+            record_id: 'ID do Registro',
+            edit: 'Editar Dados',
+            cancel: 'Cancelar',
+            save: 'Salvar Alterações',
+            parents: 'Pais',
+            godparents: 'Padrinhos / Testemunhas',
+            observations: 'Observações',
+            book_data: 'Dados do Registro',
+            book: 'Livro',
+            page: 'Página',
+            parish: 'Paróquia / Lugar'
+        }
+    },
+    agenda: {
+        title: 'Agenda Paroquial',
+        new_event: 'Novo Evento',
+        upcoming: 'Próximos Eventos',
+        no_events: 'Não há eventos próximos.',
+        modal: {
+            title: 'Novo Evento',
+            event_title: 'Título do Evento',
+            date: 'Data',
+            time: 'Hora',
+            type: 'Tipo',
+            location: 'Local',
+            cancel: 'Cancelar',
+            save: 'Salvar Evento',
+            types: {
+                Misa: 'Missa',
+                Bautizo: 'Batismo',
+                Matrimonio: 'Matrimônio',
+                Confirmación: 'Crisma',
+                'Primera Comunión': '1ª Eucaristia',
+                Reunión: 'Reunião',
+                Otro: 'Outro'
+            }
+        }
+    },
+    documents: {
+        title: 'Meus Documentos',
+        new_document: 'Novo Documento',
+        search: 'Buscar...',
+        items: 'itens',
+        empty_folder: 'Pasta vazia',
+        create_title: 'Criar Novo Documento',
+        create_subtitle: 'Selecione um modelo base ou comece do zero.',
+        blank_doc: 'Documento em Branco',
+        start_scratch: 'Começar do zero',
+        use_template: 'Usar Modelo',
+        cancel_back: 'Cancelar e voltar',
+        save: 'Salvar',
+        close: 'Fechar',
+        untitled: 'Documento sem título',
+        print: 'Imprimir',
+        upsell: {
+            title: 'Recurso Premium',
+            desc: 'O editor de documentos tipo Word é reservado para planos avançados.',
+            benefit1: 'Editor completo sem Office',
+            benefit2: 'Modelos eclesiais oficiais',
+            cta: 'Ver Planos'
+        }
+    },
+    messages: {
+        title: 'Mensagens',
+        subtitle: 'Comunidade Paroquial',
+        search_placeholder: 'Buscar chat...',
+        type_message: 'Digite uma mensagem...',
+        no_chat_selected: 'Selecione um chat para começar',
+        start_chat: 'Iniciar novo chat',
+        empty_state: 'Você ainda não tem mensagens.',
+        new_chat_modal: 'Novo Chat',
+        email_placeholder: 'Email da paróquia',
+        create_chat: 'Criar Chat',
+        support: 'Suporte Emaús',
+        directory: {
+            title: 'Diretório de Paróquias',
+            subtitle: 'Conecte-se com outras paróquias da rede Emaús.',
+            search: 'Buscar paróquia ou cidade...',
+            start_conversation: 'Conversar',
+            unavailable_basic: 'Não disponível (Plano Básico)'
+        },
+        upsell: {
+            title: 'Recurso Premium',
+            desc: 'A troca de mensagens interparoquiais é exclusiva para planos avançados.',
+            benefit1: 'Chat direto com outras paróquias',
+            benefit2: 'Diretório nacional de contatos',
+            cta: 'Ver Planos'
+        }
+    },
+    finances: {
+        title: 'Finanças Paroquiais',
+        subtitle: 'Controle de receitas, despesas e balanço mensal.',
+        income: 'Receitas',
+        expense: 'Despesas',
+        balance: 'Balanço',
+        new_transaction: 'Nova Transação',
+        no_transactions: 'Nenhuma transação registrada.',
+        search: 'Buscar movimento...',
+        calculator: 'Calculadora Rápida',
+        upsell: {
+            title: 'Recurso Premium',
+            desc: 'O módulo de Finanças e Caixa é reservado para planos avançados.',
+            benefit1: 'Controle de caixa e receitas',
+            benefit2: 'Relatórios financeiros automáticos',
+            cta: 'Ver Planos'
+        },
+        table: {
+            date: 'Data',
+            type: 'Tipo',
+            category: 'Categoria',
+            description: 'Descrição',
+            amount: 'Valor',
+            actions: 'Ações'
+        },
+        modal: {
+            title: 'Registrar Movimento',
+            type: 'Tipo de Movimento',
+            amount: 'Valor',
+            date: 'Data',
+            category: 'Categoria',
+            desc: 'Descrição',
+            method: 'Método de Pagamento',
+            cancel: 'Cancelar',
+            save: 'Salvar'
+        },
+        categories: {
+            stipends: 'Estipêndios',
+            collection: 'Coleta',
+            donations: 'Doações',
+            services: 'Serviços Básicos',
+            maintenance: 'Manutenção',
+            supplies: 'Insumos',
+            personnel: 'Pessoal',
+            other: 'Outro'
+        }
+    },
+    community: {
+        title: 'Comunidade Emaús',
+        subtitle: 'Espaço de encontro e vida eclesial',
+        new_post_placeholder: 'O que está acontecendo na sua paróquia? Compartilhe novidades, eventos ou reflexões...',
+        publish: 'Publicar',
+        upload_photo: 'Subir Foto',
+        likes: 'Curtidas',
+        comment: 'Comentar',
+        no_posts: 'Ainda não há publicações. Seja o primeiro a compartilhar algo!',
+        posting: 'Publicando...',
+        suggested_parishes: 'Paróquias Sugeridas',
+        visit_profile: 'Ver Perfil',
+        comments: 'Comentários',
+        write_comment: 'Escreva um comentário...',
+        send: 'Enviar',
+        back_to_feed: 'Voltar ao Feed'
+    },
+    settings: {
+        identity: 'Identidade Visual',
+        avatar_desc: 'Personalize o ícone e a cor que representarão sua paróquia na comunidade.',
+        cover_image: 'Foto de Capa',
+        cover_desc: 'Imagem principal para sua página de perfil pública.',
+        upload_cover: 'Subir Capa'
+    },
+    support: {
+        title: 'Centro de Suporte',
+        subtitle: 'Como podemos ajudar você hoje?',
+        create_ticket: 'Criar Ticket',
+        my_tickets: 'Meus Tickets',
+        admin_dashboard: 'Painel de Suporte',
+        status: {
+            open: 'Aberto',
+            in_progress: 'Em Progresso',
+            resolved: 'Resolvido',
+            closed: 'Fechado'
+        },
+        priority: {
+            low: 'Baixa',
+            medium: 'Média',
+            high: 'Alta',
+            critical: 'Crítica'
+        },
+        form: {
+            subject: 'Assunto',
+            subject_ph: 'Breve resumo do problema...',
+            desc: 'Descrição',
+            desc_ph: 'Detalhes sobre o que está acontecendo...',
+            priority: 'Nível de Prioridade',
+            cancel: 'Cancelar',
+            submit: 'Enviar Ticket',
+            attach: 'Anexar Imagem/PDF',
+            max_size: 'Máx 5MB (jpg, png, pdf)'
+        },
+        chat: {
+            placeholder: 'Escreva uma resposta...',
+            send: 'Enviar',
+            history: 'Histórico do Ticket'
+        },
+        columns: {
+            pending: 'Pendentes',
+            in_progress: 'Em Processo',
+            resolved: 'Resolvidos'
+        },
+        empty: 'Não há tickets nesta categoria.'
+    },
     landing: { /* ... existing ... */ }
   }
 };
