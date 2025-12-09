@@ -42,6 +42,8 @@ const Settings: React.FC = () => {
   // Auto-Gen State
   const [autoGenSignature, setAutoGenSignature] = useState(false);
   const [autoGenSeal, setAutoGenSeal] = useState(false);
+  const [sigVariant, setSigVariant] = useState(0);
+  const [sealVariant, setSealVariant] = useState(0);
 
   const [formData, setFormData] = useState<ParishSettings>({
     parishName: '',
@@ -146,31 +148,45 @@ const Settings: React.FC = () => {
       }
   };
 
-  const handleAutoGenerate = (type: 'signature' | 'seal') => {
+  const handleAutoGenerate = (type: 'signature' | 'seal', specificVariant?: number) => {
       if (type === 'signature') {
           if (!formData.priestName) {
               alert("Ingrese el nombre del párroco primero en 'Datos del Personal'.");
               return;
           }
-          const base64 = generateSignatureFromText(formData.priestName);
+          const variantToUse = specificVariant !== undefined ? specificVariant : sigVariant;
+          const base64 = generateSignatureFromText(formData.priestName, variantToUse);
           setFormData(prev => ({ ...prev, celebrantSignature: base64 }));
       } else {
           if (!formData.parishName) {
               alert("Ingrese el nombre de la parroquia primero.");
               return;
           }
-          const base64 = generateSealFromText(formData.parishName);
+          const variantToUse = specificVariant !== undefined ? specificVariant : sealVariant;
+          const base64 = generateSealFromText(formData.parishName, variantToUse);
           setFormData(prev => ({ ...prev, parishSeal: base64 }));
+      }
+  };
+
+  const handleCycleVariant = (type: 'signature' | 'seal') => {
+      if (type === 'signature') {
+          const next = (sigVariant + 1) % 3;
+          setSigVariant(next);
+          handleAutoGenerate('signature', next);
+      } else {
+          const next = (sealVariant + 1) % 3;
+          setSealVariant(next);
+          handleAutoGenerate('seal', next);
       }
   };
 
   const handleToggleAutoGen = (type: 'signature' | 'seal', checked: boolean) => {
       if (type === 'signature') {
           setAutoGenSignature(checked);
-          if (checked) handleAutoGenerate('signature');
+          if (checked) handleAutoGenerate('signature', 0); // Reset to 0 on check
       } else {
           setAutoGenSeal(checked);
-          if (checked) handleAutoGenerate('seal');
+          if (checked) handleAutoGenerate('seal', 0); // Reset to 0 on check
       }
   };
 
@@ -540,9 +556,9 @@ const Settings: React.FC = () => {
                                   )}
                                   <button 
                                     type="button"
-                                    onClick={() => handleAutoGenerate('signature')}
+                                    onClick={() => handleCycleVariant('signature')}
                                     className="absolute bottom-2 right-2 p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-sm border border-slate-200 dark:border-slate-600 text-slate-500 hover:text-emaus-600 transition-colors"
-                                    title="Regenerar"
+                                    title="Cambiar Estilo"
                                   >
                                       <RefreshCw className="w-4 h-4" />
                                   </button>
@@ -599,9 +615,9 @@ const Settings: React.FC = () => {
                                   )}
                                   <button 
                                     type="button"
-                                    onClick={() => handleAutoGenerate('seal')}
+                                    onClick={() => handleCycleVariant('seal')}
                                     className="absolute bottom-2 right-2 p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-sm border border-slate-200 dark:border-slate-600 text-slate-500 hover:text-emaus-600 transition-colors"
-                                    title="Regenerar"
+                                    title="Cambiar Estilo"
                                   >
                                       <RefreshCw className="w-4 h-4" />
                                   </button>
