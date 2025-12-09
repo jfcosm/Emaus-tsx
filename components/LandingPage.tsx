@@ -987,7 +987,7 @@ const LandingPage: React.FC = () => {
                                               value={captchaInput}
                                               onChange={(e) => setCaptchaInput(e.target.value)}
                                               placeholder="Respuesta"
-                                              className="w-24 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                              className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
                                           />
                                           <button 
                                             type="button" 
