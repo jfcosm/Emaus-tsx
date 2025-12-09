@@ -12,7 +12,8 @@ export enum ViewName {
   COMMUNITY = 'Comunidad',
   SETTINGS = 'Configuración',
   USERS = 'Usuarios',
-  SUPPORT = 'Soporte'
+  SUPPORT = 'Soporte',
+  LEADS = 'Solicitudes' // New Admin View
 }
 
 export enum SacramentType {
@@ -296,4 +297,20 @@ export interface SupportTicket {
   attachmentUrl?: string;
   attachmentName?: string;
   attachmentType?: 'image' | 'file';
+}
+
+// --- LEAD GENERATION TYPES ---
+export type LeadStatus = 'new' | 'contacted' | 'demo_scheduled' | 'closed' | 'lost';
+
+export interface Lead {
+  id: string;
+  name: string;
+  role: string;
+  parish: string;
+  diocese: string;
+  email: string;
+  phone: string;
+  status: LeadStatus;
+  createdAt: any;
+  notes?: string;
 }

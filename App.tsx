@@ -1,3 +1,4 @@
+
 // Version 1.10.1 - Critical Save Strategy
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
@@ -11,8 +12,9 @@ import Community from './components/SocialFeed';
 import LandingPage from './components/LandingPage';
 import Settings from './components/Settings';
 import UserManagement from './components/UserManagement';
+import LeadsManagement from './components/LeadsManagement'; // NEW
 import NotificationCenter from './components/NotificationCenter';
-import Support from './components/Support'; // NEW
+import Support from './components/Support';
 import { ViewName } from './types';
 import { Menu, Bell, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
@@ -73,7 +75,9 @@ const App: React.FC = () => {
         return <Settings />;
       case ViewName.USERS:
         return <UserManagement />;
-      case ViewName.SUPPORT: // NEW ROUTE
+      case ViewName.LEADS: // NEW ROUTE
+        return <LeadsManagement />;
+      case ViewName.SUPPORT:
         return <Support />;
       default:
         return <Dashboard />;
@@ -115,6 +119,7 @@ const App: React.FC = () => {
               {currentView === ViewName.COMMUNITY && t('community.title')}
               {currentView === ViewName.SETTINGS && t('sidebar.settings')}
               {currentView === ViewName.USERS && t('sidebar.users')}
+              {currentView === ViewName.LEADS && t('sidebar.leads')}
               {currentView === ViewName.SUPPORT && t('sidebar.support')}
             </h1>
           </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
@@ -17,10 +18,8 @@ import {
   Search,
   Database,
   Download,
-  ThumbsUp,
   Cloud,
   Printer,
-  Heart,
   Smartphone,
   Globe,
   Sun,
@@ -28,17 +27,22 @@ import {
   MessageCircle,
   Users,
   FileCheck,
-  Banknote
+  Banknote,
+  Send,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
+import { createLead } from '../services/leadsService'; // IMPORT LEAD SERVICE
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 
-// Version 1.9.21 - Force Sync
+// Version 1.10.0 - Lead Generation Form
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false); // NEW DEMO MODAL STATE
   const [showFeaturesPage, setShowFeaturesPage] = useState(false);
   
   // Login Form State
@@ -47,22 +51,40 @@ const LandingPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Demo Form State (Lead Gen)
+  const [leadForm, setLeadForm] = useState({
+      name: '',
+      role: '',
+      parish: '',
+      diocese: '',
+      phone: '',
+      email: ''
+  });
+  const [captcha, setCaptcha] = useState({ a: 0, b: 0 }); // Math Challenge
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [leadSuccess, setLeadSuccess] = useState(false);
+
   // Contexts
   const { t, language, setLanguage } = useLanguage();
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Check URL hash on mount to scroll to section if redirected
+  // Generate simple math challenge
+  const generateCaptcha = () => {
+      setCaptcha({
+          a: Math.floor(Math.random() * 10) + 1,
+          b: Math.floor(Math.random() * 10) + 1
+      });
+      setCaptchaInput('');
+  };
+
   useEffect(() => {
-    if (window.location.hash) {
-      const id = window.location.hash.substring(1);
-      setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 500);
-    }
-  }, []);
+      if (isDemoModalOpen) {
+          generateCaptcha();
+          setLeadSuccess(false);
+          setLeadForm({ name: '', role: '', parish: '', diocese: '', phone: '', email: '' });
+      }
+  }, [isDemoModalOpen]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,8 +106,36 @@ const LandingPage: React.FC = () => {
     }
   };
 
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      // Verify Captcha
+      if (parseInt(captchaInput) !== (captcha.a + captcha.b)) {
+          alert('La verificación de seguridad es incorrecta. Por favor intente de nuevo.');
+          generateCaptcha();
+          return;
+      }
+
+      setIsSubmittingLead(true);
+      try {
+          await createLead(leadForm);
+          setLeadSuccess(true);
+      } catch (error) {
+          console.error("Lead Error", error);
+          alert("Error al enviar solicitud. Intente nuevamente.");
+      } finally {
+          setIsSubmittingLead(false);
+      }
+  };
+
+  const handleLeadInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setLeadForm(prev => ({ ...prev, [name]: value }));
+  };
+
   // --- STANDALONE FEATURES PAGE VIEW ---
   if (showFeaturesPage) {
+    // ... same as before
     const allFeatures = [
       {
         icon: BookOpen,
@@ -316,6 +366,7 @@ const LandingPage: React.FC = () => {
 
       {/* --- HERO SECTION --- */}
       <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 relative overflow-hidden">
+        {/* ... (Existing Hero Code, only changing CTA) ... */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 z-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-100 dark:bg-gold-900/20 text-gold-800 dark:text-gold-300 rounded-full text-sm font-bold uppercase tracking-wide">
@@ -341,7 +392,7 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
           
-          {/* VISUAL REPRESENTATION (MOCKUP) */}
+          {/* VISUAL REPRESENTATION (MOCKUP) - NO CHANGES */}
           <div className="relative z-10 lg:h-[600px] flex items-center justify-center perspective-1000">
              {/* Background Glow */}
              <div className="absolute inset-0 bg-gradient-to-tr from-emaus-600/30 to-gold-400/30 rounded-full opacity-40 blur-3xl animate-pulse"></div>
@@ -477,6 +528,7 @@ const LandingPage: React.FC = () => {
 
       {/* --- FEATURES SECTION --- */}
       <section id="features" className="py-24 bg-white dark:bg-slate-900 scroll-mt-24">
+        {/* ... Existing Features Code ... */}
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.features.title')}</h2>
@@ -543,7 +595,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* --- PLANS SECTION --- */}
+      {/* --- PLANS SECTION (UPDATED CTA) --- */}
       <section id="plans" className="py-24 bg-stone-50 dark:bg-slate-950 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -583,7 +635,7 @@ const LandingPage: React.FC = () => {
                   </li>
                 </ul>
                 <button 
-                  onClick={() => setIsLoginModalOpen(true)}
+                  onClick={() => setIsDemoModalOpen(true)} // CHANGED TO DEMO
                   className="w-full py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   {t('landing.plans.basic.btn')}
@@ -624,7 +676,7 @@ const LandingPage: React.FC = () => {
                   </li>
                 </ul>
                 <button 
-                  onClick={() => setIsLoginModalOpen(true)}
+                  onClick={() => setIsDemoModalOpen(true)} // CHANGED TO DEMO
                   className="w-full py-3 bg-gold-500 text-white rounded-xl font-bold hover:bg-gold-600 transition-colors shadow-lg shadow-gold-500/20"
                 >
                   {t('landing.plans.advanced.btn')}
@@ -635,6 +687,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* --- COMMUNITY SECTION (NEW) --- */}
+      {/* ... (Existing Community Code) ... */}
       <section className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-4xl mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.community.title')}</h2>
@@ -674,6 +727,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* --- BENEFITS / SOCIAL PROOF (CAROUSEL) --- */}
+      {/* ... (Existing Benefits Code) ... */}
       <section id="benefits" className="py-24 bg-emaus-900 relative overflow-hidden text-white scroll-mt-24">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="max-w-7xl mx-auto px-4 relative z-10">
@@ -810,6 +864,155 @@ const LandingPage: React.FC = () => {
               </div>
            </div>
         </div>
+      )}
+
+      {/* --- DEMO REQUEST MODAL --- */}
+      {isDemoModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative border border-slate-200 dark:border-slate-800">
+                  <button 
+                      onClick={() => setIsDemoModalOpen(false)}
+                      className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 z-10"
+                  >
+                      <X className="w-6 h-6" />
+                  </button>
+
+                  <div className="p-8">
+                      {leadSuccess ? (
+                          <div className="text-center py-8">
+                              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                                  <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+                              </div>
+                              <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{t('demo_form.success_title')}</h3>
+                              <p className="text-slate-600 dark:text-slate-300 mb-8">{t('demo_form.success_msg')}</p>
+                              <button 
+                                onClick={() => setIsDemoModalOpen(false)}
+                                className="px-8 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors"
+                              >
+                                  Cerrar
+                              </button>
+                          </div>
+                      ) : (
+                          <>
+                              <div className="text-center mb-8">
+                                  <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('demo_form.title')}</h2>
+                                  <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{t('demo_form.subtitle')}</p>
+                              </div>
+
+                              <form onSubmit={handleLeadSubmit} className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.name')}</label>
+                                          <input 
+                                            name="name"
+                                            required
+                                            value={leadForm.name}
+                                            onChange={handleLeadInput}
+                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                          />
+                                      </div>
+                                      <div>
+                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.role')}</label>
+                                          <input 
+                                            name="role"
+                                            required
+                                            value={leadForm.role}
+                                            onChange={handleLeadInput}
+                                            placeholder={t('demo_form.role_ph')}
+                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                          />
+                                      </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.parish')}</label>
+                                          <input 
+                                            name="parish"
+                                            required
+                                            value={leadForm.parish}
+                                            onChange={handleLeadInput}
+                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                          />
+                                      </div>
+                                      <div>
+                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.diocese')}</label>
+                                          <input 
+                                            name="diocese"
+                                            required
+                                            value={leadForm.diocese}
+                                            onChange={handleLeadInput}
+                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                          />
+                                      </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.phone')}</label>
+                                          <input 
+                                            name="phone"
+                                            required
+                                            type="tel"
+                                            value={leadForm.phone}
+                                            onChange={handleLeadInput}
+                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                          />
+                                      </div>
+                                      <div>
+                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.email')}</label>
+                                          <input 
+                                            name="email"
+                                            required
+                                            type="email"
+                                            value={leadForm.email}
+                                            onChange={handleLeadInput}
+                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                          />
+                                      </div>
+                                  </div>
+
+                                  {/* CAPTCHA */}
+                                  <div className="pt-2">
+                                      <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">
+                                          <Shield className="w-3 h-3" /> {t('demo_form.captcha')}
+                                      </label>
+                                      <div className="flex items-center gap-3">
+                                          <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg font-mono font-bold text-lg text-slate-700 dark:text-slate-300 select-none border border-slate-200 dark:border-slate-700">
+                                              {captcha.a} + {captcha.b} = ?
+                                          </div>
+                                          <input 
+                                              type="number"
+                                              required
+                                              value={captchaInput}
+                                              onChange={(e) => setCaptchaInput(e.target.value)}
+                                              placeholder="Respuesta"
+                                              className="w-24 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
+                                          />
+                                          <button 
+                                            type="button" 
+                                            onClick={generateCaptcha}
+                                            className="p-2 text-slate-400 hover:text-emaus-600 transition-colors"
+                                            title="Generar otro"
+                                          >
+                                              <RefreshCw className="w-4 h-4" />
+                                          </button>
+                                      </div>
+                                  </div>
+
+                                  <button 
+                                    type="submit"
+                                    disabled={isSubmittingLead}
+                                    className="w-full py-3 bg-emaus-700 text-white rounded-xl font-bold text-lg hover:bg-emaus-800 transition-all shadow-lg mt-4 flex items-center justify-center gap-2"
+                                  >
+                                    {isSubmittingLead ? <Loader2 className="w-5 h-5 animate-spin" /> : t('demo_form.submit')}
+                                  </button>
+                              </form>
+                          </>
+                      )}
+                  </div>
+              </div>
+          </div>
       )}
     </div>
   );

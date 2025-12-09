@@ -1,3 +1,4 @@
+
 // Version 1.10.1 - Critical Save Strategy
 import React from 'react';
 import { ViewName, NavItem } from '../types';
@@ -14,7 +15,8 @@ import {
   Users,
   Banknote,
   Globe,
-  LifeBuoy
+  LifeBuoy,
+  UserPlus
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -56,6 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
        case ViewName.SUPPORT: return t('sidebar.support');
        case ViewName.SETTINGS: return t('sidebar.settings');
        case ViewName.USERS: return t('sidebar.users');
+       case ViewName.LEADS: return t('sidebar.leads'); // NEW
        default: return name;
      }
   };
@@ -123,16 +126,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
             );
           })}
 
-          {/* Admin Only Item */}
+          {/* Admin Only Items */}
           {isAdmin && (
              <div className="pt-4 mt-4 border-t border-emaus-800 dark:border-slate-800">
+                <div className="px-4 pb-2 text-xs font-bold text-emaus-400 uppercase tracking-widest">Admin</div>
                 <button
                   onClick={() => {
                     onChangeView(ViewName.USERS);
                     setIsOpen(false);
                   }}
                   className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                    w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 mb-2
                     ${currentView === ViewName.USERS 
                       ? 'bg-slate-800 text-white shadow-lg border border-slate-700' 
                       : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
@@ -140,6 +144,21 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
                 >
                   <Users className="w-5 h-5" />
                   <span className="block font-medium">{t('sidebar.users')}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onChangeView(ViewName.LEADS); // NEW VIEW
+                    setIsOpen(false);
+                  }}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                    ${currentView === ViewName.LEADS 
+                      ? 'bg-slate-800 text-white shadow-lg border border-slate-700' 
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
+                  `}
+                >
+                  <UserPlus className="w-5 h-5" />
+                  <span className="block font-medium">{t('sidebar.leads')}</span>
                 </button>
              </div>
           )}

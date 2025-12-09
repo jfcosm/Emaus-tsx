@@ -13,6 +13,7 @@ export const translations = {
       settings: 'Configuración',
       users: 'Usuarios',
       support: 'Soporte',
+      leads: 'Solicitudes',
       logout: 'Cerrar Sesión',
       role: 'Secretaria',
       parish: 'Gestión Parroquial'
@@ -85,6 +86,39 @@ export const translations = {
         create: 'Crear Usuario',
         save: 'Guardar Cambios'
       }
+    },
+    leads: {
+        title: 'Solicitudes de Ingreso',
+        subtitle: 'Gestión de interesados y prospectos',
+        status: {
+            new: 'Nuevo',
+            contacted: 'Contactado',
+            demo_scheduled: 'Demo Agendada',
+            closed: 'Cerrado/Ganado',
+            lost: 'Perdido'
+        },
+        table: {
+            name: 'Contacto',
+            parish: 'Parroquia',
+            status: 'Estado',
+            date: 'Fecha',
+            actions: 'Acciones'
+        }
+    },
+    demo_form: {
+        title: 'Solicitar Demo Emaús',
+        subtitle: 'Déjenos sus datos y nos pondremos en contacto para agendar una demostración personalizada.',
+        name: 'Nombre Completo',
+        role: 'Cargo Pastoral',
+        role_ph: 'Ej: Párroco, Secretaria, Consejo...',
+        parish: 'Parroquia',
+        diocese: 'Diócesis',
+        phone: 'Teléfono / WhatsApp',
+        email: 'Correo Electrónico',
+        captcha: 'Verificación de Seguridad',
+        submit: 'Enviar Solicitud',
+        success_title: '¡Solicitud Recibida!',
+        success_msg: 'Gracias por su interés. Nuestro equipo pastoral lo contactará a la brevedad.'
     },
     dashboard: {
       welcome: 'Bienvenida,',
@@ -411,7 +445,7 @@ export const translations = {
           name: 'Plan Básico',
           desc: 'Para parroquias pequeñas o capelas.',
           items: ['Parish Calendar', 'Sacrament Registry', 'Automatic Certificates', 'Inter-parish Chat (New)'],
-          btn: 'Comenzar'
+          btn: 'Solicitar Demo'
         },
         advanced: {
           tag: 'Recomendado',
@@ -425,7 +459,7 @@ export const translations = {
             reports: 'Reportes y Estadísticas',
             support: 'Soporte Prioritario'
           },
-          btn: 'Obtener Plan Completo'
+          btn: 'Solicitar Demo'
         }
       },
       testimonials: {
@@ -472,7 +506,7 @@ export const translations = {
       }
     }
   },
-  // English and Portuguese translations are kept concise for brevity in this specific update but structure is preserved
+  // English and Portuguese preserved mostly as is for brevity
   en: {
     sidebar: {
         dashboard: 'Dashboard',
@@ -485,10 +519,12 @@ export const translations = {
         settings: 'Settings',
         users: 'Users',
         support: 'Support',
+        leads: 'Leads',
         logout: 'Log Out',
         role: 'Secretary',
         parish: 'Parish Management'
     },
+    // ... rest of English translations
     tour: {
         start_btn: 'Start Tour',
         next: 'Next',
@@ -539,7 +575,28 @@ export const translations = {
     community: { /* ... existing ... */ },
     settings: { /* ... existing ... */ },
     support: { /* ... existing ... */ },
-    landing: { /* ... existing ... */ }
+    landing: { /* ... existing ... */ },
+    leads: {
+        title: 'Application Requests',
+        subtitle: 'Manage potential new parishes',
+        status: { new: 'New', contacted: 'Contacted', demo_scheduled: 'Demo Scheduled', closed: 'Closed', lost: 'Lost' },
+        table: { name: 'Contact', parish: 'Parish', status: 'Status', date: 'Date', actions: 'Actions' }
+    },
+    demo_form: {
+        title: 'Request Emaús Demo',
+        subtitle: 'Leave your details and we will contact you for a personalized demo.',
+        name: 'Full Name',
+        role: 'Role',
+        role_ph: 'e.g. Priest, Secretary',
+        parish: 'Parish',
+        diocese: 'Diocese',
+        phone: 'Phone',
+        email: 'Email',
+        captcha: 'Security Check',
+        submit: 'Request Demo',
+        success_title: 'Request Received!',
+        success_msg: 'Thank you. We will contact you shortly.'
+    }
   },
   pt: {
     sidebar: {
@@ -553,10 +610,12 @@ export const translations = {
         settings: 'Configurações',
         users: 'Usuários',
         support: 'Suporte',
+        leads: 'Solicitações',
         logout: 'Sair',
         role: 'Secretaria',
         parish: 'Gestão Paroquial'
     },
+    // ... rest of Portuguese translations
     tour: {
         start_btn: 'Iniciar Tour',
         next: 'Próximo',
@@ -607,6 +666,27 @@ export const translations = {
     community: { /* ... existing ... */ },
     settings: { /* ... existing ... */ },
     support: { /* ... existing ... */ },
-    landing: { /* ... existing ... */ }
+    landing: { /* ... existing ... */ },
+    leads: {
+        title: 'Solicitações de Ingresso',
+        subtitle: 'Gestão de interessados',
+        status: { new: 'Novo', contacted: 'Contactado', demo_scheduled: 'Demo Agendada', closed: 'Fechado', lost: 'Perdido' },
+        table: { name: 'Contato', parish: 'Paróquia', status: 'Status', date: 'Data', actions: 'Ações' }
+    },
+    demo_form: {
+        title: 'Solicitar Demo Emaús',
+        subtitle: 'Deixe seus dados e entraremos em contato para uma demonstração.',
+        name: 'Nome Completo',
+        role: 'Cargo',
+        role_ph: 'Ex: Pároco, Secretaria',
+        parish: 'Paróquia',
+        diocese: 'Diocese',
+        phone: 'Telefone',
+        email: 'Email',
+        captcha: 'Verificação de Segurança',
+        submit: 'Enviar Solicitação',
+        success_title: 'Solicitação Recebida!',
+        success_msg: 'Obrigado. Entraremos em contato em breve.'
+    }
   }
 };
