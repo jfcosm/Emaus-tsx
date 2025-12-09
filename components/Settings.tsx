@@ -3,16 +3,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Image as ImageIcon, Camera, Loader2, Cross, Book, Church, Heart, Sun, Star, Music, Users, Upload, Stamp, PenTool, Sparkles } from 'lucide-react';
+import { Save, User, MapPin, Phone, Mail, Building, FileSignature, CheckCircle, Shield, UserPlus, Image as ImageIcon, Camera, Loader2, Cross, Book, Church, Heart, Sun, Star, Music, Users, Upload, Stamp, PenTool, Sparkles, Wand2, RefreshCw } from 'lucide-react';
 import { ParishSettings } from '../types';
 import { getSettings, saveSettings, initializeParishDb, uploadParishImage } from '../services/settingsService';
-import { processImageForDocument } from '../services/imageUtils';
+import { processImageForDocument, generateSignatureFromText, generateSealFromText } from '../services/imageUtils';
 
 // Import Firebase Compat for Admin tools
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
-// Version 1.10.0 - Signatures & Seals
+// Version 1.10.1 - Auto Generation
 const Settings: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
@@ -38,6 +38,10 @@ const Settings: React.FC = () => {
   const profileInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const sealInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-Gen State
+  const [autoGenSignature, setAutoGenSignature] = useState(false);
+  const [autoGenSeal, setAutoGenSeal] = useState(false);
 
   const [formData, setFormData] = useState<ParishSettings>({
     parishName: '',
@@ -121,12 +125,15 @@ const Settings: React.FC = () => {
           // 1. Client-side AI Process (Clean background)
           const cleanBase64 = await processImageForDocument(file);
           
-          // 2. Update State directly (Storing Base64 in settings for simplicity in this demo, 
-          // in prod better to upload blob to storage and get URL, but this works for "instant" feel)
+          // 2. Update State directly
           setFormData(prev => ({
               ...prev,
               [type === 'signature' ? 'celebrantSignature' : 'parishSeal']: cleanBase64
           }));
+
+          // Disable auto-gen if manually uploaded
+          if (type === 'signature') setAutoGenSignature(false);
+          else setAutoGenSeal(false);
 
           setSuccessMsg('Imagen procesada y limpia.');
       } catch (error) {
@@ -139,6 +146,34 @@ const Settings: React.FC = () => {
       }
   };
 
+  const handleAutoGenerate = (type: 'signature' | 'seal') => {
+      if (type === 'signature') {
+          if (!formData.priestName) {
+              alert("Ingrese el nombre del párroco primero en 'Datos del Personal'.");
+              return;
+          }
+          const base64 = generateSignatureFromText(formData.priestName);
+          setFormData(prev => ({ ...prev, celebrantSignature: base64 }));
+      } else {
+          if (!formData.parishName) {
+              alert("Ingrese el nombre de la parroquia primero.");
+              return;
+          }
+          const base64 = generateSealFromText(formData.parishName);
+          setFormData(prev => ({ ...prev, parishSeal: base64 }));
+      }
+  };
+
+  const handleToggleAutoGen = (type: 'signature' | 'seal', checked: boolean) => {
+      if (type === 'signature') {
+          setAutoGenSignature(checked);
+          if (checked) handleAutoGenerate('signature');
+      } else {
+          setAutoGenSeal(checked);
+          if (checked) handleAutoGenerate('seal');
+      }
+  };
+
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
@@ -146,14 +181,10 @@ const Settings: React.FC = () => {
       setUploadingCover(true);
       try {
           const url = await uploadParishImage(file, 'cover');
-          // Update state
           const updatedSettings = { ...formData, coverImage: url };
           setFormData(updatedSettings);
-          
-          // AUTO SAVE: Save immediately after upload
           await saveSettings(updatedSettings);
           await refreshSettings();
-          
           setSuccessMsg('Portada actualizada correctamente.');
           setTimeout(() => setSuccessMsg(''), 3000);
       } catch (error) {
@@ -170,14 +201,10 @@ const Settings: React.FC = () => {
       setUploadingProfile(true);
       try {
           const url = await uploadParishImage(file, 'profile');
-          // Update state
           const updatedSettings = { ...formData, profileImage: url };
           setFormData(updatedSettings);
-          
-          // AUTO SAVE: Save immediately after upload so it propagates to posts
           await saveSettings(updatedSettings);
           await refreshSettings();
-          
           setSuccessMsg('Foto de perfil actualizada correctamente.');
           setTimeout(() => setSuccessMsg(''), 3000);
       } catch (error) {
@@ -471,7 +498,7 @@ const Settings: React.FC = () => {
                   </div>
               </div>
 
-              {/* SECTION 2: DIGITAL ASSETS (NEW) */}
+              {/* SECTION 2: DIGITAL ASSETS */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                      <Stamp className="w-5 h-5 text-emaus-600" /> Firmas y Timbres Digitales
@@ -481,7 +508,7 @@ const Settings: React.FC = () => {
                       <div>
                           <p className="text-sm font-bold text-blue-800 dark:text-blue-300">Procesamiento Inteligente Emaús</p>
                           <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                              Sube una foto de la firma o el timbre en papel blanco. Nuestro sistema eliminará el fondo automáticamente para que se vea profesional en los certificados.
+                              Sube una foto de la firma o el timbre en papel blanco. Nuestro sistema eliminará el fondo automáticamente.
                           </p>
                       </div>
                   </div>
@@ -489,56 +516,120 @@ const Settings: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {/* Signature Upload */}
                       <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-                              <PenTool className="w-4 h-4" /> Firma del Párroco
-                          </label>
-                          <div 
-                            className="relative h-32 rounded-xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-emaus-400 transition-colors group"
-                            onClick={() => signatureInputRef.current?.click()}
-                          >
-                              {formData.celebrantSignature ? (
-                                  <img src={formData.celebrantSignature} alt="Firma" className="h-full object-contain p-2" />
-                              ) : (
-                                  <span className="text-xs text-slate-400">Subir Firma (JPG/PNG)</span>
-                              )}
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
-                                  {processingAsset ? <Loader2 className="w-6 h-6 animate-spin text-emaus-600" /> : <Upload className="w-6 h-6 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
-                              </div>
+                          <div className="flex justify-between items-center mb-3">
+                              <label className="block text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                                  <PenTool className="w-4 h-4" /> Firma del Párroco
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                  <input 
+                                    type="checkbox" 
+                                    checked={autoGenSignature} 
+                                    onChange={(e) => handleToggleAutoGen('signature', e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-300 text-emaus-600 focus:ring-emaus-500"
+                                  />
+                                  <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Generar Automáticamente</span>
+                              </label>
                           </div>
-                          <input 
-                            ref={signatureInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handleAssetUpload(e, 'signature')}
-                          />
+                          
+                          {autoGenSignature ? (
+                              <div className="relative h-32 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-emaus-200 dark:border-slate-700 flex flex-col items-center justify-center p-4">
+                                  {formData.celebrantSignature ? (
+                                      <img src={formData.celebrantSignature} alt="Firma Generada" className="h-full object-contain" />
+                                  ) : (
+                                      <span className="text-xs text-slate-400 italic">Complete nombre del párroco para generar</span>
+                                  )}
+                                  <button 
+                                    type="button"
+                                    onClick={() => handleAutoGenerate('signature')}
+                                    className="absolute bottom-2 right-2 p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-sm border border-slate-200 dark:border-slate-600 text-slate-500 hover:text-emaus-600 transition-colors"
+                                    title="Regenerar"
+                                  >
+                                      <RefreshCw className="w-4 h-4" />
+                                  </button>
+                              </div>
+                          ) : (
+                              <>
+                                  <div 
+                                    className="relative h-32 rounded-xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-emaus-400 transition-colors group"
+                                    onClick={() => signatureInputRef.current?.click()}
+                                  >
+                                      {formData.celebrantSignature ? (
+                                          <img src={formData.celebrantSignature} alt="Firma" className="h-full object-contain p-2" />
+                                      ) : (
+                                          <span className="text-xs text-slate-400">Subir Firma (JPG/PNG)</span>
+                                      )}
+                                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                                          {processingAsset ? <Loader2 className="w-6 h-6 animate-spin text-emaus-600" /> : <Upload className="w-6 h-6 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                                      </div>
+                                  </div>
+                                  <input 
+                                    ref={signatureInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleAssetUpload(e, 'signature')}
+                                  />
+                              </>
+                          )}
                       </div>
 
                       {/* Seal Upload */}
                       <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-                              <Stamp className="w-4 h-4" /> Timbre Parroquial
-                          </label>
-                          <div 
-                            className="relative h-32 rounded-xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-emaus-400 transition-colors group"
-                            onClick={() => sealInputRef.current?.click()}
-                          >
-                              {formData.parishSeal ? (
-                                  <img src={formData.parishSeal} alt="Timbre" className="h-full object-contain p-2" />
-                              ) : (
-                                  <span className="text-xs text-slate-400">Subir Timbre (JPG/PNG)</span>
-                              )}
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
-                                  {processingAsset ? <Loader2 className="w-6 h-6 animate-spin text-emaus-600" /> : <Upload className="w-6 h-6 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
-                              </div>
+                          <div className="flex justify-between items-center mb-3">
+                              <label className="block text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                                  <Stamp className="w-4 h-4" /> Timbre Parroquial
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                  <input 
+                                    type="checkbox" 
+                                    checked={autoGenSeal} 
+                                    onChange={(e) => handleToggleAutoGen('seal', e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-300 text-emaus-600 focus:ring-emaus-500"
+                                  />
+                                  <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Generar Automáticamente</span>
+                              </label>
                           </div>
-                          <input 
-                            ref={sealInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handleAssetUpload(e, 'seal')}
-                          />
+
+                          {autoGenSeal ? (
+                              <div className="relative h-32 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-emaus-200 dark:border-slate-700 flex flex-col items-center justify-center p-4">
+                                  {formData.parishSeal ? (
+                                      <img src={formData.parishSeal} alt="Timbre Generado" className="h-full object-contain" />
+                                  ) : (
+                                      <span className="text-xs text-slate-400 italic">Complete nombre de la parroquia</span>
+                                  )}
+                                  <button 
+                                    type="button"
+                                    onClick={() => handleAutoGenerate('seal')}
+                                    className="absolute bottom-2 right-2 p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-sm border border-slate-200 dark:border-slate-600 text-slate-500 hover:text-emaus-600 transition-colors"
+                                    title="Regenerar"
+                                  >
+                                      <RefreshCw className="w-4 h-4" />
+                                  </button>
+                              </div>
+                          ) : (
+                              <>
+                                  <div 
+                                    className="relative h-32 rounded-xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-emaus-400 transition-colors group"
+                                    onClick={() => sealInputRef.current?.click()}
+                                  >
+                                      {formData.parishSeal ? (
+                                          <img src={formData.parishSeal} alt="Timbre" className="h-full object-contain p-2" />
+                                      ) : (
+                                          <span className="text-xs text-slate-400">Subir Timbre (JPG/PNG)</span>
+                                      )}
+                                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                                          {processingAsset ? <Loader2 className="w-6 h-6 animate-spin text-emaus-600" /> : <Upload className="w-6 h-6 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                                      </div>
+                                  </div>
+                                  <input 
+                                    ref={sealInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleAssetUpload(e, 'seal')}
+                                  />
+                              </>
+                          )}
                       </div>
                   </div>
               </div>
