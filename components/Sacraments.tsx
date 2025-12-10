@@ -607,22 +607,24 @@ const Sacraments: React.FC = () => {
                         ) : <p className={commonTextClass}>{editForm.motherName || '-'}</p>}
                     </div>
                 </div>
-                <div className="mb-4">
-                    {/* Using godparents field for generic "Padrinos" in UI for Confirmacion/Primera Comunion */}
-                    {isEditing ? (
-                        <NameListInput 
-                            label="Padrinos" 
-                            value={editForm.godparents || ''} 
-                            onChange={(val) => handleInputChange('godparents', val)} 
-                            placeholder="Agregar padrino..."
-                        />
-                    ) : (
-                        <div>
-                            <label className={commonLabelClass}>Padrinos</label>
-                            <p className={commonTextClass}>{editForm.godparents || '-'}</p>
-                        </div>
-                    )}
-                </div>
+                {/* Padrinos solo para Confirmación */}
+                {editForm.type === SacramentType.CONFIRMACION && (
+                    <div className="mb-4">
+                        {isEditing ? (
+                            <NameListInput 
+                                label="Padrinos" 
+                                value={editForm.godparents || ''} 
+                                onChange={(val) => handleInputChange('godparents', val)} 
+                                placeholder="Agregar padrino..."
+                            />
+                        ) : (
+                            <div>
+                                <label className={commonLabelClass}>Padrinos</label>
+                                <p className={commonTextClass}>{editForm.godparents || '-'}</p>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <CatechesisCheckbox />
             </>
         );
@@ -854,7 +856,8 @@ const Sacraments: React.FC = () => {
                         <div className="mt-6 grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
                             {selectedRecord.fatherName && <div className="col-span-1"><strong>Padre:</strong> {selectedRecord.fatherName}</div>}
                             {selectedRecord.motherName && <div className="col-span-1"><strong>Madre:</strong> {selectedRecord.motherName}</div>}
-                            {selectedRecord.godparents && <div className="col-span-2 mt-2"><strong>Padrinos:</strong> {selectedRecord.godparents}</div>}
+                            {/* Padrinos solo si no es Primera Comunion */}
+                            {selectedRecord.godparents && selectedRecord.type !== SacramentType.PRIMERA_COMUNION && <div className="col-span-2 mt-2"><strong>Padrinos:</strong> {selectedRecord.godparents}</div>}
                             {selectedRecord.witnesses && <div className="col-span-2 mt-2"><strong>Testigos:</strong> {selectedRecord.witnesses}</div>}
                         </div>
 
