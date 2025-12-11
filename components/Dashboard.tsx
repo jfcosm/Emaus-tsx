@@ -17,7 +17,9 @@ import {
   MessageSquare, 
   Sparkles,
   Baby,
-  Cross
+  Cross,
+  ExternalLink,
+  Sun
 } from 'lucide-react';
 import AppTour from './AppTour';
 
@@ -108,32 +110,59 @@ const Dashboard: React.FC = () => {
             </div>
          </div>
 
-         {/* Quick Stats (Simple Cards) */}
-         <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
-               <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 rounded-full flex items-center justify-center mb-2">
-                  <Baby className="w-5 h-5" />
-               </div>
-               <span className="text-3xl font-bold text-slate-800 dark:text-white">{sacramentCounts.baptisms}</span>
-               <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">{t('dashboard.stats.baptisms')}</span>
+         {/* Right Column: Stats & Promo */}
+         <div className="space-y-4 flex flex-col">
+            {/* Quick Stats (Simple Cards) */}
+            <div className="grid grid-cols-2 gap-4 flex-1">
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
+                   <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 rounded-full flex items-center justify-center mb-2">
+                      <Baby className="w-5 h-5" />
+                   </div>
+                   <span className="text-3xl font-bold text-slate-800 dark:text-white">{sacramentCounts.baptisms}</span>
+                   <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">{t('dashboard.stats.baptisms')}</span>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
+                   <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-full flex items-center justify-center mb-2">
+                      <Heart className="w-5 h-5" />
+                   </div>
+                   <span className="text-3xl font-bold text-slate-800 dark:text-white">{sacramentCounts.marriages}</span>
+                   <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">{t('dashboard.stats.marriages')}</span>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center col-span-2">
+                   <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span className="text-xs font-bold uppercase text-slate-400">Total Archivo</span>
+                   </div>
+                   <span className="text-4xl font-bold text-slate-800 dark:text-white">
+                      {sacramentCounts.baptisms + sacramentCounts.marriages + sacramentCounts.confirmations}
+                   </span>
+                   <span className="text-sm text-slate-500">Registros Digitalizados</span>
+                </div>
             </div>
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
-               <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-full flex items-center justify-center mb-2">
-                  <Heart className="w-5 h-5" />
+
+            {/* La Palabra Diaria Card */}
+            <a 
+              href="https://www.lapalabradiaria.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-gradient-to-br from-indigo-900 to-indigo-700 p-6 rounded-2xl shadow-lg relative overflow-hidden group border border-indigo-500/30 block transition-transform hover:-translate-y-1"
+            >
+               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <BookOpen className="w-24 h-24 text-white" />
                </div>
-               <span className="text-3xl font-bold text-slate-800 dark:text-white">{sacramentCounts.marriages}</span>
-               <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">{t('dashboard.stats.marriages')}</span>
-            </div>
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center col-span-2">
-               <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  <span className="text-xs font-bold uppercase text-slate-400">Total Archivo</span>
+               <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                     <Sun className="w-5 h-5 text-yellow-400" />
+                     <span className="text-xs font-bold uppercase text-indigo-200 tracking-wider">Lecturas de Hoy</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-1 font-serif">La Palabra Diaria</h3>
+                  <p className="text-indigo-200 text-sm mb-4 leading-snug">Accede al Evangelio y Santoral del día.</p>
+                  
+                  <div className="inline-flex items-center gap-2 text-xs font-bold text-white bg-white/20 px-3 py-1.5 rounded-lg group-hover:bg-white/30 transition-colors">
+                     Leer Evangelio <ExternalLink className="w-3 h-3" />
+                  </div>
                </div>
-               <span className="text-4xl font-bold text-slate-800 dark:text-white">
-                  {sacramentCounts.baptisms + sacramentCounts.marriages + sacramentCounts.confirmations}
-               </span>
-               <span className="text-sm text-slate-500">Registros Digitalizados</span>
-            </div>
+            </a>
          </div>
       </div>
 
