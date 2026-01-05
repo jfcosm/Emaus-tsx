@@ -1,15 +1,21 @@
 
-import { db } from './firebase';
-import { collection, getDocs, addDoc, updateDoc, doc, query, orderBy } from 'firebase/firestore';
+import { db, auth } from './firebase';
+import { collection, getDocs, addDoc, updateDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { SacramentRecord } from '../types';
-import { mockSacraments } from './mockData';
 
 const COLLECTION_NAME = 'sacraments';
 
-// Obtener todos los sacramentos
 export const getSacraments = async (): Promise<SacramentRecord[]> => {
   try {
-    const q = query(collection(db, COLLECTION_NAME), orderBy('date', 'desc'));
+    const user = auth.currentUser;
+    if (!user) return [];
+
+    // Filtramos para que el usuario solo traiga SUS propios registros
+    const q = query(
+      collection(db, COLLECTION_NAME), 
+      where('userId', '==', user.uid),
+      orderBy('date', 'desc')
+    );
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => ({
@@ -22,10 +28,16 @@ export const getSacraments = async (): Promise<SacramentRecord[]> => {
   }
 };
 
-// Agregar un nuevo sacramento
 export const addSacrament = async (sacrament: Omit<SacramentRecord, 'id'>): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), sacrament);
+    const user = auth.currentUser;
+    if (!user) throw new Error("No auth");
+
+    // Inyectamos el userId del creador obligatoriamente
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+      ...sacrament,
+      userId: user.uid
+    });
     return docRef.id;
   } catch (error) {
     console.error("Error adding sacrament:", error);
@@ -33,7 +45,6 @@ export const addSacrament = async (sacrament: Omit<SacramentRecord, 'id'>): Prom
   }
 };
 
-// Actualizar un sacramento existente
 export const updateSacrament = async (id: string, updates: Partial<SacramentRecord>): Promise<void> => {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
@@ -44,18 +55,9 @@ export const updateSacrament = async (id: string, updates: Partial<SacramentReco
   }
 };
 
-// Función utilitaria para poblar la BD con datos de prueba iniciales
-export const seedDatabase = async (): Promise<void> => {
-  try {
-    const promises = mockSacraments.map(item => {
-      // Eliminamos el ID del mock para que Firebase genere uno real
-      const { id, ...data } = item;
-      return addDoc(collection(db, COLLECTION_NAME), data);
-    });
-    await Promise.all(promises);
-    console.log("Database seeded successfully");
-  } catch (error) {
-    console.error("Error seeding database:", error);
-    throw error;
-  }
+// Fix: Added missing seedDatabase export for development/testing support
+export const seedDatabase = async () => {
+  console.log("seedDatabase is currently a placeholder for future synchronization logic.");
 };
+
+// Version 1.13.1

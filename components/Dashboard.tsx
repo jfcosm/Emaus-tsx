@@ -140,12 +140,13 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* La Palabra Diaria Card */}
+            {/* La Palabra Diaria Card - Version 1.10.2 */}
             <a 
               href="https://www.lapalabradiaria.com" 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-gradient-to-br from-indigo-900 to-indigo-700 p-6 rounded-2xl shadow-lg relative overflow-hidden group border border-indigo-500/30 block transition-transform hover:-translate-y-1"
+              aria-label="Acceder a La Palabra Diaria"
             >
                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                   <BookOpen className="w-24 h-24 text-white" />
