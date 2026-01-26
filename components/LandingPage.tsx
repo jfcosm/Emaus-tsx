@@ -1,80 +1,32 @@
-
+// Version 1.16.0 - Production Ready UI Audit
 import React, { useState, useEffect } from 'react';
 import { 
-  BookOpen, 
-  Calendar, 
-  FileText, 
-  Shield, 
-  CheckCircle, 
-  ArrowRight, 
-  ArrowLeft, 
-  Menu, 
-  X,
-  Cross,
-  User,
-  Lock,
-  ChevronRight,
-  Check,
-  Search,
-  Database,
-  Download,
-  Cloud,
-  Printer,
-  Smartphone,
-  Globe,
-  Sun,
-  Moon,
-  MessageCircle,
-  Users,
-  FileCheck,
-  Banknote,
-  Send,
-  Loader2,
-  RefreshCw
+  BookOpen, Calendar, FileText, CheckCircle, ArrowRight, Menu, X, Cross, User, Users, Lock, ChevronRight, Globe, Sun, Moon, MessageSquare, Database, Search, Download, Check, Sparkles, AlertCircle, Loader2, RefreshCw
 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
-import { createLead } from '../services/leadsService'; // IMPORT LEAD SERVICE
+import { createLead } from '../services/leadsService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 
-// Version 1.10.0 - Lead Generation Form
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false); // NEW DEMO MODAL STATE
-  const [showFeaturesPage, setShowFeaturesPage] = useState(false);
-  
-  // Login Form State
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // Demo Form State (Lead Gen)
-  const [leadForm, setLeadForm] = useState({
-      name: '',
-      role: '',
-      parish: '',
-      diocese: '',
-      phone: '',
-      email: ''
-  });
-  const [captcha, setCaptcha] = useState({ a: 0, b: 0 }); // Math Challenge
+  const [leadForm, setLeadForm] = useState({ name: '', role: '', parish: '', diocese: '', phone: '', email: '' });
+  const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
   const [captchaInput, setCaptchaInput] = useState('');
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState(false);
-
-  // Contexts
   const { t, language, setLanguage } = useLanguage();
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Generate simple math challenge
   const generateCaptcha = () => {
-      setCaptcha({
-          a: Math.floor(Math.random() * 10) + 1,
-          b: Math.floor(Math.random() * 10) + 1
-      });
+      setCaptcha({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
       setCaptchaInput('');
   };
 
@@ -90,39 +42,27 @@ const LandingPage: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
     try {
       await signInWithEmailAndPassword(auth, username, password);
     } catch (err: any) {
-      console.error("Login error:", err);
-      let msg = 'Error al iniciar sesión.';
-      if (err.code === 'auth/invalid-email') msg = 'El correo electrónico no es válido.';
-      if (err.code === 'auth/user-not-found') msg = 'Usuario no encontrado.';
-      if (err.code === 'auth/wrong-password') msg = 'Contraseña incorrecta.';
-      if (err.code === 'auth/invalid-credential') msg = 'Credenciales inválidas.';
-      
-      setError(msg);
+      setError(t('landing.login.error'));
       setIsLoading(false);
     }
   };
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      
-      // Verify Captcha
       if (parseInt(captchaInput) !== (captcha.a + captcha.b)) {
-          alert('La verificación de seguridad es incorrecta. Por favor intente de nuevo.');
+          alert(t('landing.demo.captcha_error'));
           generateCaptcha();
           return;
       }
-
       setIsSubmittingLead(true);
       try {
           await createLead(leadForm);
           setLeadSuccess(true);
       } catch (error) {
-          console.error("Lead Error", error);
-          alert("Error al enviar solicitud. Intente nuevamente.");
+          alert(t('landing.demo.submit_error'));
       } finally {
           setIsSubmittingLead(false);
       }
@@ -133,879 +73,452 @@ const LandingPage: React.FC = () => {
       setLeadForm(prev => ({ ...prev, [name]: value }));
   };
 
-  // --- STANDALONE FEATURES PAGE VIEW ---
-  if (showFeaturesPage) {
-    // ... same as before
-    const allFeatures = [
-      {
-        icon: BookOpen,
-        title: "Libros Sacramentales Digitales",
-        desc: "Bautizos, Confirmaciones, Matrimonios y Defunciones. Todo el archivo parroquial histórico y actual en un solo lugar seguro y buscable."
-      },
-      {
-        icon: FileText,
-        title: "Certificados Automáticos",
-        desc: "Genere partidas oficiales con un solo clic. Plantillas pre-cargadas con el formato estándar del obispado, listas para imprimir y firmar."
-      },
-      {
-        icon: Calendar,
-        title: "Agenda Pastoral Inteligente",
-        desc: "Gestión de intenciones de misa, reservas de salones, reuniones de catequesis y visitas a enfermos. Evite topes de horario."
-      },
-      {
-        icon: MessageCircle,
-        title: "Red Interparroquial",
-        desc: "Conecte directamente con otras secretarías para solicitar traslados y resolver dudas mediante un chat seguro y exclusivo."
-      },
-      {
-        icon: Banknote,
-        title: "Finanzas y Contabilidad",
-        desc: "Lleve el control de caja, ingresos por estipendios, colectas y gastos operativos. Obtenga balances mensuales automáticos."
-      },
-      {
-        icon: Shield,
-        title: "Seguridad y Privacidad",
-        desc: "Datos encriptados y respaldos automáticos diarios. Acceso diferenciado para párroco, secretaria y consejos pastorales."
-      },
-      {
-        icon: Cloud,
-        title: "Acceso en la Nube",
-        desc: "Acceda a la información desde la oficina parroquial, la sacristía o incluso desde su hogar. Compatible con computadoras y tablets."
-      },
-      {
-        icon: Printer,
-        title: "Editor de Documentos",
-        desc: "Redacte cartas pastorales, comunicados y actas sin necesidad de pagar licencias de Office. Todo queda guardado en la ficha de la parroquia."
-      },
-      {
-        icon: Smartphone,
-        title: "Diseño Móvil",
-        desc: "Interfaz optimizada para teléfonos, permitiendo al sacerdote consultar datos urgentes mientras está en terreno."
-      }
-    ];
-
-    return (
-      <div className="min-h-screen bg-stone-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans animate-fade-in transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* Header simple for sub-page */}
-          <div className="flex justify-between items-center mb-16">
-             <div className="flex items-center gap-3">
-                <div className="bg-gold-500 p-2 rounded-lg shadow-lg">
-                  <Cross className="w-6 h-6 text-emaus-950" />
-                </div>
-                <span className="text-2xl font-bold tracking-tight font-serif text-emaus-900 dark:text-gold-50">EMAÚS</span>
-             </div>
-             <button 
-               onClick={() => {
-                 setShowFeaturesPage(false);
-                 window.scrollTo(0, 0);
-               }}
-               className="flex items-center gap-2 px-6 py-2 border-2 border-slate-300 dark:border-slate-700 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-bold"
-             >
-               <ArrowLeft className="w-5 h-5" /> Volver al Inicio
-             </button>
-          </div>
-
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <span className="text-emaus-600 dark:text-gold-400 font-bold uppercase tracking-widest text-sm mb-4 block">Funcionalidades</span>
-            <h1 className="text-4xl lg:text-5xl font-bold font-serif text-slate-900 dark:text-white mb-6">Herramientas diseñadas para la vida parroquial</h1>
-            <p className="text-xl text-slate-600 dark:text-slate-400">
-              Cada funcionalidad de Emaús ha sido co-diseñada con secretarias y sacerdotes para resolver problemas reales del día a día.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {allFeatures.map((feat, idx) => (
-              <div key={idx} className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:border-gold-300 dark:hover:border-gold-700 transition-all group">
-                <div className="w-14 h-14 bg-emaus-50 dark:bg-emaus-900/30 text-emaus-700 dark:text-emaus-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <feat.icon className="w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{feat.title}</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                  {feat.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-20 bg-emaus-900 rounded-3xl p-12 text-center text-white relative overflow-hidden">
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-             <div className="relative z-10">
-               <h2 className="text-3xl font-serif font-bold mb-6">¿Listo para modernizar su parroquia?</h2>
-               <button 
-                  onClick={() => {
-                    setShowFeaturesPage(false);
-                    setTimeout(() => {
-                      const plansSection = document.getElementById('plans');
-                      if (plansSection) plansSection.scrollIntoView({ behavior: 'smooth' });
-                    }, 100);
-                  }}
-                  className="px-8 py-4 bg-gold-500 text-white rounded-xl font-bold text-lg hover:bg-gold-600 transition-all shadow-xl shadow-black/20"
-                >
-                  Ver Planes Disponibles
-                </button>
-             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- MAIN LANDING PAGE VIEW ---
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
-      <style>{`
-        @keyframes scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-scroll {
-          animation: scroll 40s linear infinite;
-        }
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-
-      {/* --- NAVBAR --- */}
-      <nav className="fixed w-full z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div className="min-h-screen bg-stone-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300 overflow-x-hidden">
+      {/* Navigation */}
+      <nav className="fixed w-full z-40 bg-white/90 dark:bg-slate-950/80 backdrop-blur-sm border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <div className="flex items-center gap-3">
-              <div className="bg-gold-500 p-2 rounded-lg shadow-lg">
-                <Cross className="w-6 h-6 text-emaus-950" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight font-serif text-emaus-900 dark:text-gold-50">EMAÚS</span>
+              <div className="bg-gold-500 p-1.5 rounded shadow-sm"><Cross className="w-5 h-5 text-white" /></div>
+              <span className="text-xl font-bold tracking-tight font-serif text-emaus-900 dark:text-gold-50 uppercase">Emaús</span>
             </div>
             
-            {/* Desktop Nav */}
             <div className="hidden lg:flex items-center space-x-6">
-              <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.features')}</a>
-              <a href="#benefits" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.benefits')}</a>
-              <a href="#plans" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 font-medium transition-colors">{t('landing.nav.plans')}</a>
+              <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 text-sm font-medium transition-colors">{t('landing.nav.features')}</a>
+              <a href="#benefits" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 text-sm font-medium transition-colors">{t('landing.nav.benefits')}</a>
+              <a href="#plans" className="text-slate-600 dark:text-slate-300 hover:text-emaus-700 text-sm font-medium transition-colors">{t('landing.nav.plans')}</a>
               
-              <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
-
-              {/* Language Selector */}
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 rounded-lg p-1">
-                 <Globe className="w-4 h-4 ml-1 text-slate-500" />
+              <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 px-2 py-1">
+                 <Globe className="w-3 h-3 text-slate-400" />
                  <select 
                    value={language} 
                    onChange={(e) => setLanguage(e.target.value as any)}
-                   className="bg-transparent border-none text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-0 cursor-pointer py-1 pr-8"
+                   className="bg-transparent border-none text-[10px] font-bold text-slate-700 dark:text-slate-300 focus:ring-0 cursor-pointer pr-5 py-0"
                  >
-                    <option value="es">ES</option>
-                    <option value="en">EN</option>
-                    <option value="pt">PT</option>
+                    {['es', 'en', 'pt', 'fr', 'it', 'de', 'pl', 'el', 'ru', 'ja', 'ko', 'zh', 'hi'].map(lang => (
+                        <option key={lang} value={lang}>{lang.toUpperCase()}</option>
+                    ))}
                  </select>
               </div>
 
-              {/* Dark Mode Toggle */}
-              <button 
-                onClick={toggleDarkMode}
-                className="p-2 text-slate-500 dark:text-gold-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-              >
+              <button onClick={toggleDarkMode} className="p-2 text-slate-400 hover:text-gold-500 transition-colors">
                  {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              <button 
-                onClick={() => setIsLoginModalOpen(true)}
-                className="px-6 py-2.5 bg-emaus-700 text-white rounded-full font-medium hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20"
-              >
+              <button onClick={() => setIsLoginModalOpen(true)} className="px-6 py-2 bg-emaus-700 text-white rounded-lg font-bold text-sm hover:bg-emaus-800 transition-all shadow-md active:scale-95">
                 {t('landing.nav.login')}
               </button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-600 dark:text-slate-300">
-                {isMenuOpen ? <X /> : <Menu />}
-              </button>
+            <div className="lg:hidden flex items-center gap-2">
+               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-600 dark:text-slate-300 p-2">
+                  {isMenuOpen ? <X /> : <Menu />}
+               </button>
             </div>
           </div>
         </div>
-        
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="lg:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-6 space-y-4">
-             <a href="#features" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.features')}</a>
-             <a href="#benefits" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.benefits')}</a>
-             <a href="#plans" onClick={() => setIsMenuOpen(false)} className="block text-slate-600 dark:text-slate-300 font-medium">{t('landing.nav.plans')}</a>
-             
-             {/* Mobile Settings */}
-             <div className="flex items-center gap-4 py-2 border-t border-slate-100 dark:border-slate-800">
-                <button onClick={toggleDarkMode} className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                  {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  <span>{darkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
-                </button>
-             </div>
-             <div className="flex gap-2">
-                {['es', 'en', 'pt'].map((lang) => (
-                  <button 
-                    key={lang}
-                    onClick={() => { setLanguage(lang as any); setIsMenuOpen(false); }}
-                    className={`px-3 py-1 rounded border ${language === lang ? 'bg-emaus-100 border-emaus-500 text-emaus-700' : 'border-slate-200 dark:border-slate-700'}`}
-                  >
-                    {lang.toUpperCase()}
-                  </button>
-                ))}
-             </div>
-
-             <button 
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  setIsLoginModalOpen(true);
-                }}
-                className="w-full text-left font-bold text-emaus-700 dark:text-emaus-400 border-t border-slate-100 dark:border-slate-800 mt-2 pt-2"
-             >
-               {t('landing.nav.client_access')}
-             </button>
-          </div>
-        )}
       </nav>
 
-      {/* --- HERO SECTION --- */}
-      <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 relative overflow-hidden">
-        {/* ... (Existing Hero Code, only changing CTA) ... */}
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* HERO SECTION */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-100 dark:bg-gold-900/20 text-gold-800 dark:text-gold-300 rounded-full text-sm font-bold uppercase tracking-wide">
-              <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-50 dark:bg-gold-900/20 text-gold-700 dark:text-gold-400 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 bg-gold-500 rounded-full"></span>
               {t('landing.hero.badge')}
             </div>
-            <h1 className="text-5xl lg:text-7xl font-bold font-serif leading-tight text-slate-900 dark:text-white">
-              {t('landing.hero.title_start')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emaus-600 to-emaus-400">{t('landing.hero.title_highlight')}</span>
-            </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-lg">
-              {t('landing.hero.subtitle')}
-            </p>
+            
+            <div className="space-y-4">
+              <h1 className="text-5xl lg:text-7xl font-bold font-serif leading-none text-slate-900 dark:text-white uppercase">
+                {t('landing.hero.title_start')} <br />
+                <span className="text-emaus-700 dark:text-emaus-400">
+                  {t('landing.hero.title_highlight')}
+                </span>
+              </h1>
+              <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-lg">
+                {t('landing.hero.subtitle')}
+              </p>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-8 py-4 bg-emaus-700 text-white rounded-xl font-bold text-lg hover:bg-emaus-800 transition-all shadow-xl shadow-emaus-900/20 flex items-center justify-center gap-2"
+                className="px-8 py-3 bg-emaus-700 text-white rounded-lg font-bold text-base hover:bg-emaus-800 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95"
               >
-                {t('landing.hero.cta_access')} <ArrowRight className="w-5 h-5" />
+                {t('landing.hero.cta_access')} 
+                <ArrowRight className="w-5 h-5" />
               </button>
-              <a href="#plans" className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center">
+              <button 
+                onClick={() => {
+                  document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-8 py-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-800 rounded-lg font-bold text-base hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
+              >
                 {t('landing.hero.cta_plans')}
-              </a>
+              </button>
             </div>
           </div>
-          
-          {/* VISUAL REPRESENTATION (MOCKUP) - NO CHANGES */}
-          <div className="relative z-10 lg:h-[600px] flex items-center justify-center perspective-1000">
-             {/* Background Glow */}
-             <div className="absolute inset-0 bg-gradient-to-tr from-emaus-600/30 to-gold-400/30 rounded-full opacity-40 blur-3xl animate-pulse"></div>
-             
-             {/* Main App Interface Mockup */}
-             <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 rotate-y-12 rotate-x-6 transform transition-transform hover:rotate-0 duration-700">
-                
-                {/* Mockup Header */}
-                <div className="flex items-center justify-between mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-emaus-50 dark:bg-emaus-900/30 rounded-full flex items-center justify-center text-emaus-700 dark:text-emaus-400">
-                         <User className="w-5 h-5" />
-                      </div>
-                      <div>
-                         <div className="text-xs text-emaus-600 dark:text-emaus-400 font-bold uppercase tracking-wider">{t('landing.mockup.sacrament')}</div>
-                         <div className="text-lg font-bold text-slate-800 dark:text-white">{t('landing.mockup.baptism_card')}</div>
-                      </div>
-                   </div>
-                   <div className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-2 py-1 rounded">
-                      {t('landing.mockup.verified')}
-                   </div>
+
+          {/* MOCKUP FLOTANTE (DYNAMIC TRANSLATION) */}
+          <div className="relative animate-fade-in-up delay-200 lg:pl-12">
+             <div className="relative bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-slate-100 dark:border-slate-800 max-w-md ml-auto">
+                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-50 dark:border-slate-800">
+                    <div className="w-10 h-10 bg-emaus-50 dark:bg-emaus-900/30 rounded-full flex items-center justify-center text-emaus-600">
+                        <User className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-bold text-emaus-600 uppercase tracking-widest">{t('landing.mockup.sacrament')}</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">{t('landing.mockup.record_type')}</p>
+                    </div>
                 </div>
 
-                {/* Mockup Fields */}
                 <div className="space-y-4">
-                   {/* Name Field */}
                    <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.name_label')}</label>
-                      <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-800 dark:text-slate-200 font-medium flex items-center justify-between">
-                         Juan Pérez Gómez
-                         <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      </div>
+                       <label className="text-[9px] font-bold text-slate-400 uppercase">{t('landing.mockup.label_name')}</label>
+                       <div className="w-full bg-slate-50 dark:bg-slate-800 px-3 py-2 rounded text-sm text-slate-700 dark:text-slate-200 font-medium">Juan Pérez Gómez</div>
                    </div>
-
-                   {/* Date Field */}
                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                         <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.date_label')}</label>
-                         <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-600 dark:text-slate-400 text-sm">
-                            15 / 05 / 2024
-                         </div>
-                      </div>
-                      <div>
-                         <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.book_label')}</label>
-                         <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-600 dark:text-slate-400 text-sm">
-                            L: 104 / P: 23
-                         </div>
-                      </div>
-                   </div>
-
-                   {/* Parents Field */}
-                   <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">{t('landing.mockup.parents_label')}</label>
-                      <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-slate-600 dark:text-slate-400 text-sm">
-                         Pedro Pérez y María Gómez
-                      </div>
-                   </div>
-
-                   {/* Mock Button */}
-                   <div className="pt-4">
-                      <div className="w-full bg-emaus-700 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md opacity-90">
-                         {t('landing.mockup.generate_btn')}
-                      </div>
-                   </div>
-                </div>
-             </div>
-             
-             {/* SEQUENTIAL POPUPS */}
-             <div className="absolute top-10 -right-4 lg:-right-12 w-64 space-y-3">
-                
-                {/* Popup 1: Registro */}
-                <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3 animate-[fade-in-up_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.5s' }}>
-                   <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full text-blue-600 dark:text-blue-400">
-                      <Database className="w-4 h-4" />
+                       <div>
+                           <label className="text-[9px] font-bold text-slate-400 uppercase">{t('landing.mockup.label_date')}</label>
+                           <div className="w-full bg-slate-50 dark:bg-slate-800 px-3 py-2 rounded text-sm text-slate-700 dark:text-slate-200 font-medium">15 / 05 / 2024</div>
+                       </div>
+                       <div>
+                           <label className="text-[9px] font-bold text-slate-400 uppercase">{t('landing.mockup.label_book')}</label>
+                           <div className="w-full bg-slate-50 dark:bg-slate-800 px-3 py-2 rounded text-sm text-slate-700 dark:text-slate-200 font-medium">L: 104 / P: 23</div>
+                       </div>
                    </div>
                    <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">{t('landing.mockup.popup_db')}</p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white">{t('landing.mockup.popup_db_sub')}</p>
+                       <label className="text-[9px] font-bold text-slate-400 uppercase">{t('landing.mockup.label_parents')}</label>
+                       <div className="w-full bg-slate-50 dark:bg-slate-800 px-3 py-2 rounded text-sm text-slate-700 dark:text-slate-200 font-medium">Pedro Pérez y María Gómez</div>
                    </div>
                 </div>
 
-                {/* Popup 2: Búsqueda */}
-                <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3 animate-[fade-in-up_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '2.0s' }}>
-                   <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full text-purple-600 dark:text-purple-400">
-                      <Search className="w-4 h-4" />
+                <div className="mt-8 pt-6 border-t border-slate-50 dark:border-slate-800">
+                    <div className="h-6 w-full bg-emaus-700 rounded opacity-90"></div>
+                </div>
+
+                {/* Floating Status Badges (DYNAMIC) */}
+                <div className="absolute -right-8 top-0 space-y-3 hidden md:block">
+                   <div className="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-xl border border-slate-50 dark:border-slate-700 flex items-center gap-3 animate-bounce-slow">
+                       <div className="bg-blue-100 p-1.5 rounded text-blue-600"><Database className="w-4 h-4" /></div>
+                       <div>
+                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter leading-none">{t('landing.mockup.badge_db')}</p>
+                           <p className="text-[11px] font-bold text-slate-700 dark:text-white">{t('landing.mockup.status_db')}</p>
+                       </div>
                    </div>
-                   <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">{t('landing.mockup.popup_search')}</p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white">{t('landing.mockup.popup_search_sub')}</p>
+                   <div className="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-xl border border-slate-50 dark:border-slate-700 flex items-center gap-3 animate-bounce-slow delay-75">
+                       <div className="bg-purple-100 p-1.5 rounded text-purple-600"><Search className="w-4 h-4" /></div>
+                       <div>
+                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter leading-none">{t('landing.mockup.badge_search')}</p>
+                           <p className="text-[11px] font-bold text-slate-700 dark:text-white">{t('landing.mockup.status_search')}</p>
+                       </div>
+                   </div>
+                   <div className="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-xl border border-slate-50 dark:border-slate-700 flex items-center gap-3 animate-bounce-slow delay-150">
+                       <div className="bg-emerald-100 p-1.5 rounded text-emerald-600"><Download className="w-4 h-4" /></div>
+                       <div>
+                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter leading-none">{t('landing.mockup.badge_docs')}</p>
+                           <p className="text-[11px] font-bold text-slate-700 dark:text-white">{t('landing.mockup.status_docs')}</p>
+                       </div>
                    </div>
                 </div>
 
-                {/* Popup 3: Certificado */}
-                <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3 animate-[fade-in-up_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '3.5s' }}>
-                   <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full text-green-600 dark:text-green-400">
-                      <Download className="w-4 h-4" />
+                {/* Chat Bubble Popup (DYNAMIC) */}
+                <div className="absolute -left-12 -bottom-4 bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 flex items-center gap-3 animate-fade-in">
+                   <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-pink-600 shrink-0">
+                      <MessageSquare className="w-4 h-4" />
                    </div>
                    <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">{t('landing.mockup.popup_docs')}</p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white">{t('landing.mockup.popup_docs_sub')}</p>
+                       <p className="text-[10px] font-bold text-slate-700 dark:text-white">{t('landing.mockup.chat_name')}</p>
+                       <p className="text-[9px] text-slate-400">{t('landing.mockup.chat_msg')} <span className="text-emerald-500">✅</span></p>
                    </div>
                 </div>
-
-                {/* Popup 4: Chat (NEW) */}
-                <div className="absolute -bottom-64 -left-48 lg:-left-64 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-4 animate-[fade-in-up_0.5s_ease-out_forwards] opacity-0 w-64 md:w-72" style={{ animationDelay: '5.0s' }}>
-                   <div className="bg-emaus-100 dark:bg-emaus-900/30 p-3 rounded-full text-emaus-600 dark:text-emaus-400 shrink-0">
-                      <MessageCircle className="w-6 h-6" />
-                   </div>
-                   <div>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">{t('landing.mockup.popup_chat')}</p>
-                      <p className="text-xs text-slate-500 mt-1">{t('landing.mockup.popup_chat_sub')}</p>
-                   </div>
-                </div>
-
              </div>
           </div>
         </div>
-        
-        {/* Custom Animation Style for this component */}
-        <style>{`
-          @keyframes fade-in-up {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
       </section>
 
-      {/* --- FEATURES SECTION --- */}
-      <section id="features" className="py-24 bg-white dark:bg-slate-900 scroll-mt-24">
-        {/* ... Existing Features Code ... */}
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.features.title')}</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg">{t('landing.features.subtitle')}</p>
+      {/* SECTION: TODO LO QUE SU SECRETARÍA NECESITA */}
+      <section id="features" className="py-24 px-4 bg-white dark:bg-slate-900/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 space-y-3">
+            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-slate-900 dark:text-white uppercase tracking-tight">{t('landing.features.title')}</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto text-sm">{t('landing.features.subtitle')}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {/* Feature 1 */}
-            <div className="group p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 hover:bg-gold-50 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800">
-               <div className="w-14 h-14 bg-emaus-100 dark:bg-emaus-900/30 text-emaus-700 dark:text-emaus-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                 <BookOpen className="w-7 h-7" />
-               </div>
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.digital_sacraments')}</h3>
-               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                 {t('landing.features.digital_sacraments_desc')}
-               </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="group p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800">
-               <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                 <FileText className="w-7 h-7" />
-               </div>
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.certs')}</h3>
-               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                 {t('landing.features.certs_desc')}
-               </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="group p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800">
-               <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                 <Calendar className="w-7 h-7" />
-               </div>
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.agenda')}</h3>
-               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                 {t('landing.features.agenda_desc')}
-               </p>
-            </div>
-
-            {/* Feature 4 (Network) */}
-            <div className="group p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 hover:bg-teal-50 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800">
-               <div className="w-14 h-14 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                 <MessageCircle className="w-7 h-7" />
-               </div>
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{t('landing.features.network')}</h3>
-               <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                 {t('landing.features.network_desc')}
-               </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: BookOpen, title: t('landing.features.sacraments_title'), desc: t('landing.features.sacraments_desc'), color: 'text-pink-600', bg: 'bg-pink-50' },
+              { icon: FileText, title: t('landing.features.docs_title'), desc: t('landing.features.docs_desc'), color: 'text-blue-600', bg: 'bg-blue-50' },
+              { icon: Calendar, title: t('landing.features.agenda_title'), desc: t('landing.features.agenda_desc'), color: 'text-purple-600', bg: 'bg-purple-50' },
+              { icon: MessageSquare, title: t('landing.features.chat_title'), desc: t('landing.features.chat_desc'), color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            ].map((f, i) => (
+              <div key={i} className="p-8 rounded-xl bg-slate-50 dark:bg-slate-950/30 border border-slate-100 dark:border-slate-800 text-center flex flex-col items-center">
+                <div className={`w-12 h-12 ${f.bg} dark:bg-slate-800 ${f.color} rounded-lg flex items-center justify-center mb-6`}>
+                   <f.icon className="w-6 h-6" />
+                </div>
+                <h4 className="text-base font-bold text-slate-800 dark:text-white mb-3">{f.title}</h4>
+                <p className="text-slate-500 dark:text-slate-400 text-[13px] leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
           </div>
-
-          <div className="text-center">
-             <button 
-               onClick={() => {
-                 setShowFeaturesPage(true);
-                 window.scrollTo(0, 0);
-               }}
-               className="px-10 py-3 bg-white dark:bg-slate-800 border-2 border-emaus-100 dark:border-slate-700 text-emaus-700 dark:text-slate-200 rounded-full font-bold hover:bg-emaus-50 dark:hover:bg-slate-700 hover:border-emaus-200 transition-all text-lg shadow-sm"
-             >
-               {t('landing.features.btn_more')}
+          <div className="mt-12 text-center">
+             <button className="px-6 py-2.5 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-bold text-emaus-700 dark:text-emaus-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all uppercase tracking-widest">
+                {t('landing.features.btn_more')}
              </button>
           </div>
         </div>
       </section>
 
-      {/* --- PLANS SECTION (UPDATED CTA) --- */}
-      <section id="plans" className="py-24 bg-stone-50 dark:bg-slate-950 scroll-mt-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.plans.title')}</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg">{t('landing.plans.subtitle')}</p>
+      {/* SECTION: PLANES DISEÑADOS PARA CADA COMUNIDAD */}
+      <section id="plans" className="py-24 px-4 bg-slate-50 dark:bg-slate-950/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 space-y-3">
+            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-slate-900 dark:text-white uppercase tracking-tight">{t('landing.plans.title')}</h2>
+            <p className="text-slate-500 max-w-xl mx-auto text-sm">{t('landing.plans.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-             {/* Plan Básico */}
-             <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all">
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('landing.plans.basic.name')}</h3>
-                  <p className="text-slate-500 dark:text-slate-400 mt-2">{t('landing.plans.basic.desc')}</p>
-                </div>
-                <div className="mb-8">
-                  <span className="text-4xl font-bold text-emaus-700 dark:text-emaus-400">$9.000</span>
-                  <span className="text-slate-500"> / mes</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-gold-500" /> Agenda Parroquial
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-gold-500" /> Registro de Sacramentos
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-gold-500" /> Certificados Automáticos
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-gold-500" /> Chat Interparroquial
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
-                    <X className="w-5 h-5" /> Editor Tipo Word
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
-                    <X className="w-5 h-5" /> Módulo de Finanzas
-                  </li>
-                </ul>
-                <button 
-                  onClick={() => setIsDemoModalOpen(true)} // CHANGED TO DEMO
-                  className="w-full py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                >
-                  {t('landing.plans.basic.btn')}
-                </button>
-             </div>
+            {/* Plan Básico */}
+            <div className="bg-white dark:bg-slate-900 p-10 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+              <div className="mb-8">
+                 <h4 className="text-xl font-bold text-slate-800 dark:text-white mb-1">{t('landing.plans.basic_title')}</h4>
+                 <p className="text-xs text-slate-500 mb-6">{t('landing.plans.basic_desc')}</p>
+                 <div className="flex items-baseline gap-1">
+                    <span className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white">USD 10</span>
+                    <span className="text-xl font-bold text-slate-400 ml-1">(€9)</span>
+                    <span className="text-slate-400 text-sm">/ {t('landing.plans.forever')}</span>
+                 </div>
+              </div>
+              <ul className="space-y-3 mb-10 flex-1">
+                 {[
+                   t('landing.plans.feature_agenda'), 
+                   t('landing.plans.feature_sacraments'), 
+                   t('landing.plans.feature_certs'), 
+                   t('landing.plans.feature_chat')
+                 ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-[13px] text-slate-600 dark:text-slate-300">
+                       <Check className="w-4 h-4 text-gold-500" />
+                       {item}
+                    </li>
+                 ))}
+                 {[
+                   t('landing.plans.feature_editor'), 
+                   t('landing.plans.feature_finances')
+                 ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-[13px] text-slate-400 line-through opacity-50">
+                       <X className="w-4 h-4" />
+                       {item}
+                    </li>
+                 ))}
+              </ul>
+              <button 
+                onClick={() => setIsDemoModalOpen(true)}
+                className="w-full py-3 border-2 border-slate-100 dark:border-slate-800 rounded-lg font-bold text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
+              >
+                {t('landing.plans.cta')}
+              </button>
+            </div>
 
-             {/* Plan Avanzado */}
-             <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-gold-400 relative hover:shadow-2xl transition-all transform md:-translate-y-4">
-                <div className="absolute top-0 right-0 bg-gold-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wide">
-                  {t('landing.plans.advanced.tag')}
-                </div>
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('landing.plans.advanced.name')}</h3>
-                  <p className="text-slate-500 dark:text-slate-400 mt-2">{t('landing.plans.advanced.desc')}</p>
-                </div>
-                <div className="mb-8">
-                  <span className="text-4xl font-bold text-emaus-700 dark:text-emaus-400">$19.000</span>
-                  <span className="text-slate-500"> / mes</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> <strong>{t('landing.plans.advanced.items.basic_features')}</strong>
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.word_editor')}
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.finance')}
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.chat')}
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.reports')}
-                  </li>
-                  <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <Check className="w-5 h-5 text-emaus-600" /> {t('landing.plans.advanced.items.support')}
-                  </li>
-                </ul>
-                <button 
-                  onClick={() => setIsDemoModalOpen(true)} // CHANGED TO DEMO
-                  className="w-full py-3 bg-gold-500 text-white rounded-xl font-bold hover:bg-gold-600 transition-colors shadow-lg shadow-gold-500/20"
-                >
-                  {t('landing.plans.advanced.btn')}
-                </button>
-             </div>
+            {/* Plan Avanzado */}
+            <div className="bg-white dark:bg-slate-900 p-10 rounded-2xl border-2 border-gold-500 shadow-xl flex flex-col relative overflow-hidden">
+              <div className="absolute top-0 right-0">
+                 <div className="bg-gold-500 text-white text-[9px] font-black px-3 py-1 uppercase tracking-widest">{t('landing.plans.popular')}</div>
+              </div>
+              <div className="mb-8">
+                 <h4 className="text-xl font-bold text-slate-800 dark:text-white mb-1">{t('landing.plans.adv_title')}</h4>
+                 <p className="text-xs text-slate-500 mb-6">{t('landing.plans.adv_desc')}</p>
+                 <div className="flex items-baseline gap-1">
+                    <span className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white">USD 22</span>
+                    <span className="text-xl font-bold text-slate-400 ml-1">(€19)</span>
+                    <span className="text-slate-400 text-sm">/ {t('landing.plans.forever')}</span>
+                 </div>
+              </div>
+              <ul className="space-y-3 mb-10 flex-1">
+                 <li className="flex items-center gap-3 text-[13px] font-bold text-slate-800 dark:text-white">
+                    <Check className="w-4 h-4 text-gold-500" /> {t('landing.plans.feature_basic_all')}
+                 </li>
+                 {[
+                   t('landing.plans.feature_editor'), 
+                   t('landing.plans.feature_finances'), 
+                   t('landing.plans.feature_unlimited'), 
+                   t('landing.plans.feature_reports'), 
+                   t('landing.plans.feature_support')
+                 ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-[13px] text-slate-600 dark:text-slate-300">
+                       <Check className="w-4 h-4 text-gold-500" />
+                       {item}
+                    </li>
+                 ))}
+              </ul>
+              <button 
+                onClick={() => setIsDemoModalOpen(true)}
+                className="w-full py-3 bg-gold-500 text-white rounded-lg font-bold text-sm hover:bg-gold-600 transition-all shadow-md active:scale-95"
+              >
+                {t('landing.plans.cta')}
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* --- COMMUNITY SECTION (NEW) --- */}
-      {/* ... (Existing Community Code) ... */}
-      <section className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold font-serif text-slate-900 dark:text-white mb-4">{t('landing.community.title')}</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg mb-12 max-w-2xl mx-auto">{t('landing.community.subtitle')}</p>
+      {/* SECTION: NUNCA MÁS TRABAJE EN SOLITARIO */}
+      <section className="py-24 px-4 bg-white dark:bg-slate-900/30">
+         <div className="max-w-7xl mx-auto text-center">
+            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-slate-900 dark:text-white uppercase mb-4 tracking-tight">{t('landing.community.title')}</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto text-sm mb-16">{t('landing.community.subtitle')}</p>
             
-            <div className="relative">
-               {/* Decorative connecting lines (abstract) */}
-               <div className="absolute top-1/2 left-0 w-full h-px bg-slate-200 dark:bg-slate-800 -z-10 hidden md:block"></div>
-               
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:border-gold-200 transition-colors group">
-                     <div className="w-12 h-12 bg-emaus-100 dark:bg-emaus-900/30 text-emaus-600 dark:text-emaus-400 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                        <Users className="w-6 h-6" />
-                     </div>
-                     <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{t('landing.community.card_community.title')}</h3>
-                     <p className="text-sm text-slate-500 dark:text-slate-400">{t('landing.community.card_community.desc')}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="bg-slate-50 dark:bg-slate-950 p-10 rounded-2xl border border-slate-100 dark:border-slate-800 text-center group hover:bg-white dark:hover:bg-slate-900 transition-colors">
+                  <div className="w-12 h-12 bg-pink-50 dark:bg-pink-900/20 rounded-full flex items-center justify-center mx-auto mb-6 text-pink-600 group-hover:scale-110 transition-transform">
+                     <Users className="w-6 h-6" />
                   </div>
-                  
-                  <div className="bg-gold-500 text-white p-6 rounded-2xl shadow-lg transform md:-translate-y-4">
-                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <MessageCircle className="w-6 h-6" />
-                     </div>
-                     <h3 className="font-bold text-lg mb-1">{t('landing.community.card_chat.title')}</h3>
-                     <p className="text-sm text-white/80">{t('landing.community.card_chat.desc')}</p>
+                  <h4 className="font-bold text-slate-800 dark:text-white mb-2">{t('landing.community.card1_title')}</h4>
+                  <p className="text-xs text-slate-500">{t('landing.community.card1_desc')}</p>
+               </div>
+               <div className="bg-gold-500 p-10 rounded-2xl shadow-xl text-white text-center transform scale-105">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                     <MessageSquare className="w-6 h-6" />
                   </div>
-                  
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:border-gold-200 transition-colors group">
-                     <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                        <FileCheck className="w-6 h-6" />
-                     </div>
-                     <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{t('landing.community.card_docs.title')}</h3>
-                     <p className="text-sm text-slate-500 dark:text-slate-400">{t('landing.community.card_docs.desc')}</p>
+                  <h4 className="font-bold mb-2">{t('landing.community.card2_title')}</h4>
+                  <p className="text-xs opacity-90">{t('landing.community.card2_desc')}</p>
+               </div>
+               <div className="bg-slate-50 dark:bg-slate-950 p-10 rounded-2xl border border-slate-100 dark:border-slate-800 text-center group hover:bg-white dark:hover:bg-slate-900 transition-colors">
+                  <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 group-hover:scale-110 transition-transform">
+                     <FileText className="w-6 h-6" />
                   </div>
+                  <h4 className="font-bold text-slate-800 dark:text-white mb-2">{t('landing.community.card3_title')}</h4>
+                  <p className="text-xs text-slate-500">{t('landing.community.card3_desc')}</p>
                </div>
             </div>
-        </div>
+         </div>
       </section>
 
-      {/* --- BENEFITS / SOCIAL PROOF (CAROUSEL) --- */}
-      {/* ... (Existing Benefits Code) ... */}
-      <section id="benefits" className="py-24 bg-emaus-900 relative overflow-hidden text-white scroll-mt-24">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-           <div className="text-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-4">{t('landing.testimonials.quote')}</h2>
-              <p className="text-emaus-200 text-lg max-w-2xl mx-auto">
-                {t('landing.testimonials.text')}
-              </p>
-           </div>
+      {/* SECTION: TESTIMONIALS (DYNAMIC) */}
+      <section className="py-24 px-4 bg-emaus-900 text-white relative overflow-hidden">
+         <div className="absolute top-0 right-0 p-20 opacity-5">
+            <Cross className="w-96 h-96" />
+         </div>
+         <div className="max-w-4xl mx-auto text-center relative z-10 space-y-12">
+            <div className="space-y-4">
+                <h2 className="text-3xl lg:text-5xl font-serif font-bold italic">{t('landing.testimonials.title')}</h2>
+                <p className="text-emaus-200 max-w-2xl mx-auto text-lg">{t('landing.testimonials.subtitle')}</p>
+            </div>
 
-           {/* Infinite Carousel */}
-           <div className="relative w-full overflow-hidden mask-linear-gradient">
-              <div className="flex gap-6 animate-scroll w-max hover:[animation-play-state:paused]">
-                 {/* Duplicate items for infinite effect */}
-                 {[1, 2].map((iter) => (
-                    <React.Fragment key={iter}>
-                       {['t1', 't2', 't3', 't4'].map((key) => (
-                          <div key={`${iter}-${key}`} className="w-80 md:w-96 bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 shrink-0">
-                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center font-bold text-emaus-900 text-sm">
-                                   {t(`landing.testimonials.carousel.${key}.author`).charAt(0)}
-                                </div>
-                                <div>
-                                   <p className="font-bold text-sm">{t(`landing.testimonials.carousel.${key}.author`)}</p>
-                                   <p className="text-emaus-300 text-xs">{t(`landing.testimonials.carousel.${key}.role`)}</p>
-                                </div>
-                             </div>
-                             <p className="text-emaus-100 text-sm italic leading-relaxed">
-                               "{t(`landing.testimonials.carousel.${key}.quote`)}"
-                             </p>
-                          </div>
-                       ))}
-                    </React.Fragment>
-                 ))}
-              </div>
-           </div>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               {[
+                  { name: t('landing.testimonials.t1_name'), role: t('landing.testimonials.t1_role'), initial: 'H', text: t('landing.testimonials.t1_text') },
+                  { name: t('landing.testimonials.t2_name'), role: t('landing.testimonials.t2_role'), initial: 'P', text: t('landing.testimonials.t2_text') },
+                  { name: t('landing.testimonials.t3_name'), role: t('landing.testimonials.t3_role'), initial: 'D', text: t('landing.testimonials.t3_text') }
+               ].map((testi, i) => (
+                  <div key={i} className="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/10 text-left space-y-4 hover:bg-white/15 transition-colors">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gold-500/20 rounded-full flex items-center justify-center text-gold-400 font-bold">{testi.initial}</div>
+                        <div>
+                           <p className="font-bold text-sm leading-none">{testi.name}</p>
+                           <p className="text-[10px] text-emaus-300 mt-1">{testi.role}</p>
+                        </div>
+                     </div>
+                     <p className="text-xs italic leading-relaxed text-emaus-100">{testi.text}</p>
+                  </div>
+               ))}
+            </div>
+         </div>
       </section>
 
-      {/* --- FOOTER --- */}
-      <footer className="bg-slate-50 dark:bg-slate-950 py-12 border-t border-slate-200 dark:border-slate-800">
-         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+      {/* FOOTER (DYNAMIC) */}
+      <footer className="py-12 px-8 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800">
+         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
-               <Cross className="w-5 h-5 text-emaus-700 dark:text-gold-500" />
-               <span className="font-serif font-bold text-lg text-slate-900 dark:text-white">EMAÚS</span>
+               <div className="bg-emaus-700 p-1.5 rounded"><Cross className="w-4 h-4 text-white" /></div>
+               <span className="font-serif font-bold text-emaus-900 dark:text-white uppercase tracking-wider">Emaús</span>
             </div>
             <div className="text-center md:text-right">
-               <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">
-                 {t('landing.footer.designed')}
-               </p>
-               <p className="text-slate-500 dark:text-slate-400 text-sm">
-                 {t('landing.footer.developed')} <a href="https://www.melodialab.net" target="_blank" rel="noopener noreferrer" className="text-emaus-700 dark:text-gold-500 hover:underline font-medium">MelodIA La♭</a>.
-               </p>
+               <p className="text-[11px] text-slate-400 font-medium uppercase tracking-widest mb-1">{t('landing.footer.tagline')}</p>
+               <p className="text-[10px] text-slate-400">{t('landing.footer.dev')} <span className="text-emaus-600 font-bold">Melodia Lab</span>.</p>
             </div>
          </div>
       </footer>
 
-      {/* --- LOGIN MODAL --- */}
+      {/* LOGIN MODAL */}
       {isLoginModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative border border-slate-200 dark:border-slate-800">
-              <button 
-                 onClick={() => setIsLoginModalOpen(false)}
-                 className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                 <X className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="bg-emaus-900 p-10 text-center relative">
+              <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
+              <div className="w-16 h-16 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"><Lock className="w-8 h-8 text-white" /></div>
+              <h3 className="text-2xl font-bold text-white uppercase tracking-widest font-serif">{t('landing.login.title')}</h3>
+              <p className="text-emaus-200 text-sm mt-2">{t('landing.login.subtitle')}</p>
+            </div>
+            <form onSubmit={handleLoginSubmit} className="p-8 space-y-6">
+              {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2"><AlertCircle className="w-4 h-4" /> {error}</div>}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">{t('landing.login.email')}</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                    <input type="email" required value={username} onChange={(e) => setUsername(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-emaus-500 dark:text-white" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">{t('landing.login.password')}</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-emaus-500 dark:text-white" />
+                  </div>
+                </div>
+              </div>
+              <button type="submit" disabled={isLoading} className="w-full py-4 bg-emaus-700 text-white rounded-lg font-bold hover:bg-emaus-800 disabled:opacity-50 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : t('landing.login.btn')}
               </button>
-
-              <div className="p-8">
-                 <div className="text-center mb-8">
-                    <div className="inline-block p-3 bg-emaus-50 dark:bg-emaus-900/30 rounded-xl mb-4">
-                       <Lock className="w-8 h-8 text-emaus-700 dark:text-emaus-400" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('landing.login.welcome')}</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2">{t('landing.login.subtitle')}</p>
-                 </div>
-
-                 <form onSubmit={handleLoginSubmit} className="space-y-6">
-                    {error && (
-                       <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 text-sm rounded-lg border border-red-100 dark:border-red-900/50">
-                          {error}
-                       </div>
-                    )}
-                    
-                    <div>
-                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('landing.login.user')}</label>
-                       <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                          <input 
-                            type="email"
-                            required
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emaus-500 transition-all dark:text-white"
-                            placeholder="Ej: parroquia.santamaria@email.com"
-                          />
-                       </div>
-                    </div>
-
-                    <div>
-                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('landing.login.pass')}</label>
-                       <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                          <input 
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emaus-500 transition-all dark:text-white"
-                            placeholder="••••••••"
-                          />
-                       </div>
-                    </div>
-
-                    <button 
-                      type="submit"
-                      disabled={isLoading}
-                      className={`w-full py-3 bg-emaus-700 text-white rounded-xl font-bold text-lg hover:bg-emaus-800 transition-all shadow-lg shadow-emaus-900/20 flex items-center justify-center gap-2 group ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    >
-                      {isLoading ? t('landing.login.verifying') : t('landing.login.btn')} 
-                      {!isLoading && <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
-                    </button>
-                 </form>
-
-                 <div className="mt-6 text-center">
-                    <p className="text-sm text-slate-400">
-                       {t('landing.login.forgot')} <a href="#" className="text-emaus-600 hover:underline">{t('landing.login.contact')}</a>
-                    </p>
-                 </div>
-              </div>
-              
-              <div className="bg-slate-50 dark:bg-slate-950 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                 <p className="text-xs text-slate-400">{t('landing.login.secure')}</p>
-              </div>
-           </div>
+            </form>
+          </div>
         </div>
       )}
 
-      {/* --- DEMO REQUEST MODAL --- */}
+      {/* DEMO REQUEST MODAL */}
       {isDemoModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative border border-slate-200 dark:border-slate-800">
-                  <button 
-                      onClick={() => setIsDemoModalOpen(false)}
-                      className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 z-10"
-                  >
-                      <X className="w-6 h-6" />
-                  </button>
-
-                  <div className="p-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row max-h-[90vh]">
+                  <div className="hidden md:flex md:w-48 bg-emaus-800 p-8 flex-col justify-between text-white">
+                      <div className="bg-gold-500 p-2 rounded w-fit shadow-lg"><Cross className="w-5 h-5 text-white" /></div>
+                      <div className="space-y-4">
+                          <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Emaús Pro</p>
+                          <h4 className="text-xl font-serif font-bold leading-tight">Transforme su gestión hoy</h4>
+                      </div>
+                  </div>
+                  <div className="flex-1 p-8 md:p-12 overflow-y-auto">
+                      <button onClick={() => setIsDemoModalOpen(false)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X /></button>
                       {leadSuccess ? (
-                          <div className="text-center py-8">
-                              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                                  <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
-                              </div>
-                              <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{t('demo_form.success_title')}</h3>
-                              <p className="text-slate-600 dark:text-slate-300 mb-8">{t('demo_form.success_msg')}</p>
-                              <button 
-                                onClick={() => setIsDemoModalOpen(false)}
-                                className="px-8 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors"
-                              >
-                                  Cerrar
-                              </button>
+                          <div className="h-full flex flex-col items-center justify-center text-center space-y-6 py-10 animate-fade-in">
+                              <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-500"><CheckCircle className="w-10 h-10" /></div>
+                              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('landing.demo.success_title')}</h3>
+                              <p className="text-slate-500 text-sm">{t('landing.demo.success_msg')}</p>
+                              <button onClick={() => setIsDemoModalOpen(false)} className="px-8 py-2 bg-slate-800 text-white rounded-lg font-bold">{t('landing.demo.close')}</button>
                           </div>
                       ) : (
                           <>
-                              <div className="text-center mb-8">
-                                  <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('demo_form.title')}</h2>
-                                  <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{t('demo_form.subtitle')}</p>
-                              </div>
-
+                              <h3 className="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-2 uppercase">{t('landing.demo.title')}</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mb-8">{t('landing.demo.subtitle')}</p>
                               <form onSubmit={handleLeadSubmit} className="space-y-4">
                                   <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.name')}</label>
-                                          <input 
-                                            name="name"
-                                            required
-                                            value={leadForm.name}
-                                            onChange={handleLeadInput}
-                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
-                                          />
-                                      </div>
-                                      <div>
-                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.role')}</label>
-                                          <input 
-                                            name="role"
-                                            required
-                                            value={leadForm.role}
-                                            onChange={handleLeadInput}
-                                            placeholder={t('demo_form.role_ph')}
-                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
-                                          />
-                                      </div>
+                                      <div><label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">{t('landing.demo.name')}</label><input type="text" name="name" required value={leadForm.name} onChange={handleLeadInput} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded focus:ring-1 focus:ring-emaus-500 dark:text-white text-sm" /></div>
+                                      <div><label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">{t('landing.demo.role')}</label><input type="text" name="role" required value={leadForm.role} onChange={handleLeadInput} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded focus:ring-1 focus:ring-emaus-500 dark:text-white text-sm" /></div>
                                   </div>
-
+                                  <div><label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">{t('landing.demo.parish')}</label><input type="text" name="parish" required value={leadForm.parish} onChange={handleLeadInput} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded focus:ring-1 focus:ring-emaus-500 dark:text-white text-sm" /></div>
                                   <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.parish')}</label>
-                                          <input 
-                                            name="parish"
-                                            required
-                                            value={leadForm.parish}
-                                            onChange={handleLeadInput}
-                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
-                                          />
-                                      </div>
-                                      <div>
-                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.diocese')}</label>
-                                          <input 
-                                            name="diocese"
-                                            required
-                                            value={leadForm.diocese}
-                                            onChange={handleLeadInput}
-                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
-                                          />
-                                      </div>
+                                      <div><label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">EMAIL</label><input type="email" name="email" required value={leadForm.email} onChange={handleLeadInput} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded focus:ring-1 focus:ring-emaus-500 dark:text-white text-sm" /></div>
+                                      <div><label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">TELÉFONO</label><input type="tel" name="phone" required value={leadForm.phone} onChange={handleLeadInput} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded focus:ring-1 focus:ring-emaus-500 dark:text-white text-sm" /></div>
                                   </div>
-
-                                  <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.phone')}</label>
-                                          <input 
-                                            name="phone"
-                                            required
-                                            type="tel"
-                                            value={leadForm.phone}
-                                            onChange={handleLeadInput}
-                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
-                                          />
-                                      </div>
-                                      <div>
-                                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('demo_form.email')}</label>
-                                          <input 
-                                            name="email"
-                                            required
-                                            type="email"
-                                            value={leadForm.email}
-                                            onChange={handleLeadInput}
-                                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
-                                          />
-                                      </div>
-                                  </div>
-
-                                  {/* CAPTCHA */}
-                                  <div className="pt-2">
-                                      <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">
-                                          <Shield className="w-3 h-3" /> {t('demo_form.captcha')}
-                                      </label>
+                                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded border border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                       <div className="flex items-center gap-3">
-                                          <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg font-mono font-bold text-lg text-slate-700 dark:text-slate-300 select-none border border-slate-200 dark:border-slate-700">
-                                              {captcha.a} + {captcha.b} = ?
-                                          </div>
-                                          <input 
-                                              type="number"
-                                              required
-                                              value={captchaInput}
-                                              onChange={(e) => setCaptchaInput(e.target.value)}
-                                              placeholder="Respuesta"
-                                              className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emaus-500 outline-none dark:text-white"
-                                          />
-                                          <button 
-                                            type="button" 
-                                            onClick={generateCaptcha}
-                                            className="p-2 text-slate-400 hover:text-emaus-600 transition-colors"
-                                            title="Generar otro"
-                                          >
-                                              <RefreshCw className="w-4 h-4" />
-                                          </button>
+                                          <div className="text-sm font-bold text-slate-500">{captcha.a} + {captcha.b} =</div>
+                                          <input type="number" required value={captchaInput} onChange={(e) => setCaptchaInput(e.target.value)} className="w-16 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-center font-bold text-sm" />
                                       </div>
+                                      <button type="button" onClick={generateCaptcha} className="text-slate-400 hover:text-emaus-600 transition-colors"><RefreshCw className="w-4 h-4" /></button>
                                   </div>
-
-                                  <button 
-                                    type="submit"
-                                    disabled={isSubmittingLead}
-                                    className="w-full py-3 bg-emaus-700 text-white rounded-xl font-bold text-lg hover:bg-emaus-800 transition-all shadow-lg mt-4 flex items-center justify-center gap-2"
-                                  >
-                                    {isSubmittingLead ? <Loader2 className="w-5 h-5 animate-spin" /> : t('demo_form.submit')}
+                                  <button type="submit" disabled={isSubmittingLead} className="w-full py-3 bg-emaus-700 text-white rounded font-bold text-sm hover:bg-emaus-800 shadow-md transition-all flex justify-center items-center gap-2">
+                                      {isSubmittingLead ? <Loader2 className="w-4 h-4 animate-spin" /> : t('landing.demo.submit')}
                                   </button>
                               </form>
                           </>

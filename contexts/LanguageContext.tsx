@@ -1,8 +1,8 @@
-
+// Version 1.15.4 - Bulletproof Translation Engine
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { translations } from '../services/translations';
 
-type Language = 'es' | 'en' | 'pt';
+export type Language = 'es' | 'en' | 'pt' | 'fr' | 'it' | 'de' | 'pl' | 'el' | 'ru' | 'ja' | 'ko' | 'zh' | 'hi';
 
 interface LanguageContextType {
   language: Language;
@@ -14,30 +14,42 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
-    // Auto-detect browser language
     if (typeof navigator !== 'undefined') {
       const browserLang = navigator.language || (navigator as any).userLanguage;
       if (browserLang) {
-        if (browserLang.startsWith('pt')) return 'pt';
-        if (browserLang.startsWith('en')) return 'en';
+        const langCode = browserLang.split('-')[0];
+        const supported = ['es', 'en', 'pt', 'fr', 'it', 'de', 'pl', 'el', 'ru', 'ja', 'ko', 'zh', 'hi'];
+        if (supported.includes(langCode)) return langCode as Language;
       }
     }
-    // Default to Spanish
     return 'es';
   });
 
   const t = (path: string): string => {
     const keys = path.split('.');
-    let current: any = translations[language];
     
-    for (const key of keys) {
-      if (current[key] === undefined) {
-        console.warn(`Translation missing for key: ${path} in language: ${language}`);
-        return path;
+    const getFromObj = (obj: any, pathKeys: string[]) => {
+      let current = obj;
+      for (const key of pathKeys) {
+        if (current && typeof current === 'object' && key in current) {
+          current = current[key];
+        } else {
+          return undefined;
+        }
       }
-      current = current[key];
-    }
-    return current as string;
+      return typeof current === 'string' ? current : undefined;
+    };
+
+    // 1. Try current language
+    const result = getFromObj(translations[language], keys);
+    if (result !== undefined) return result;
+
+    // 2. Fallback to Spanish (the source of truth)
+    const fallback = getFromObj(translations['es'], keys);
+    if (fallback !== undefined) return fallback;
+
+    // 3. Return the key path as text if everything else fails
+    return path;
   };
 
   return (
