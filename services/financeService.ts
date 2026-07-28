@@ -11,12 +11,11 @@ export const getTransactions = async (): Promise<FinanceTransaction[]> => {
     if (!user) return [];
 
     // Ensure we query transactions for this user (Multi-tenancy)
-    // For this simple implementation, we assume the collection is sub-collection or filtered by UID if we were stricter.
-    // BUT since we are using a root collection for simplicity in this demo, let's just query everything 
-    // In a real app: collection(db, 'settings', user.uid, 'finances')
-    
-    // Using root collection for now, filtering logic would be needed in real backend
-    const q = query(collection(db, COLLECTION_NAME), orderBy('date', 'desc'));
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      where('userId', '==', user.uid),
+      orderBy('date', 'desc')
+    );
     const snapshot = await getDocs(q);
     
     if (snapshot.empty) {
@@ -35,7 +34,13 @@ export const getTransactions = async (): Promise<FinanceTransaction[]> => {
 
 export const addTransaction = async (transaction: Omit<FinanceTransaction, 'id'>): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), transaction);
+    const user = auth.currentUser;
+    if (!user) throw new Error("No auth");
+
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+      ...transaction,
+      userId: user.uid
+    });
     return docRef.id;
   } catch (error) {
     console.error("Error adding transaction:", error);

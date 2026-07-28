@@ -44,7 +44,16 @@ const navItems: NavItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, setIsOpen }) => {
   const { t } = useLanguage();
   const { settings } = useSettings();
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error al cerrar sesión", error);
+    }
+  };
 
   const getTranslatedName = (name: ViewName): string => {
      switch(name) {
@@ -166,7 +175,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
 
         {/* User Profile / Logout */}
         <div className="p-4 border-t border-emaus-800 dark:border-slate-800 bg-emaus-950 dark:bg-black/20">
-          <button className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-emaus-800 dark:hover:bg-slate-800 transition-colors">
+         <div className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-emaus-800 dark:hover:bg-slate-800 transition-colors">
             <img 
               src={settings.profileImage || "https://picsum.photos/40/40"} 
               alt="User" 
@@ -176,8 +185,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
               <p className="text-sm font-medium text-white truncate max-w-[140px]">{settings.secretaryName || 'Usuario'}</p>
               <p className="text-xs text-emaus-300 dark:text-slate-400">{settings.userRole || t('sidebar.role')}</p>
             </div>
-            <LogOut className="w-5 h-5 text-emaus-400 hover:text-red-400" />
-          </button>
+            <button 
+              onClick={handleLogout}
+              className="p-1.5 hover:bg-red-500/20 rounded-full transition-colors group" 
+              title={t('sidebar.logout') || 'Cerrar sesión'}
+            >
+              <LogOut className="w-5 h-5 text-emaus-400 group-hover:text-red-400" />
+            </button>
+          </div>
         </div>
       </aside>
     </>

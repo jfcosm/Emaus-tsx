@@ -1,5 +1,4 @@
-
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { SavedDocument } from '../types';
 
@@ -8,7 +7,14 @@ const COLLECTION_NAME = 'documents';
 // Obtener todos los documentos y carpetas
 export const getDocuments = async (): Promise<SavedDocument[]> => {
   try {
-    const q = query(collection(db, COLLECTION_NAME), orderBy('lastModified', 'desc'));
+    const user = auth.currentUser;
+    if (!user) return [];
+
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      where('userId', '==', user.uid),
+      orderBy('lastModified', 'desc')
+    );
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => ({
@@ -24,7 +30,13 @@ export const getDocuments = async (): Promise<SavedDocument[]> => {
 // Crear un nuevo documento o carpeta
 export const createDocument = async (docData: Omit<SavedDocument, 'id'>): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), docData);
+    const user = auth.currentUser;
+    if (!user) throw new Error("No auth");
+
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+      ...docData,
+      userId: user.uid
+    });
     return docRef.id;
   } catch (error) {
     console.error("Error creating document:", error);
@@ -61,11 +73,18 @@ export const deleteDocument = async (id: string): Promise<void> => {
 // Eliminar carpeta y su contenido
 export const deleteFolderAndContents = async (folderId: string): Promise<void> => {
     try {
+        const user = auth.currentUser;
+        if (!user) throw new Error("No auth");
+
         // 1. Borrar la carpeta
         await deleteDocument(folderId);
         
         // 2. Buscar hijos
-        const q = query(collection(db, COLLECTION_NAME), where('parentId', '==', folderId));
+        const q = query(
+            collection(db, COLLECTION_NAME),
+            where('parentId', '==', folderId),
+            where('userId', '==', user.uid)
+        );
         const snapshot = await getDocs(q);
         
         // 3. Borrar hijos
@@ -80,15 +99,29 @@ export const deleteFolderAndContents = async (folderId: string): Promise<void> =
 
 // Utility: Ensure folder structure exists
 export const ensureFolderStructure = async (path: string[]): Promise<string | null> => {
+    const user = auth.currentUser;
+    if (!user) return null;
     let parentId: string | null = null;
 
     for (const folderName of path) {
         // Find folder with this name and parentId
         let q;
         if (parentId === null) {
-             q = query(collection(db, COLLECTION_NAME), where('name', '==', folderName), where('type', '==', 'folder'), where('parentId', '==', null));
+             q = query(
+                 collection(db, COLLECTION_NAME),
+                 where('name', '==', folderName),
+                 where('type', '==', 'folder'),
+                 where('parentId', '==', null),
+                 where('userId', '==', user.uid)
+             );
         } else {
-             q = query(collection(db, COLLECTION_NAME), where('name', '==', folderName), where('type', '==', 'folder'), where('parentId', '==', parentId));
+             q = query(
+                 collection(db, COLLECTION_NAME),
+                 where('name', '==', folderName),
+                 where('type', '==', 'folder'),
+                 where('parentId', '==', parentId),
+                 where('userId', '==', user.uid)
+             );
         }
         
         const snapshot = await getDocs(q);

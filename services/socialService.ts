@@ -130,7 +130,7 @@ export const subscribeToComments = (postId: string, callback: (comments: SocialC
 export const addComment = async (postId: string, comment: Omit<SocialComment, 'id'>) => {
     try {
         const user = auth.currentUser;
-        await addDoc(collection(db, COLLECTION_NAME), {
+        await addDoc(collection(db, COLLECTION_NAME, postId, 'comments'), {
             ...comment,
             authorUid: user?.uid, // Para que el autor pueda borrar su comentario
             timestamp: new Date().toISOString()
