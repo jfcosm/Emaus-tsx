@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para la colección 'leads' (solicitudes de demostración)
+    match /leads/{leadId} {
+      allow create: if request.resource.data.name is string 
+                    && request.resource.data.name.size() > 0 
+                    && request.resource.data.name.size() < 200
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() > 0
+                    && request.resource.data.email.size() < 200
+                    && request.resource.data.parish is string
+                    && request.resource.data.parish.size() < 200
+                    && request.resource.data.role is string
+                    && request.resource.data.role.size() < 200
+                    && request.resource.data.status == 'new';
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Regla por defecto para el resto de colecciones de Emaús
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
