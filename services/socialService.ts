@@ -38,8 +38,14 @@ export const subscribeToAuthorPosts = (authorId: string, callback: (posts: Socia
 export const createPost = async (postData: Omit<SocialPost, 'id' | 'likes'>) => {
     try {
         const user = auth.currentUser;
+        
+        // Sanitizar campos undefined que Firestore no soporta
+        const sanitizedData = Object.fromEntries(
+            Object.entries(postData).filter(([_, v]) => v !== undefined)
+        );
+
         await addDoc(collection(db, COLLECTION_NAME), {
-            ...postData,
+            ...sanitizedData,
             authorUid: user?.uid, // Campo crítico para las reglas de seguridad
             likes: [],
             commentsCount: 0,
@@ -130,8 +136,14 @@ export const subscribeToComments = (postId: string, callback: (comments: SocialC
 export const addComment = async (postId: string, comment: Omit<SocialComment, 'id'>) => {
     try {
         const user = auth.currentUser;
+
+        // Sanitizar campos undefined que Firestore no soporta
+        const sanitizedComment = Object.fromEntries(
+            Object.entries(comment).filter(([_, v]) => v !== undefined)
+        );
+
         await addDoc(collection(db, COLLECTION_NAME, postId, 'comments'), {
-            ...comment,
+            ...sanitizedComment,
             authorUid: user?.uid, // Para que el autor pueda borrar su comentario
             timestamp: new Date().toISOString()
         });
