@@ -21,6 +21,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
+import { usePlansConfig } from '../contexts/PlansConfigContext';
 
 interface SidebarProps {
   currentView: ViewName;
@@ -45,13 +46,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
   const { t } = useLanguage();
   const { settings } = useSettings();
   const { currentUser, logout } = useAuth();
+  const { getCurrentLimits } = usePlansConfig();
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await logout();
+      window.location.reload();
     } catch (error) {
-      console.error("Error al cerrar sesión", error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -72,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
      }
   };
 
-  const isBasicPlan = settings.planType === 'basic';
+  const limits = getCurrentLimits(settings.planType);
   const isAdmin = currentUser?.email === 'admin@emaus.app';
 
   return (
@@ -108,8 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isOpen, se
           {navItems.map((item) => {
             const isDocuments = item.name === ViewName.DOCUMENTS;
             const isFinances = item.name === ViewName.FINANCES;
-            // Chat (Messages) and Community are open for all
-            const isLocked = isBasicPlan && (isDocuments || isFinances);
+            const isLocked = (isDocuments && !limits.documentsEnabled) || (isFinances && !limits.financesEnabled);
 
             return (
               <button

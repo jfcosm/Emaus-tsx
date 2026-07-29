@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
+import { usePlansConfig } from '../contexts/PlansConfigContext';
 import { FinanceTransaction } from '../types';
 import { getTransactions, addTransaction, deleteTransaction } from '../services/financeService';
 import { 
@@ -27,6 +28,7 @@ const Finances: React.FC = () => {
   const { t } = useLanguage();
   const { settings } = useSettings();
   const { logout } = useAuth();
+  const { getCurrentLimits } = usePlansConfig();
 
   const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +50,10 @@ const Finances: React.FC = () => {
   };
   const [formData, setFormData] = useState(initialForm);
 
-  // --- UPSELL LOCK FOR BASIC PLANS ---
-  if (settings.planType === 'basic') {
+  const limits = getCurrentLimits(settings.planType);
+
+  // --- UPSELL LOCK IF FINANCES MODULE IS TOTALLY DISABLED IN PLAN ---
+  if (!limits.financesEnabled) {
     return (
       <div className="h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-fade-in">
         {/* Blurred Content */}
@@ -195,6 +199,10 @@ const Finances: React.FC = () => {
       { name: 'Total', ingresos: totalIncome, egresos: totalExpense }
   ];
 
+  const currentMonthStr = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  const transactionsThisMonth = transactions.filter(t => t.date.startsWith(currentMonthStr));
+  const hasReachedTransactionLimit = limits.maxTransactionsPerMonth !== -1 && transactionsThisMonth.length >= limits.maxTransactionsPerMonth;
+
   const filteredTransactions = transactions.filter(t => 
       t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -202,16 +210,45 @@ const Finances: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+        {hasReachedTransactionLimit && (
+            <div className="bg-gradient-to-r from-gold-500 to-amber-600 text-white p-4 rounded-xl shadow-md flex items-center justify-between gap-4 animate-pulse">
+                <div className="flex items-center gap-3">
+                    <Lock className="w-6 h-6" />
+                    <div>
+                        <p className="font-bold">Límite de registros alcanzado ({transactionsThisMonth.length}/{limits.maxTransactionsPerMonth})</p>
+                        <p className="text-xs text-gold-50">Has completado el cupo mensual de transacciones de tu plan. Actualiza a Plan Avanzado para registros ilimitados.</p>
+                    </div>
+                </div>
+                <button 
+                    onClick={async () => {
+                        await logout();
+                        window.location.href = window.location.origin + '/#plans';
+                    }}
+                    className="px-4 py-2 bg-white text-amber-700 font-bold rounded-lg text-sm hover:bg-amber-50 transition-colors shadow"
+                >
+                    Ver Planes
+                </button>
+            </div>
+        )}
+
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('finances.title')}</h2>
                 <p className="text-slate-500 dark:text-slate-400">{t('finances.subtitle')}</p>
             </div>
             <button 
-                onClick={() => setShowModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-emaus-700 text-white rounded-lg hover:bg-emaus-800 shadow-sm transition-colors"
+                onClick={() => {
+                  if (hasReachedTransactionLimit) {
+                    alert(`Límite de transacciones mensuales alcanzado (${transactionsThisMonth.length}/${limits.maxTransactionsPerMonth} registradas este mes). Actualiza tu plan para registros ilimitados.`);
+                  } else {
+                    setShowModal(true);
+                  }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg shadow-sm transition-colors ${hasReachedTransactionLimit ? 'bg-slate-400 dark:bg-slate-700 cursor-not-allowed' : 'bg-emaus-700 hover:bg-emaus-800'}`}
+                title={hasReachedTransactionLimit ? `Límite alcanzado (${transactionsThisMonth.length}/${limits.maxTransactionsPerMonth})` : t('finances.new_transaction')}
             >
-                <Plus className="w-4 h-4" /> {t('finances.new_transaction')}
+                {hasReachedTransactionLimit ? <Lock className="w-4 h-4 text-gold-300 animate-pulse" /> : <Plus className="w-4 h-4" />}
+                {t('finances.new_transaction')}
             </button>
         </div>
 

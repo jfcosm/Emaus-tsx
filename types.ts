@@ -314,3 +314,19 @@ export interface Lead {
   createdAt: any;
   notes?: string;
 }
+
+// --- PLANS PARAMETERIZATION TYPES ---
+export interface PlanLimits {
+  financesEnabled: boolean;
+  maxTransactionsPerMonth: number; // -1 for unlimited
+  documentsEnabled: boolean;
+  maxPdfsPerMonth: number; // -1 for unlimited
+  chatAttachmentsEnabled: boolean;
+  maxAttachmentSizeMb: number;
+}
+
+export interface PlansConfig {
+  basic: PlanLimits;
+  advanced: PlanLimits;
+}
+

@@ -40,6 +40,7 @@ import { SavedDocument } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
+import { usePlansConfig } from '../contexts/PlansConfigContext';
 import { getDocuments, createDocument, updateDocument, deleteFolderAndContents } from '../services/documentsService';
 
 // Declaration for html2pdf global
@@ -52,6 +53,8 @@ const DocumentEditor: React.FC = () => {
   const { t } = useLanguage();
   const { settings } = useSettings();
   const { logout } = useAuth();
+  const { getCurrentLimits } = usePlansConfig();
+  const limits = getCurrentLimits(settings.planType);
   
   // Data State
   const [documents, setDocuments] = useState<SavedDocument[]>([]);
@@ -77,10 +80,10 @@ const DocumentEditor: React.FC = () => {
 
   // --- INITIAL LOAD ---
   useEffect(() => {
-    if (settings.planType !== 'basic') {
+    if (limits.documentsEnabled) {
       loadDocuments();
     }
-  }, [settings.planType]);
+  }, [limits.documentsEnabled]);
 
   const loadDocuments = async () => {
     setLoading(true);
@@ -192,8 +195,11 @@ const DocumentEditor: React.FC = () => {
       });
   };
 
-  // --- UPSELL LOCK FOR BASIC PLANS ---
-  if (settings.planType === 'basic') {
+  const savedFiles = documents.filter(doc => doc.type === 'file');
+  const hasReachedDocLimit = limits.maxPdfsPerMonth !== -1 && savedFiles.length >= limits.maxPdfsPerMonth;
+
+  // --- UPSELL LOCK IF DOCUMENTS MODULE IS TOTALLY DISABLED IN PLAN ---
+  if (!limits.documentsEnabled) {
     return (
       <div className="h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-fade-in">
         {/* Blurred Content Background (Simulating the App) */}
@@ -333,6 +339,10 @@ const DocumentEditor: React.FC = () => {
   // --- EDITOR LOGIC ---
 
   const handleCreateNewFile = (templateId: string, templateName: string) => {
+     if (hasReachedDocLimit) {
+         alert(`Límite de documentos alcanzado (${savedFiles.length}/${limits.maxPdfsPerMonth} creados). Por favor, actualiza a Plan Avanzado para crear más documentos.`);
+         return;
+     }
      // 1. Create a draft object in memory
      const newDoc: SavedDocument = {
          id: 'temp_new', // Temporary ID
@@ -431,6 +441,26 @@ const DocumentEditor: React.FC = () => {
   // --- SUB-COMPONENT: FILE LIST (Mac Finder Style) ---
   const renderFileList = () => (
     <div key="list-view" className="space-y-4 h-full flex flex-col relative animate-fade-in">
+      {hasReachedDocLimit && (
+          <div className="bg-gradient-to-r from-gold-500 to-amber-600 text-white p-4 rounded-xl shadow-md flex items-center justify-between gap-4 animate-pulse mb-2">
+              <div className="flex items-center gap-3">
+                  <Lock className="w-6 h-6" />
+                  <div>
+                      <p className="font-bold">Límite de certificados alcanzado ({savedFiles.length}/{limits.maxPdfsPerMonth})</p>
+                      <p className="text-xs text-gold-50">Has completado el cupo mensual de certificados de tu plan. Actualiza a Plan Avanzado para crear y descargar documentos ilimitados.</p>
+                  </div>
+              </div>
+              <button 
+                  onClick={async () => {
+                      await logout();
+                      window.location.href = window.location.origin + '/#plans';
+                  }}
+                  className="px-4 py-2 bg-white text-amber-700 font-bold rounded-lg text-sm hover:bg-amber-50 transition-colors shadow"
+              >
+                  Ver Planes
+              </button>
+          </div>
+      )}
       {/* Header / Toolbar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -649,6 +679,26 @@ const DocumentEditor: React.FC = () => {
   // --- SUB-COMPONENT: TEMPLATE SELECTOR ---
   const renderTemplateSelector = () => (
     <div key="templates-view" className="space-y-6 animate-fade-in">
+      {hasReachedDocLimit && (
+          <div className="bg-gradient-to-r from-gold-500 to-amber-600 text-white p-4 rounded-xl shadow-md flex items-center justify-between gap-4 animate-pulse mb-2">
+              <div className="flex items-center gap-3">
+                  <Lock className="w-6 h-6" />
+                  <div>
+                      <p className="font-bold">Límite de documentos alcanzado ({savedFiles.length}/{limits.maxPdfsPerMonth})</p>
+                      <p className="text-xs text-gold-50">Has completado el cupo de certificados de tu plan. Actualiza a Plan Avanzado para crear documentos y PDFs ilimitados.</p>
+                  </div>
+              </div>
+              <button 
+                  onClick={async () => {
+                      await logout();
+                      window.location.href = window.location.origin + '/#plans';
+                  }}
+                  className="px-4 py-2 bg-white text-amber-700 font-bold rounded-lg text-sm hover:bg-amber-50 transition-colors shadow"
+              >
+                  Ver Planes
+              </button>
+          </div>
+      )}
       <div className="flex justify-between items-center">
         <div>
            <button 

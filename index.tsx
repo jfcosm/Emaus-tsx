@@ -6,6 +6,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { PlansConfigProvider } from './contexts/PlansConfigContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -19,7 +20,9 @@ root.render(
       <ThemeProvider>
         <LanguageProvider>
           <SettingsProvider>
-            <App />
+            <PlansConfigProvider>
+              <App />
+            </PlansConfigProvider>
           </SettingsProvider>
         </LanguageProvider>
       </ThemeProvider>

@@ -266,6 +266,21 @@ export const translations: any = {
       cover_desc: 'Imagen de portada',
       cover_image: 'Imagen de Portada',
       upload_cover: 'Subir Portada'
+    },
+    tour: {
+      prev: 'Anterior',
+      next: 'Siguiente',
+      finish: 'Finalizar',
+      steps: {
+        dashboard: { title: 'Resumen General', desc: 'Una vista rápida del estado diario de tu parroquia, eventos de la agenda y novedades de la comunidad.' },
+        agenda: { title: 'Calendario y Actividades', desc: 'Programa y administra misas, reuniones pastorales y eventos parroquiales de forma centralizada.' },
+        sacraments: { title: 'Registro de Sacramentos', desc: 'Digitaliza, edita y busca actas oficiales de bautizos, matrimonios y confirmaciones en segundos.' },
+        documents: { title: 'Editor de Certificados', desc: 'Genera certificados oficiales en PDF usando plantillas parroquiales preconfiguradas.' },
+        community: { title: 'Comunidad y Feed', desc: 'Conecta con otras parroquias del país, comparte avisos y entérate de las novedades.' },
+        messages: { title: 'Mensajería Directa', desc: 'Escribe directamente a otras secretarías parroquiales o chatea con el soporte de Emaús.' },
+        finances: { title: 'Módulo Contable', desc: 'Lleva el control de ingresos, gastos y estipendios de tu parroquia con gráficos interactivos.' },
+        support: { title: 'Ayuda y Soporte', desc: 'Genera tickets de soporte y habla con nuestro equipo técnico para resolver dudas.' }
+      }
     }
   },
   en: {
@@ -390,7 +405,22 @@ export const translations: any = {
       suggested_parishes: 'Suggested Parishes',
       visit_profile: 'Visit Profile'
     },
-    settings: { identity: 'Visual Identity', avatar_desc: 'Profile icon', cover_desc: 'Cover image', cover_image: 'Cover Image', upload_cover: 'Upload Cover' }
+    settings: { identity: 'Visual Identity', avatar_desc: 'Profile icon', cover_desc: 'Cover image', cover_image: 'Cover Image', upload_cover: 'Upload Cover' },
+    tour: {
+      prev: 'Previous',
+      next: 'Next',
+      finish: 'Finish',
+      steps: {
+        dashboard: { title: 'General Summary', desc: 'A quick view of your parish\'s daily status, agenda events, and community updates.' },
+        agenda: { title: 'Calendar & Activities', desc: 'Schedule and manage masses, pastoral meetings, and parish events centrally.' },
+        sacraments: { title: 'Sacramental Registry', desc: 'Digitize, edit, and search official records of baptisms, marriages, and confirmations in seconds.' },
+        documents: { title: 'Certificate Editor', desc: 'Generate official PDF certificates using pre-configured parish templates.' },
+        community: { title: 'Community & Feed', desc: 'Connect with other parishes in the country, share notices, and find out about updates.' },
+        messages: { title: 'Direct Messaging', desc: 'Write directly to other parish offices or chat with Emaús support.' },
+        finances: { title: 'Accounting Module', desc: 'Keep track of income, expenses, and stipends of your parish with interactive charts.' },
+        support: { title: 'Help & Support', desc: 'Create support tickets and speak with our technical team to resolve questions.' }
+      }
+    }
   },
   pt: {
     sidebar: { dashboard: 'Resumo', agenda: 'Agenda', sacraments: 'Sacramentos', documents: 'Documentos', messages: 'Mensagens', finances: 'Finanças', community: 'Comunidade', settings: 'Configurações', users: 'Usuários', support: 'Suporte', leads: 'Solicitações', logout: 'Sair', role: 'Secretária', parish: 'Gestão Paroquial' },
@@ -514,7 +544,22 @@ export const translations: any = {
       suggested_parishes: 'Paróquias Sugeridas',
       visit_profile: 'Visitar Perfil'
     },
-    settings: { identity: 'Identidade Visual', avatar_desc: 'Ícone de perfil', cover_desc: 'Imagem de capa', cover_image: 'Imagem de Capa', upload_cover: 'Enviar Capa' }
+    settings: { identity: 'Identidade Visual', avatar_desc: 'Ícone de perfil', cover_desc: 'Imagem de capa', cover_image: 'Imagem de Capa', upload_cover: 'Enviar Capa' },
+    tour: {
+      prev: 'Anterior',
+      next: 'Próximo',
+      finish: 'Finalizar',
+      steps: {
+        dashboard: { title: 'Resumo Geral', desc: 'Uma visão rápida do estado diário da sua paróquia, eventos da agenda e novidades da comunidade.' },
+        agenda: { title: 'Calendário e Atividades', desc: 'Agende e gerencie missas, reuniões pastorais e eventos paroquiais de forma centralizada.' },
+        sacraments: { title: 'Registro de Sacramentos', desc: 'Digitalize, edite e busque atas oficiais de batizados, casamentos e crismas em segundos.' },
+        documents: { title: 'Editor de Certificados', desc: 'Gere certificados oficiais em PDF usando modelos paroquiais pré-configurados.' },
+        community: { title: 'Comunidade e Feed', desc: 'Conecte-se com outras paróquias do país, compartilhe avisos e saiba das novidades.' },
+        messages: { title: 'Mensagens Diretas', desc: 'Escreva diretamente para outras secretarias paroquiais ou converse com o suporte do Emaús.' },
+        finances: { title: 'Módulo Contábil', desc: 'Controle as receitas, despesas e estipêndios da sua paróquia com gráficos interativos.' },
+        support: { title: 'Ajuda e Suporte', desc: 'Crie tíquetes de suporte e fale com nossa equipe técnica para tirar dúvidas.' }
+      }
+    }
   },
   fr: {
     sidebar: { dashboard: 'Résumé', agenda: 'Agenda', sacraments: 'Sacrements', documents: 'Documents', messages: 'Messages', finances: 'Finances', community: 'Communauté', settings: 'Paramètres', users: 'Utilisateurs', support: 'Support', leads: 'Demandes', logout: 'Déconnexion', role: 'Secrétaire', parish: 'Gestion Paroissiale' },
@@ -638,7 +683,22 @@ export const translations: any = {
       suggested_parishes: 'Paroisses Suggérées',
       visit_profile: 'Voir le Profil'
     },
-    settings: { identity: 'Identité Visuelle', avatar_desc: 'Icône de profil', cover_desc: 'Image de couverture', cover_image: 'Image de Couverture', upload_cover: 'Télécharger Couverture' }
+    settings: { identity: 'Identité Visuelle', avatar_desc: 'Icône de profil', cover_desc: 'Image de couverture', cover_image: 'Image de Couverture', upload_cover: 'Télécharger Couverture' },
+    tour: {
+      prev: 'Précédent',
+      next: 'Suivant',
+      finish: 'Terminer',
+      steps: {
+        dashboard: { title: 'Résumé Général', desc: 'Un aperçu rapide de l\'état quotidien de votre paroisse, des événements de l\'agenda et des nouveautés de la communauté.' },
+        agenda: { title: 'Calendrier et Activités', desc: 'Planifiez et gérez les messes, les réunions pastorales et les événements paroissiaux de manière centralisée.' },
+        sacraments: { title: 'Registre des Sacrements', desc: 'Numérisez, modifiez et recherchez des actes officiels de baptêmes, mariages et confirmations en quelques secondes.' },
+        documents: { title: 'Éditeur de Certificats', desc: 'Générez des certificats officiels en PDF à l\'aide de modèles paroissiaux préconfigurés.' },
+        community: { title: 'Communauté et Fil d\'actualité', desc: 'Connectez-vous avec d\'autres paroisses du pays, partagez des avis et tenez-vous informé des nouveautés.' },
+        messages: { title: 'Messagerie Directe', desc: 'Écrivez directement à d\'autres secrétariats paroissiaux ou discutez avec le support d\'Emaús.' },
+        finances: { title: 'Module Comptable', desc: 'Suivez les revenus, les dépenses et les offrandes de votre paroisse grâce à des graphiques interactifs.' },
+        support: { title: 'Aide et Support', desc: 'Créez des tickets de support et discutez avec notre équipe technique pour résoudre vos questions.' }
+      }
+    }
   },
   it: {
     sidebar: { dashboard: 'Riepilogo', agenda: 'Agenda', sacraments: 'Sacramenti', documents: 'Documenti', messages: 'Messaggi', finances: 'Finanze', community: 'Comunità', settings: 'Impostazioni', users: 'Utenti', support: 'Supporto', leads: 'Richieste', logout: 'Esci', role: 'Segretaria', parish: 'Gestione Parrocchiale' },
@@ -762,7 +822,22 @@ export const translations: any = {
       suggested_parishes: 'Parrocchie Suggerite',
       visit_profile: 'Visita Profilo'
     },
-    settings: { identity: 'Identità Visuale', avatar_desc: 'Icona profilo', cover_desc: 'Immagine copertina', cover_image: 'Immagine Copertina', upload_cover: 'Carica Copertina' }
+    settings: { identity: 'Identità Visuale', avatar_desc: 'Icona profilo', cover_desc: 'Immagine copertina', cover_image: 'Immagine Copertina', upload_cover: 'Carica Copertina' },
+    tour: {
+      prev: 'Precedente',
+      next: 'Successivo',
+      finish: 'Termina',
+      steps: {
+        dashboard: { title: 'Riepilogo Generale', desc: 'Una panoramica rapida dello stato quotidiano della parrocchia, degli eventi in agenda e delle novità della comunità.' },
+        agenda: { title: 'Calendario e Attività', desc: 'Pianifica e gestisci messe, incontri pastorali ed eventi parrocchiali in modo centralizzato.' },
+        sacraments: { title: 'Registro dei Sacramenti', desc: 'Digitalizza, modifica e cerca atti ufficiali di battesimi, matrimoni e cresime in pochi secondi.' },
+        documents: { title: 'Editor di Certificati', desc: 'Genera certificati ufficiali in PDF utilizzando modelli parrocchiali preconfigurati.' },
+        community: { title: 'Comunità e Feed', desc: 'Connettiti con altre parrocchie del paese, condividi avvisi e scopri le novità.' },
+        messages: { title: 'Messaggistica Diretta', desc: 'Scrivi direttamente ad altre segreterie parrocchiali o chatta con il supporto di Emaús.' },
+        finances: { title: 'Modulo Contabile', desc: 'Tieni sotto controllo entrate, uscite e offerte della parrocchia con grafici interattivi.' },
+        support: { title: 'Aiuto e Supporto', desc: 'Apri ticket di supporto e parla con il nostro team tecnico per risolvere qualsiasi dubbio.' }
+      }
+    }
   },
   de: {
     sidebar: { dashboard: 'Übersicht', agenda: 'Agenda', sacraments: 'Sakramente', documents: 'Dokumente', messages: 'Nachrichten', finances: 'Finanzen', community: 'Gemeinschaft', settings: 'Einstellungen', users: 'Benutzer', support: 'Support', leads: 'Anfragen', logout: 'Abmelden', role: 'Sekretärin', parish: 'Pfarrverwaltung' },
@@ -886,7 +961,22 @@ export const translations: any = {
       suggested_parishes: 'Empfohlene Pfarreien',
       visit_profile: 'Profil anzeigen'
     },
-    settings: { identity: 'Visuelle Identität', avatar_desc: 'Profilbild-Icon', cover_desc: 'Titelbild', cover_image: 'Titelbild', upload_cover: 'Titelbild hochladen' }
+    settings: { identity: 'Visuelle Identität', avatar_desc: 'Profilbild-Icon', cover_desc: 'Titelbild', cover_image: 'Titelbild', upload_cover: 'Titelbild hochladen' },
+    tour: {
+      prev: 'Zurück',
+      next: 'Weiter',
+      finish: 'Beenden',
+      steps: {
+        dashboard: { title: 'Allgemeine Übersicht', desc: 'Eine schnelle Übersicht über den täglichen Status Ihrer Pfarrei, Termine und Neuigkeiten aus der Gemeinschaft.' },
+        agenda: { title: 'Kalender & Aktivitäten', desc: 'Planen und verwalten Sie Messen, pastorale Treffen und pfarreiliche Termine zentral.' },
+        sacraments: { title: 'Sakramentsregister', desc: 'Digitalisieren, bearbeiten und durchsuchen Sie offizielle Akten von Taufen, Trauungen und Firmungen in Sekundenschnelle.' },
+        documents: { title: 'Zertifikats-Editor', desc: 'Erstellen Sie offizielle PDF-Urkunden mithilfe vorkonfigurierter Pfarreivorlagen.' },
+        community: { title: 'Gemeinschaft & Feed', desc: 'Vernetzen Sie sich mit anderen Pfarreien des Landes, teilen Sie Ankündigungen und erfahren Sie Neuigkeiten.' },
+        messages: { title: 'Direktnachrichten', desc: 'Schreiben Sie direkt an andere Pfarrbüros oder chatten Sie mit dem Emaús-Support.' },
+        finances: { title: 'Finanzmodul', desc: 'Behalten Sie Einnahmen, Ausgaben und Spenden Ihrer Pfarrei mit interaktiven Diagrammen im Blick.' },
+        support: { title: 'Hilfe & Support', desc: 'Erstellen Sie Support-Tickets und sprechen Sie mit unserem technischen Team, um Fragen zu klären.' }
+      }
+    }
   },
   pl: {
     sidebar: { dashboard: 'Podsumowanie', agenda: 'Agenda', sacraments: 'Sakramenty', documents: 'Dokumenty', messages: 'Wiadomości', finances: 'Finanse', community: 'Wspólnota', settings: 'Ustawienia', users: 'Użytkownicy', support: 'Wsparcie', leads: 'Zgłoszenia', logout: 'Wyloguj', role: 'Sekretarka', parish: 'Zarządzanie Parafią' },
@@ -1010,7 +1100,22 @@ export const translations: any = {
       suggested_parishes: 'Sugerowane Parafie',
       visit_profile: 'Odwiedź Profil'
     },
-    settings: { identity: 'Tożsamość Wizualna', avatar_desc: 'Ikona profilu', cover_desc: 'Zdjęcie w tle', cover_image: 'Zdjęcie w tle', upload_cover: 'Prześlij zdjęcie w tle' }
+    settings: { identity: 'Tożsamość Wizualna', avatar_desc: 'Ikona profilu', cover_desc: 'Zdjęcie w tle', cover_image: 'Zdjęcie w tle', upload_cover: 'Prześlij zdjęcie w tle' },
+    tour: {
+      prev: 'Poprzedni',
+      next: 'Dalej',
+      finish: 'Zakończ',
+      steps: {
+        dashboard: { title: 'Ogólne podsumowanie', desc: 'Szybki podgląd codziennego stanu Twojej parafii, nadchodzących wydarzeń i nowości ze wspólnoty.' },
+        agenda: { title: 'Kalendarz i aktywności', desc: 'Planuj i zarządzaj mszami, spotkaniami duszpasterskimi i wydarzeniami parafialnymi w jednym miejscu.' },
+        sacraments: { title: 'Księgi Sakramentów', desc: 'Digitalizuj, edytuj i przeszukuj oficjalne akta chrztów, małżeństw i bierzmowań w kilka sekund.' },
+        documents: { title: 'Edytor certyfikatów', desc: 'Generuj oficjalne certyfikaty PDF, korzystając ze wstępnie skonfigurowanych szablonów parafialnych.' },
+        community: { title: 'Wspólnota i tablica', desc: 'Połącz się z innymi parafiami w kraju, udostępniaj ogłoszenia i śledź aktualności.' },
+        messages: { title: 'Bezpośrednie wiadomości', desc: 'Pisz bezpośrednio do innych kancelarii parafialnych lub czatuj ze wsparciem Emaús.' },
+        finances: { title: 'Moduł księgowy', desc: 'Kontroluj przychody, wydatki i ofiary w swojej parafii za pomocą interaktywnych wykresów.' },
+        support: { title: 'Pomoc i wsparcie', desc: 'Twórz zgłoszenia wsparcia i rozmawiaj z naszym zespołem technicznym, aby wyjaśnić wątpliwości.' }
+      }
+    }
   },
   el: {
     sidebar: { dashboard: 'Σύνοψη', agenda: 'Ατζέντα', sacraments: 'Μυστήρια', documents: 'Έγγραφα', messages: 'Μηνύματα', finances: 'Οικονομικά', community: 'Κοινότητα', settings: 'Ρυθμίσεις', users: 'Χρήστες', support: 'Υποστήριξη', leads: 'Αιτήματα', logout: 'Αποσύνδεση', role: 'Γραμματέας', parish: 'Διαχείριση Ενορίας' },
@@ -1134,7 +1239,22 @@ export const translations: any = {
       suggested_parishes: 'Προτεινόμενες Ενορίες',
       visit_profile: 'Επίσκεψη Προφίλ'
     },
-    settings: { identity: 'Οπτική Ταυτότητα', avatar_desc: 'Εικονίδιο προφίλ', cover_desc: 'Εικόνα εξωφύλλου', cover_image: 'Εικόνα Εξωφύλλου', upload_cover: 'Μεταφόρτωση Εξωφύλλου' }
+    settings: { identity: 'Οπτική Ταυτότητα', avatar_desc: 'Εικονίδιο προφίλ', cover_desc: 'Εικόνα εξωφύλλου', cover_image: 'Εικόνα Εξωφύλλου', upload_cover: 'Μεταφόρτωση Εξωφύλλου' },
+    tour: {
+      prev: 'Προηγούμενο',
+      next: 'Επόμενο',
+      finish: 'Τέλος',
+      steps: {
+        dashboard: { title: 'Γενική Σύνοψη', desc: 'Μια γρήγορη ματιά στην καθημερινή κατάσταση της ενορίας σας, τα συμβάντα της ατζέντας και τα νέα της κοινότητας.' },
+        agenda: { title: 'Ημερολόγιο & Δραστηριότητες', desc: 'Προγραμματίστε και διαχειριστείτε λειτουργίες, ποιμαντικές συναντήσεις και ενοριακά συμβάντα κεντρικά.' },
+        sacraments: { title: 'Μητρώο Μυστηρίων', desc: 'Ψηφιοποιήστε, επεξεργαστείτε και αναζητήστε επίσημα αρχεία βαπτίσεων, γάμων και χρισμάτων σε δευτερόλεπτα.' },
+        documents: { title: 'Επεξεργαστής Πιστοποιητικών', desc: 'Δημιουργήστε επίσημα πιστοποιητικά PDF χρησιμοποιώντας προδιαμορφωμένα ενοριακά πρότυπα.' },
+        community: { title: 'Κοινότητα & Ροή', desc: 'Συνδεθείτε με άλλες ενορίες της χώρας, μοιραστείτε ανακοινώσεις και μάθετε τα νέα.' },
+        messages: { title: 'Άμεσα Μηνύματα', desc: 'Γράψτε απευθείας σε άλλα ενοριακά γραφεία ή συνομιλήστε με την υποστήριξη του Emaús.' },
+        finances: { title: 'Οικονομική Ενότητα', desc: 'Παρακολουθήστε τα έσοδα, τα έξοδα και τις προσφορές της ενορίας σας με διαδραστικά γραφήματα.' },
+        support: { title: 'Βοήθεια & Υποστήριξη', desc: 'Δημιουργήστε αιτήματα υποστήριξης και μιλήστε με την τεχνική ομάδα μας για να επιλύσετε απορίες.' }
+      }
+    }
   },
   ru: {
     sidebar: { dashboard: 'Обзор', agenda: 'Повестка', sacraments: 'Таинства', documents: 'Документы', messages: 'Сообщения', finances: 'Финансы', community: 'Сообщество', settings: 'Настройки', users: 'Пользователи', support: 'Поддержка', leads: 'Запросы', logout: 'Выйти', role: 'Секретарь', parish: 'Управление приходом' },
@@ -1258,7 +1378,22 @@ export const translations: any = {
       suggested_parishes: 'Рекомендуемые приходы',
       visit_profile: 'Открыть профиль'
     },
-    settings: { identity: 'Визуальный стиль', avatar_desc: 'Иконка профиля', cover_desc: 'Обложка профиля', cover_image: 'Обложка', upload_cover: 'Загрузить обложку' }
+    settings: { identity: 'Визуальный стиль', avatar_desc: 'Иконка профиля', cover_desc: 'Обложка профиля', cover_image: 'Обложка', upload_cover: 'Загрузить обложку' },
+    tour: {
+      prev: 'Назад',
+      next: 'Далее',
+      finish: 'Завершить',
+      steps: {
+        dashboard: { title: 'Общий обзор', desc: 'Быстрый просмотр ежедневного состояния вашего прихода, событий календаря и новостей сообщества.' },
+        agenda: { title: 'Календарь и события', desc: 'Планируйте и координируйте мессы, пастырские встречи и приходские мероприятия централизованно.' },
+        sacraments: { title: 'Реестр таинств', desc: 'Оцифровывайте, редактируйте и ищите официальные акты крещений, венчаний и миропомазаний за секунды.' },
+        documents: { title: 'Редактор справок', desc: 'Генерируйте официальные справки в формате PDF, используя предварительно настроенные шаблоны.' },
+        community: { title: 'Сообщество и лента', desc: 'Общайтесь с другими приходами страны, делитесь объявлениями и узнавайте новости.' },
+        messages: { title: 'Прямые сообщения', desc: 'Пишите напрямую секретарям других приходов или общайтесь с техподдержкой Emaús.' },
+        finances: { title: 'Бухгалтерский модуль', desc: 'Контролируйте доходы, расходы и пожертвования вашего прихода с помощью интерактивных графиков.' },
+        support: { title: 'Помощь и поддержка', desc: 'Создавайте тикеты поддержки и общайтесь с нашей технической командой по любым вопросам.' }
+      }
+    }
   },
   ja: {
     sidebar: { dashboard: '概要', agenda: '予定表', sacraments: '秘跡', documents: '書類', messages: 'メッセージ', finances: '財務', community: 'コミュニティ', settings: '設定', users: 'ユーザー', support: 'サポート', leads: 'リクエスト', logout: 'ログアウト', role: '秘書', parish: '教区管理' },
@@ -1382,7 +1517,22 @@ export const translations: any = {
       suggested_parishes: 'おすすめの教会',
       visit_profile: 'プロフィールを表示'
     },
-    settings: { identity: 'ビジュアルアイデンティティ', avatar_desc: 'アバターアイコン', cover_desc: 'カバー画像', cover_image: 'カバー画像', upload_cover: 'カバー画像をアップロード' }
+    settings: { identity: 'ビジュアルアイデンティティ', avatar_desc: 'アバターアイコン', cover_desc: 'カバー画像', cover_image: 'カバー画像', upload_cover: 'カバー画像をアップロード' },
+    tour: {
+      prev: '前へ',
+      next: '次へ',
+      finish: '終了',
+      steps: {
+        dashboard: { title: '全体概要', desc: '教区の日常の活動状況、予定表のイベント、コミュニティの最新情報をすばやく確認できます。' },
+        agenda: { title: '予定表と活動', desc: 'ミサ、司牧ミーティング、教区のイベントを中央のカレンダーで計画・管理します。' },
+        sacraments: { title: '秘跡記録', desc: '洗礼、婚礼、堅信の公式記録を数秒でデジタル化、編集、検索できます。' },
+        documents: { title: '証明書エディタ', desc: '事前設定された教区テンプレートを使用して、公式なPDF証明书を生成します。' },
+        community: { title: 'コミュニティとフィード', desc: '全国の他の教区とつながり、お知らせを共有し、最新情報を入手できます。' },
+        messages: { title: 'ダイレクトメッセージ', desc: '他の教区事務所に直接メッセージを送るか、Emaúsサポートとチャットできます。' },
+        finances: { title: '会計モジュール', desc: 'インタラクティブなグラフで教区の収入、支出、献金を追跡・管理します。' },
+        support: { title: 'ヘルプとサポート', desc: 'サポートチケットを作成し、技術チームに質問して疑問を解決できます。' }
+      }
+    }
   },
   ko: {
     sidebar: { dashboard: '개요', agenda: '일정', sacraments: '성사', documents: '문서', messages: '메시지', finances: '재정', community: '커뮤니티', settings: '설정', users: '사용자', support: '지원', leads: '요청', logout: '로그아웃', role: '사무장', parish: '본당 관리' },
@@ -1506,7 +1656,22 @@ export const translations: any = {
       suggested_parishes: '추천 성당',
       visit_profile: '프로필 보기'
     },
-    settings: { identity: '비주얼 설정', avatar_desc: '프로필 아이콘', cover_desc: '배경 이미지', cover_image: '배경 이미지', upload_cover: '배경 업로드' }
+    settings: { identity: '비주얼 설정', avatar_desc: '프로필 아이콘', cover_desc: '배경 이미지', cover_image: '배경 이미지', upload_cover: '배경 업로드' },
+    tour: {
+      prev: '이전',
+      next: '다음',
+      finish: '완료',
+      steps: {
+        dashboard: { title: '종합 개요', desc: '본당의 일일 상태, 일정표 이벤트 및 커뮤니티의 최신 소식을 빠르게 확인합니다.' },
+        agenda: { title: '일정 및 사목 활동', desc: '미사, 사목 회의 및 본당 행사를 공유 캘린더에서 통합하여 계획하고 관리합니다.' },
+        sacraments: { title: '성사 대장 관리', desc: '세례, 혼인, 견신 성사의 공식 대장을 수초 만에 디지털화하고 편집 및 검색합니다.' },
+        documents: { title: '증명서 에디터', desc: '사전에 구성된 본당 템플릿을 사용하여 공식 PDF 증명서를 발급합니다.' },
+        community: { title: '공동체 소식 피드', desc: '전국의 다른 본당과 소통하고 공지사항을 공유하며 최신 소식을 접합니다.' },
+        messages: { title: '실시간 메시지', desc: '다른 본당 사무실과 실시간으로 메시지를 주고받거나 Emaús 기술 지원 부서와 문의를 주고받습니다.' },
+        finances: { title: '회계 재정 모듈', desc: '수입, 지출 및 헌금 내역을 직관적인 차트와 함께 편리하게 기록하고 관리합니다.' },
+        support: { title: '도움말 및 기술 지원', desc: '지원 티켓을 접수하고 기술 부서와 소통하여 문제나 궁금증을 신속히 해결합니다.' }
+      }
+    }
   },
   zh: {
     sidebar: { dashboard: '概览', agenda: '日程', sacraments: '圣事', documents: '文档', messages: '消息', finances: '财务', community: '社区', settings: '设置', users: '用户', support: '支持', leads: '申请', logout: '登出', role: '秘书', parish: '堂区管理' },
@@ -1630,7 +1795,22 @@ export const translations: any = {
       suggested_parishes: '推荐的堂区',
       visit_profile: '查看堂区主页'
     },
-    settings: { identity: '视觉样式设定', avatar_desc: '堂区头像图标', cover_desc: '主页顶部横幅', cover_image: '顶部横幅图片', upload_cover: '上传新横幅' }
+    settings: { identity: '视觉样式设定', avatar_desc: '堂区头像图标', cover_desc: '主页顶部横幅', cover_image: '顶部横幅图片', upload_cover: '上传新横幅' },
+    tour: {
+      prev: '上一步',
+      next: '下一步',
+      finish: '完成',
+      steps: {
+        dashboard: { title: '总览面板', desc: '快速查看您堂区的每日状态简报、日程表安排和教会社区动态。' },
+        agenda: { title: '日程表与牧灵活动', desc: '在一个集中的日历中统一安排 and 管理弥撒、牧灵会议及堂区活动。' },
+        sacraments: { title: '圣事历史档案', desc: '数秒内数字化登记、编辑和搜索洗礼、婚姻及坚振圣事的官方历史台账。' },
+        documents: { title: '开证排版中心', desc: '使用预配置的堂区公文模板，一键生成并导出官方 PDF 证明书。' },
+        community: { title: '教会家圈动态', desc: '与全国其他注册堂区保持互联，分享堂区通知并获取最新的教会消息。' },
+        messages: { title: '即时会话消息', desc: '直接与其他堂区秘书发起在线对话，或与 Emaús 的售后技术客服人员沟通。' },
+        finances: { title: '堂区财务收支', desc: '通过直观且可交互的图表，清晰记录和掌控您堂区的收入、支出及捐献。' },
+        support: { title: '技术服务工单', desc: '在线新建售后服务工单，直接与我们的技术支持团队对话解决问题。' }
+      }
+    }
   },
   hi: {
     sidebar: { dashboard: 'सारांश', agenda: 'कार्यसूची', sacraments: 'संस्कार', documents: 'दस्तावेज़', messages: 'संदेश', finances: 'वित्त', community: 'समुदाय', settings: 'सेटिंग्स', users: 'उपयोगकर्ता', support: 'सहायता', leads: 'अनुरोध', logout: 'लॉग आउट', role: 'सचिव', parish: 'पैरिश प्रबंधन' },
@@ -1754,6 +1934,21 @@ export const translations: any = {
       suggested_parishes: 'अनुशंसित पैरिश',
       visit_profile: 'प्रोफ़ाइल देखें'
     },
-    settings: { identity: 'दृश्य पहचान', avatar_desc: 'प्रोफ़ाइल आइकन', cover_desc: 'कवर छवि', cover_image: 'कवर छवि', upload_cover: 'कवर छवि अपलोड करें' }
+    settings: { identity: 'दृश्य पहचान', avatar_desc: 'प्रोफ़ाइल आइकन', cover_desc: 'कवर छवि', cover_image: 'कवर छवि', upload_cover: 'कवर छवि अपलोड करें' },
+    tour: {
+      prev: 'पिछला',
+      next: 'अगला',
+      finish: 'समाप्त',
+      steps: {
+        dashboard: { title: 'सामान्य सारांश', desc: 'आपके पैरिश की दैनिक स्थिति, कैलेंडर कार्यक्रमों और समुदाय के समाचारों का त्वरित विवरण।' },
+        agenda: { title: 'कैलेंडर और गतिविधियां', desc: 'साझा कैलेंडर में पैरिश मिसा, बैठकों और कार्यक्रमों को केंद्रीय रूप से निर्धारित और प्रबंधित करें।' },
+        sacraments: { title: 'संस्कार रिकॉर्ड', desc: 'बपतिस्मा, विवाह और दृढ़ीकरण के आधिकारिक रिकॉर्डों को कुछ ही सेकंड में डिजिटल, संपादित और खोजें।' },
+        documents: { title: 'प्रमाणपत्र संपादक', desc: 'पूर्व-कॉन्फ़िगर की गई पैरिश शैली का उपयोग करके आधिकारिक पीडीएफ प्रमाणपत्र जनरेट करें।' },
+        community: { title: 'समुदाय और फीड', desc: 'देश भर के अन्य पैरिश कार्यालयों से जुड़ें, सूचनाएं साझा करें और समाचार जानें।' },
+        messages: { title: 'त्वरित संदेश', desc: 'अन्य पैरिशों से सीधे संपर्क करें या Emaús तकनीकी सहायता टीम से चैट करें।' },
+        finances: { title: 'वित्तीय मॉड्यूल', desc: 'इंटरैक्टिव चार्ट की मदद से पैरिश की आय, व्यय और दान को व्यवस्थित रूप से प्रबंधित करें।' },
+        support: { title: 'तकनीकी सहायता', desc: 'समर्थन टिकट बनाएं और प्रश्नों को हल करने के लिए हमारी तकनीकी टीम से संपर्क करें।' }
+      }
+    }
   }
 };

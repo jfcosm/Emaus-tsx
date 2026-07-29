@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
+import { usePlansConfig } from '../contexts/PlansConfigContext';
 import { ChatThread, ChatMessage, ParishDirectoryEntry, NotificationType } from '../types';
 import { 
   subscribeToChats, 
@@ -37,6 +38,8 @@ const Messages: React.FC = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
   const { settings } = useSettings();
+  const { getCurrentLimits } = usePlansConfig();
+  const limits = getCurrentLimits(settings.planType);
   
   // State
   const [threads, setThreads] = useState<ChatThread[]>([]);
@@ -114,14 +117,14 @@ const Messages: React.FC = () => {
       const file = e.target.files?.[0];
       if (!file || !activeThreadId || !currentUser?.email) return;
 
-      if (settings.planType !== 'advanced') {
-          alert("Función Premium: El envío de archivos está disponible solo en el Plan Avanzado.");
+      if (!limits.chatAttachmentsEnabled) {
+          alert("Función Premium: El envío de archivos no está habilitado en tu plan.");
           if (fileInputRef.current) fileInputRef.current.value = '';
           return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-          alert("El archivo es demasiado pesado. Límite: 5MB.");
+      if (file.size > limits.maxAttachmentSizeMb * 1024 * 1024) {
+          alert(`El archivo es demasiado pesado. Límite: ${limits.maxAttachmentSizeMb}MB.`);
           if (fileInputRef.current) fileInputRef.current.value = '';
           return;
       }
@@ -378,20 +381,20 @@ const Messages: React.FC = () => {
                  />
                  
                  <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-                    <button 
-                        type="button" 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="p-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative"
-                        disabled={isUploading}
-                        title={settings.planType !== 'advanced' ? "Función Premium (Solo Plan Avanzado)" : "Adjuntar archivo"}
-                    >
-                       {isUploading ? <Loader2 className="w-5 h-5 animate-spin text-emaus-600" /> : <Paperclip className="w-5 h-5" />}
-                       {settings.planType !== 'advanced' && (
-                           <span className="absolute -top-1 -right-1">
-                               <Lock className="w-3 h-3 text-gold-500" />
-                           </span>
-                       )}
-                    </button>
+                     <button 
+                         type="button" 
+                         onClick={() => fileInputRef.current?.click()}
+                         className="p-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative"
+                         disabled={isUploading}
+                         title={!limits.chatAttachmentsEnabled ? "Función Premium (No habilitado)" : "Adjuntar archivo"}
+                     >
+                        {isUploading ? <Loader2 className="w-5 h-5 animate-spin text-emaus-600" /> : <Paperclip className="w-5 h-5" />}
+                        {!limits.chatAttachmentsEnabled && (
+                            <span className="absolute -top-1 -right-1">
+                                <Lock className="w-3 h-3 text-gold-500" />
+                            </span>
+                        )}
+                     </button>
                     
                     <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center px-4 py-2 border border-transparent focus-within:border-emaus-300 dark:focus-within:border-emaus-700 transition-colors">
                        <input 
