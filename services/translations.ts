@@ -1,7 +1,7 @@
 // Version 1.17.0 - Full Audit Production Dictionary with 13 Languages and 100% Coverage
 export const translations: any = {
   es: {
-    sidebar: { dashboard: 'Resumen', agenda: 'Agenda', sacraments: 'Sacramentos', documents: 'Documentos', messages: 'Mensajes', finances: 'Finanzas', community: 'Comunidad', settings: 'Configuración', users: 'Usuarios', support: 'Soporte', leads: 'Solicitudes', logout: 'Cerrar Sesión', role: 'Secretaria', parish: 'Gestión Parroquial' },
+    sidebar: { dashboard: 'Resumen', agenda: 'Agenda', sacraments: 'Sacramentos', documents: 'Documentos', messages: 'Mensajes', finances: 'Finanzas', community: 'Comunidad', settings: 'Configuración', users: 'Usuarios y Planes', support: 'Soporte', leads: 'Solicitudes', logout: 'Cerrar Sesión', role: 'Secretaria', parish: 'Gestión Parroquial' },
     landing: {
       nav: { features: 'Características', benefits: 'Beneficios', plans: 'Planes', login: 'Iniciar Sesión' },
       hero: { badge: 'GESTIÓN PARROQUIAL 2.0', title_start: 'DIGITALICE LA MISIÓN DE SU', title_highlight: 'PARROQUIA', subtitle: 'Emaús ordena el caos administrative, protege la historia sacramental y libera tiempo para lo verdaderamente importante: la pastoral.', cta_access: 'Acceder a la Plataforma', cta_plans: 'Ver Planes' },
@@ -284,7 +284,7 @@ export const translations: any = {
     }
   },
   en: {
-    sidebar: { dashboard: 'Summary', agenda: 'Agenda', sacraments: 'Sacraments', documents: 'Documents', messages: 'Messages', finances: 'Finances', community: 'Community', settings: 'Settings', users: 'Users', support: 'Support', leads: 'Requests', logout: 'Log Out', role: 'Secretary', parish: 'Parish Management' },
+    sidebar: { dashboard: 'Summary', agenda: 'Agenda', sacraments: 'Sacraments', documents: 'Documents', messages: 'Messages', finances: 'Finances', community: 'Community', settings: 'Settings', users: 'Users & Plans', support: 'Support', leads: 'Requests', logout: 'Log Out', role: 'Secretary', parish: 'Parish Management' },
     landing: {
       nav: { features: 'Features', benefits: 'Benefits', plans: 'Plans', login: 'Log In' },
       hero: { badge: 'PARISH MANAGEMENT 2.0', title_start: 'DIGITIZE YOUR', title_highlight: 'PARISH MISSION', subtitle: 'Emaús organizes administrative chaos, protects sacramental history, and frees up time for pastoral care.', cta_access: 'Access Platform', cta_plans: 'View Plans' },
@@ -423,7 +423,7 @@ export const translations: any = {
     }
   },
   pt: {
-    sidebar: { dashboard: 'Resumo', agenda: 'Agenda', sacraments: 'Sacramentos', documents: 'Documentos', messages: 'Mensagens', finances: 'Finanças', community: 'Comunidade', settings: 'Configurações', users: 'Usuários', support: 'Suporte', leads: 'Solicitações', logout: 'Sair', role: 'Secretária', parish: 'Gestão Paroquial' },
+    sidebar: { dashboard: 'Resumo', agenda: 'Agenda', sacraments: 'Sacramentos', documents: 'Documentos', messages: 'Mensagens', finances: 'Finanças', community: 'Comunidade', settings: 'Configurações', users: 'Usuários e Planos', support: 'Suporte', leads: 'Solicitações', logout: 'Sair', role: 'Secretária', parish: 'Gestão Paroquial' },
     landing: {
       nav: { features: 'Recursos', benefits: 'Benefícios', plans: 'Planos', login: 'Iniciar Sessão' },
       hero: { badge: 'GESTÃO PAROQUIAL 2.0', title_start: 'DIGITALIZE A MISSÃO DA SUA', title_highlight: 'PARÓQUIA', subtitle: 'Emaús organiza o caos administrativo, protege a história sacramental e libera tempo para a pastoral.', cta_access: 'Acessar a Plataforma', cta_plans: 'Ver Planos' },
@@ -562,7 +562,7 @@ export const translations: any = {
     }
   },
   fr: {
-    sidebar: { dashboard: 'Résumé', agenda: 'Agenda', sacraments: 'Sacrements', documents: 'Documents', messages: 'Messages', finances: 'Finances', community: 'Communauté', settings: 'Paramètres', users: 'Utilisateurs', support: 'Support', leads: 'Demandes', logout: 'Déconnexion', role: 'Secrétaire', parish: 'Gestion Paroissiale' },
+    sidebar: { dashboard: 'Résumé', agenda: 'Agenda', sacraments: 'Sacrements', documents: 'Documents', messages: 'Messages', finances: 'Finances', community: 'Communauté', settings: 'Paramètres', users: 'Utilisateurs et Plans', support: 'Support', leads: 'Demandes', logout: 'Déconnexion', role: 'Secrétaire', parish: 'Gestion Paroissiale' },
     landing: {
       nav: { features: 'Fonctionnalités', benefits: 'Avantages', plans: 'Tarifs', login: 'Connexion' },
       hero: { badge: 'GESTION PAROISSIALE 2.0', title_start: 'NUMÉRISEZ LA MISSION DE VOTRE', title_highlight: 'PAROISSE', subtitle: 'Emaús organise le chaos administratif, protège l\'histoire sacramentelle et libère du temps pour la pastorale.', cta_access: 'Accéder à la Plateforme', cta_plans: 'Voir les Tarifs' },
@@ -701,7 +701,7 @@ export const translations: any = {
     }
   },
   it: {
-    sidebar: { dashboard: 'Riepilogo', agenda: 'Agenda', sacraments: 'Sacramenti', documents: 'Documenti', messages: 'Messaggi', finances: 'Finanze', community: 'Comunità', settings: 'Impostazioni', users: 'Utenti', support: 'Supporto', leads: 'Richieste', logout: 'Esci', role: 'Segretaria', parish: 'Gestione Parrocchiale' },
+    sidebar: { dashboard: 'Riepilogo', agenda: 'Agenda', sacraments: 'Sacramenti', documents: 'Documenti', messages: 'Messaggi', finances: 'Finanze', community: 'Comunità', settings: 'Impostazioni', users: 'Utenti e Piani', support: 'Supporto', leads: 'Richieste', logout: 'Esci', role: 'Segretaria', parish: 'Gestione Parrocchiale' },
     landing: {
       nav: { features: 'Funzionalità', benefits: 'Vantaggi', plans: 'Piani', login: 'Accedi' },
       hero: { badge: 'GESTIONE PARROCCHIALE 2.0', title_start: 'DIGITALIZZA LA MISSIONE DELLA TUA', title_highlight: 'PARROCCHIA', subtitle: 'Emaús ordina il caos amministrativo, protegge la storia sacramentale e libera tempo per la pastorale.', cta_access: 'Accedi alla Piattaforma', cta_plans: 'Vedi i Piani' },
@@ -840,7 +840,7 @@ export const translations: any = {
     }
   },
   de: {
-    sidebar: { dashboard: 'Übersicht', agenda: 'Agenda', sacraments: 'Sakramente', documents: 'Dokumente', messages: 'Nachrichten', finances: 'Finanzen', community: 'Gemeinschaft', settings: 'Einstellungen', users: 'Benutzer', support: 'Support', leads: 'Anfragen', logout: 'Abmelden', role: 'Sekretärin', parish: 'Pfarrverwaltung' },
+    sidebar: { dashboard: 'Übersicht', agenda: 'Agenda', sacraments: 'Sakramente', documents: 'Dokumente', messages: 'Nachrichten', finances: 'Finanzen', community: 'Gemeinschaft', settings: 'Einstellungen', users: 'Benutzer & Pläne', support: 'Support', leads: 'Anfragen', logout: 'Abmelden', role: 'Sekretärin', parish: 'Pfarrverwaltung' },
     landing: {
       nav: { features: 'Funktionen', benefits: 'Vorteile', plans: 'Preise', login: 'Anmelden' },
       hero: { badge: 'PFARRVERWALTUNG 2.0', title_start: 'DIGITALISIEREN SIE DIE MISSION IHRER', title_highlight: 'PFARREI', subtitle: 'Emaús ordnet das administrative Chaos, schützt die sakramentale Geschichte und schafft Zeit für die Seelsorge.', cta_access: 'Zur Plattform', cta_plans: 'Preise ansehen' },
@@ -979,7 +979,7 @@ export const translations: any = {
     }
   },
   pl: {
-    sidebar: { dashboard: 'Podsumowanie', agenda: 'Agenda', sacraments: 'Sakramenty', documents: 'Dokumenty', messages: 'Wiadomości', finances: 'Finanse', community: 'Wspólnota', settings: 'Ustawienia', users: 'Użytkownicy', support: 'Wsparcie', leads: 'Zgłoszenia', logout: 'Wyloguj', role: 'Sekretarka', parish: 'Zarządzanie Parafią' },
+    sidebar: { dashboard: 'Podsumowanie', agenda: 'Agenda', sacraments: 'Sakramenty', documents: 'Dokumenty', messages: 'Wiadomości', finances: 'Finanse', community: 'Wspólnota', settings: 'Ustawienia', users: 'Użytkownicy i Plany', support: 'Wsparcie', leads: 'Zgłoszenia', logout: 'Wyloguj', role: 'Sekretarka', parish: 'Zarządzanie Parafią' },
     landing: {
       nav: { features: 'Funkcje', benefits: 'Korzyści', plans: 'Plany', login: 'Zaloguj się' },
       hero: { badge: 'ZARZĄDZANIE PARAFIĄ 2.0', title_start: 'ZDIGITALIZUJ MISJĘ SWOJEJ', title_highlight: 'PARAFII', subtitle: 'Emaús porządkuje chaos administracyjny, chroni historię sakramentalną i uwalnia czas na duszpasterstwo.', cta_access: 'Dostęp do platformy', cta_plans: 'Zobacz plany' },
@@ -1118,7 +1118,7 @@ export const translations: any = {
     }
   },
   el: {
-    sidebar: { dashboard: 'Σύνοψη', agenda: 'Ατζέντα', sacraments: 'Μυστήρια', documents: 'Έγγραφα', messages: 'Μηνύματα', finances: 'Οικονομικά', community: 'Κοινότητα', settings: 'Ρυθμίσεις', users: 'Χρήστες', support: 'Υποστήριξη', leads: 'Αιτήματα', logout: 'Αποσύνδεση', role: 'Γραμματέας', parish: 'Διαχείριση Ενορίας' },
+    sidebar: { dashboard: 'Σύνοψη', agenda: 'Ατζέντα', sacraments: 'Μυστήρια', documents: 'Έγγραφα', messages: 'Μηνύματα', finances: 'Οικονομικά', community: 'Κοινότητα', settings: 'Ρυθμίσεις', users: 'Χρήστες & Σχέδια', support: 'Υποστήριξη', leads: 'Αιτήματα', logout: 'Αποσύνδεση', role: 'Γραμματέας', parish: 'Διαχείριση Ενορίας' },
     landing: {
       nav: { features: 'Χαρακτηριστικά', benefits: 'Οφέλη', plans: 'Προγράμματα', login: 'Σύνδεση' },
       hero: { badge: 'ΔΙΑΧΕΙΡΙΣΗ ΕΝΟΡΙΑΣ 2.0', title_start: 'ΨΗΦΙΟΠΟΙΗΣΤΕ ΤΗΝ ΑΠΟΣΤΟΛΗ ΤΗΣ', title_highlight: 'ΕΝΟΡΙΑΣ ΣΑΣ', subtitle: 'Το Emaús οργανώνει το διοικητικό χάος και προστατεύει τη μυστηριακή ιστορία.', cta_access: 'Είσοδος', cta_plans: 'Προγράμματα' },
@@ -1257,7 +1257,7 @@ export const translations: any = {
     }
   },
   ru: {
-    sidebar: { dashboard: 'Обзор', agenda: 'Повестка', sacraments: 'Таинства', documents: 'Документы', messages: 'Сообщения', finances: 'Финансы', community: 'Сообщество', settings: 'Настройки', users: 'Пользователи', support: 'Поддержка', leads: 'Запросы', logout: 'Выйти', role: 'Секретарь', parish: 'Управление приходом' },
+    sidebar: { dashboard: 'Обзор', agenda: 'Повестка', sacraments: 'Таинства', documents: 'Документы', messages: 'Сообщения', finances: 'Финансы', community: 'Сообщество', settings: 'Настройки', users: 'Пользователи и Тарифы', support: 'Поддержка', leads: 'Запросы', logout: 'Выйти', role: 'Секретарь', parish: 'Управление приходом' },
     landing: {
       nav: { features: 'Функции', benefits: 'Преимущества', plans: 'Тарифы', login: 'Войти' },
       hero: { badge: 'УПРАВЛЕНИЕ ПРИХОДОМ 2.0', title_start: 'ЦИФРОВИЗИРУЙТЕ МИССИЮ ВАШЕГО', title_highlight: 'ПРИХОДА', subtitle: 'Emaús упорядочивает административный хаос, защищает историю таинств и экономит время для пастырской работы.', cta_access: 'Войти на платформу', cta_plans: 'Тарифы' },
@@ -1396,7 +1396,7 @@ export const translations: any = {
     }
   },
   ja: {
-    sidebar: { dashboard: '概要', agenda: '予定表', sacraments: '秘跡', documents: '書類', messages: 'メッセージ', finances: '財務', community: 'コミュニティ', settings: '設定', users: 'ユーザー', support: 'サポート', leads: 'リクエスト', logout: 'ログアウト', role: '秘書', parish: '教区管理' },
+    sidebar: { dashboard: '概要', agenda: '予定表', sacraments: '秘跡', documents: '書類', messages: 'メッセージ', finances: '財務', community: 'コミュニティ', settings: '設定', users: 'ユーザーとプラン', support: 'サポート', leads: 'リクエスト', logout: 'ログアウト', role: '秘書', parish: '教区管理' },
     landing: {
       nav: { features: '機能', benefits: 'メリット', plans: 'プラン', login: 'ログイン' },
       hero: { badge: '教区管理 2.0', title_start: 'あなたの', title_highlight: '教区使命をデジタル化', subtitle: 'Emaúsは事務的な混乱を整理し、秘跡の歴史を守り、より多くの時間を司牧ケアに充てられます。', cta_access: 'アクセス', cta_plans: 'プランを見る' },
@@ -1535,7 +1535,7 @@ export const translations: any = {
     }
   },
   ko: {
-    sidebar: { dashboard: '개요', agenda: '일정', sacraments: '성사', documents: '문서', messages: '메시지', finances: '재정', community: '커뮤니티', settings: '설정', users: '사용자', support: '지원', leads: '요청', logout: '로그아웃', role: '사무장', parish: '본당 관리' },
+    sidebar: { dashboard: '개요', agenda: '일정', sacraments: '성사', documents: '문서', messages: '메시지', finances: '재정', community: '커뮤니티', settings: '설정', users: '사용자 및 요금제', support: '지원', leads: '요청', logout: '로그아웃', role: '사무장', parish: '본당 관리' },
     landing: {
       nav: { features: '기능', benefits: '혜택', plans: '요금제', login: '로그인' },
       hero: { badge: '본당 관리 2.0', title_start: '본당의 사명을', title_highlight: '디지털화하세요', subtitle: 'Emaús는 행정적 혼란을 정리하고 성사 기록을 안전하게 보호하여 더 많은 시간 동안 사목 활동에 집중할 수 있도록 돕습니다.', cta_access: '접속', cta_plans: '요금제 보기' },
@@ -1674,7 +1674,7 @@ export const translations: any = {
     }
   },
   zh: {
-    sidebar: { dashboard: '概览', agenda: '日程', sacraments: '圣事', documents: '文档', messages: '消息', finances: '财务', community: '社区', settings: '设置', users: '用户', support: '支持', leads: '申请', logout: '登出', role: '秘书', parish: '堂区管理' },
+    sidebar: { dashboard: '概览', agenda: '日程', sacraments: '圣事', documents: '文档', messages: '消息', finances: '财务', community: '社区', settings: '设置', users: '用户与方案', support: '支持', leads: '申请', logout: '登出', role: '秘书', parish: '堂区管理' },
     landing: {
       nav: { features: '功能', benefits: '优势', plans: '方案', login: '登录' },
       hero: { badge: '堂区管理 2.0', title_start: '数字化您的', title_highlight: '堂区使命', subtitle: 'Emaús 整理行政混乱，保护圣事历史记录，为您节省更多的时间用于牧灵关怀。', cta_access: '访问系统', cta_plans: '查看方案' },
@@ -1813,7 +1813,7 @@ export const translations: any = {
     }
   },
   hi: {
-    sidebar: { dashboard: 'सारांश', agenda: 'कार्यसूची', sacraments: 'संस्कार', documents: 'दस्तावेज़', messages: 'संदेश', finances: 'वित्त', community: 'समुदाय', settings: 'सेटिंग्स', users: 'उपयोगकर्ता', support: 'सहायता', leads: 'अनुरोध', logout: 'लॉग आउट', role: 'सचिव', parish: 'पैरिश प्रबंधन' },
+    sidebar: { dashboard: 'सारांश', agenda: 'कार्यसूची', sacraments: 'संस्कार', documents: 'दस्तावेज़', messages: 'संदेश', finances: 'वित्त', community: 'समुदाय', settings: 'सेटिंग्स', users: 'उपयोगकर्ता और योजनाएँ', support: 'सहायता', leads: 'अनुरोध', logout: 'लॉग आउट', role: 'सचिव', parish: 'पैरिश प्रबंधन' },
     landing: {
       nav: { features: 'विशेषताएं', benefits: 'लाभ', plans: 'योजनाएं', login: 'लॉग इन' },
       hero: { badge: 'पैरिश प्रबंधन 2.0', title_start: 'अपने पैरिश को', title_highlight: 'डिजिटल करें', subtitle: 'Emaús प्रशासनिक व्यवस्था सुधारता है, संस्कार इतिहास की रक्षा करता है और पैरिश सेवा के लिए समय बचाता है।', cta_access: 'प्लेटफ़ॉर्म में प्रवेश करें', cta_plans: 'योजनाएं देखें' },
